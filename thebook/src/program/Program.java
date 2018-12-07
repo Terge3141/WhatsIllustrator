@@ -14,7 +14,7 @@ public class Program {
 
 	/**
 	 * @param args
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void main2(String[] args) throws IOException {
 		// TODO read command line arguments
@@ -40,16 +40,24 @@ public class Program {
 			Container.Debug = null;
 		}
 	}
-	
+
 	// TODO use of get/set
 	// TODO org.apache.commons.lang3.text.StrBuilder
-	
-	public static void main(String[] args){
-		String path = "/home/michael/whatsappprint/chats/data/tst/chat";
-		List<String> bla = FileHandler.listDir(path, ".*.txt");
-		int a = 1;
-		/*String str = "filename.dat";
-		boolean b = str.matches(".*.txt");
-		int a = 1;*/
+
+	public static void main(String[] args) throws IOException {
+		String str = Misc
+				.readAllText("/home/michael/whatsappprint/whatsbook/smiler.txt");
+		System.out.println(convert16to32(str));
+	}
+
+	public static String convert16to32(String toConvert) {
+		for (int i = 0; i < toConvert.length();) {
+			int codePoint = Character.codePointAt(toConvert, i);
+			i += Character.charCount(codePoint);
+			// System.out.printf("%x%n", codePoint);
+			String utf32 = String.format("0x%x%n", codePoint);
+			return utf32;
+		}
+		return null;
 	}
 }

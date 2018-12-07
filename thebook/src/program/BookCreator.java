@@ -209,7 +209,7 @@ public class BookCreator implements IEmojiFormatFunction {
 	private String Encode(String str) {
 		str = Latex.EncodeLatex(str);
 		str = Latex.ReplaceURL(str);
-		str = this.emojis.ReplaceEmojis(str);
+		str = this.emojis.replaceEmojis(str);
 		return str;
 	}
 
