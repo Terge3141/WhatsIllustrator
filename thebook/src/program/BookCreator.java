@@ -1,18 +1,21 @@
 package program;
 
+import helper.DateUtils;
 import helper.EmojiParser;
+import helper.FileHandler;
 import helper.IEmojiFormatFunction;
 import helper.ImageMatcher;
+import helper.Latex;
 import helper.Misc;
 
 import messageparser.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 public class BookCreator implements IEmojiFormatFunction {
@@ -61,13 +64,13 @@ public class BookCreator implements IEmojiFormatFunction {
 
 	public BookCreator(String inputDir, String outputDir, String emojiInputDir)
 			throws IOException {
-		List<String> emojiList = ReadEmojiList(emojiInputDir);
+		List<String> emojiList = readEmojiList(emojiInputDir);
 		this.emojiInputDir = emojiInputDir;
 
 		this.emojis = new EmojiParser(emojiList, this);
 
-		header = Misc.ReadAllText("header.tex.tmpl");
-		footer = Misc.ReadAllText("footer.tex.tmpl");
+		header = Misc.readAllText("header.tex.tmpl");
+		footer = Misc.readAllText("footer.tex.tmpl");
 
 		InputDir = inputDir;
 		OutputDir = outputDir;
@@ -81,97 +84,102 @@ public class BookCreator implements IEmojiFormatFunction {
 		dir.mkdir();
 	}
 
-	public void WriteTex() throws IOException {
+	public void writeTex() throws IOException {
 		this.copyList = new ArrayList<BookCreator.CopyItem>();
-		
-		File dir = new File(ChatDir);
-		List<String> txtFiles=Misc.ListDir(ChatDir, ".*.txt");
-		if(txtFiles.size()!=1){
-			throw new IllegalArgumentException(String.format("Invalid number of .txt-files found: %d", txtFiles.size()));
+
+		List<String> txtFiles = FileHandler.listDir(ChatDir, ".*.txt");
+		if (txtFiles.size() != 1) {
+			throw new IllegalArgumentException(String.format(
+					"Invalid number of .txt-files found: %d", txtFiles.size()));
 		}
-		
-		String txtInputPath=txtFiles.get(0);
+
+		String txtInputPath = txtFiles.get(0);
 		System.out.format("Using %s as input", txtInputPath);
-		
-		String namePrefix = Misc.getFileName(txtInputPath);
-		namePrefix=namePrefix.substring(0, namePrefix.length()-4);
-		String texOutputPath=Paths.get(OutputDir,namePrefix+".tex").toString();
-		
-		String matchInputPath=Paths.get(ConfigDir,namePrefix+".match.xml").toString();
-		String matchOutputPath=Paths.get(OutputDir,namePrefix+".match.xml").toString();
-		ImageMatcher im = new ImageMatcher();		
-		if(Misc.fileExists(matchInputPath)){
+
+		String namePrefix = FileHandler.getFileName(txtInputPath);
+		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
+		String texOutputPath = Paths.get(OutputDir, namePrefix + ".tex")
+				.toString();
+
+		String matchInputPath = Paths.get(ConfigDir, namePrefix + ".match.xml")
+				.toString();
+		String matchOutputPath = Paths
+				.get(OutputDir, namePrefix + ".match.xml").toString();
+		ImageMatcher im = new ImageMatcher();
+		if (FileHandler.fileExists(matchInputPath)) {
 			System.out.format("Loading matches '%s'\n", matchInputPath);
 			im.LoadMatches(matchInputPath);
-			im.SearchMode=false;
-		}
-		else		{
-			if(ImagePoolDir==null){
-				im.SearchMode=false;
-			}
-			else{
-				System.out.format("Loading pool images from '%s'\n", ImagePoolDir);
+			im.SearchMode = false;
+		} else {
+			if (ImagePoolDir == null) {
+				im.SearchMode = false;
+			} else {
+				System.out.format("Loading pool images from '%s'\n",
+						ImagePoolDir);
 				im.LoadFiles(ImagePoolDir);
-                im.SearchMode = true;
+				im.SearchMode = true;
 			}
 		}
-		
 
-		WhatsappParser parser=new WhatsappParser(txtInputPath,im);
-		
+		WhatsappParser parser = new WhatsappParser(txtInputPath, im);
+
 		StringBuilder sb = new StringBuilder();
-		sb.append(header+ "\n");
-		
+		sb.append(header + "\n");
+
 		// https://stackoverflow.com/questions/999172/how-to-parse-a-date
 		// String input = "Thu Jun 18 20:56:02 EDT 2009";
-        // SimpleDateFormat parser = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
-        // Date date = parser.parse(input);
-		
+		// SimpleDateFormat parser = new
+		// SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
+		// Date date = parser.parse(input);
+
 		IMessage msg;
-		Date last = new Date(0);
-		while ((msg = parser.NextMessage()) != null){
-			if(TimeDiffer(last, msg.getTimepoint())){	
+		Calendar last = Calendar.getInstance();
+		last.setTimeInMillis(0);
+		while ((msg = parser.NextMessage()) != null) {
+			if (DateUtils.dateDiffer(last, msg.getTimepoint())) {
 				// TODO via sb.format??
-				sb.append("\\begin{center}" + GetDateString(msg.getTimepoint()) + "\\end{center}\n");
+				sb.append("\\begin{center}"
+						+ DateUtils.formatDateString(msg.getTimepoint())
+						+ "\\end{center}\n");
 			}
-			
+
 			last = msg.getTimepoint();
-			
-			if (msg instanceof TextMessage)
-            {
-                AppendTextMessage((TextMessage)msg , sb);
-            }
-            else if (msg instanceof ImageMessage)
-            {
-                AppendImageMessage((ImageMessage)msg , sb);
-            }
-            else if (msg instanceof MediaOmittedMessage)
-            {
-                AppendMediaOmittedMessage((MediaOmittedMessage)msg , sb);
-            }
-            else if (msg instanceof MediaMessage)
-            {
-                AppendMediaMessage((MediaMessage)msg  , sb);
-            }
+
+			if (msg instanceof TextMessage) {
+				appendTextMessage((TextMessage) msg, sb);
+			} else if (msg instanceof ImageMessage) {
+				appendImageMessage((ImageMessage) msg, sb);
+			} else if (msg instanceof MediaOmittedMessage) {
+				appendMediaOmittedMessage((MediaOmittedMessage) msg, sb);
+			} else if (msg instanceof MediaMessage) {
+				appendMediaMessage((MediaMessage) msg, sb);
+			}
 		}
-		
+
 		sb.append(this.footer + "\n");
-		
+
 		System.out.format("Writing tex file to '%s'\n", texOutputPath);
-		Misc.WriteAllText(texOutputPath, sb.toString());
-		
-		System.out.format("Writing match file to '%s'\n",matchOutputPath);
-        im.Save(matchOutputPath);
+		Misc.writeAllText(texOutputPath, sb.toString());
 
-        System.out.format("Copy emojis to '%s'\n",EmojiOutputDir);
-        CopyList();
+		System.out.format("Writing match file to '%s'\n", matchOutputPath);
+		im.Save(matchOutputPath);
+
+		System.out.format("Copy emojis to '%s'\n", EmojiOutputDir);
+		copyList();
 	}
 
-	public String Format(String str) {
-		return GetEmojiPath(str);
+	public String format(String str) {
+		return getEmojiPath(str);
 	}
 
-	private List<String> ReadEmojiList(String dir) {
+	public static String formatSenderAndTime(IMessage msg) {
+		String sender = String.format("\\textbf{%s}",
+				Latex.EncodeLatex(msg.getSender()));
+		return String.format("%s (%s): ", sender,
+				DateUtils.formatTimeString(msg.getTimepoint()));
+	}
+
+	private List<String> readEmojiList(String dir) {
 		List<String> list = new ArrayList<>();
 
 		File lister = new File(dir);
@@ -190,28 +198,35 @@ public class BookCreator implements IEmojiFormatFunction {
 
 		return list;
 	}
-	
-	private void CopyList(){
-		
-		throw new UnsupportedOperationException();
-	}
-	
-	private static boolean TimeDiffer(Date date1, Date date2)
-    {
-		Calendar cal1 = Calendar.getInstance();
-		cal1.setTime(date1);
-		
-		Calendar cal2 = Calendar.getInstance();
-		cal2.setTime(date2);
-		
-		return cal1.get(Calendar.YEAR)!=cal2.get(Calendar.YEAR) || cal1.get(Calendar.MONTH)!=cal2.get(Calendar.MONTH)||cal1.get(Calendar.DAY_OF_MONTH)!=cal2.get(Calendar.DAY_OF_MONTH);
-    }
-	
-	private static String GetDateString(Date date){
-		throw new UnsupportedOperationException();
+
+	private void copyList() throws IOException {
+		for (CopyItem x : this.copyList) {
+			Files.copy(x.getSrcPath(), x.getDstPath(),
+					StandardCopyOption.REPLACE_EXISTING);
+		}
 	}
 
-	private String GetEmojiPath(String str) {
+	private String Encode(String str) {
+		str = Latex.EncodeLatex(str);
+		str = Latex.ReplaceURL(str);
+		str = this.emojis.ReplaceEmojis(str);
+		return str;
+	}
+
+	private String createLatexImage(String path, String subscription) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format(
+				"\\includegraphics[height=0.1\textheight]{%s}\\\\\n", path));
+		sb.append(String
+				.format("\\small{\\textit{%s}}\n", Encode(subscription)));
+		return sb.toString();
+	}
+
+	private String createLatexImage(Path path, String subscription) {
+		return createLatexImage(path.toString(), subscription);
+	}
+
+	private String getEmojiPath(String str) {
 		String src = String.format("%s/%s%s.png", emojiInputDir, EMOJIPREFIX,
 				str);
 		String dst = String.format("%s/%s.png", EmojiOutputDir, str);
@@ -221,50 +236,47 @@ public class BookCreator implements IEmojiFormatFunction {
 		return String.format("\\includegraphics[scale=0.075]{emojis/%s.png}",
 				str);
 	}
-	
-	private void AppendTextMessage(TextMessage msg, StringBuilder sb)
-    {throw new UnsupportedOperationException();
-        /*var senderAndTime = FormatSenderAndTime(msg);
-        var content = Encode(msg.Content);
-        sb.AppendLine($"{senderAndTime} {content}");
-        sb.AppendLine(@"\\");*/
-    }
 
-    private void AppendImageMessage(ImageMessage msg, StringBuilder sb)
-    {
-    	throw new UnsupportedOperationException();
-        /*sb.AppendLine(FormatSenderAndTime(msg) + @"\\");
-        sb.AppendLine(@"\begin{center}");
-        sb.AppendLine(@"\includegraphics[height=0.1\textheight]{" + Path.Combine(ImageDir, msg.Filename) + @"}\\");
-        sb.AppendFormat(@"\small{{\textit{{{0}}}}}", Encode(msg.Subscription));
-        sb.AppendLine(@"\end{center}");*/
-    }
+	private void appendTextMessage(TextMessage msg, StringBuilder sb) {
+		String senderAndTime = formatSenderAndTime(msg);
+		String content = Encode(msg.content);
+		sb.append(String.format("%s %s\n", senderAndTime, content));
+		sb.append("\\\\\n");
+	}
 
-    private void AppendMediaOmittedMessage(MediaOmittedMessage msg, StringBuilder sb)
-    {
-    	throw new UnsupportedOperationException();
-        /*sb.AppendLine(FormatSenderAndTime(msg) + @"\\");
-        sb.AppendLine(@"\begin{center}");
-        foreach (var x in msg.Relpaths)
-        {
-            sb.AppendLine(@"\includegraphics[height=0.1\textheight]{" + Path.Combine(ImagePoolDir, x) + @"}\\");
-            sb.AppendFormat(@"\small{{\textit{{{0}}}}}\\", Encode(x));
-        }
-        sb.AppendLine(@"\end{center}");*/
-    }
+	private void appendImageMessage(ImageMessage msg, StringBuilder sb) {
+		sb.append(String.format("%s\\\\\n", formatSenderAndTime(msg)));
+		sb.append("\\begin{center}");
+		sb.append(createLatexImage(Paths.get(ImageDir, msg.getFilename()),
+				msg.getSubscription()));
+		sb.append("\\end{center}\n");
+	}
 
-    private void AppendMediaMessage(MediaMessage msg, StringBuilder sb)
-    {
-    	throw new UnsupportedOperationException();
-        /*var str = string.Format(@"{0} \textit{{{1}}}", FormatSenderAndTime(msg), Latex.EncodeLatex(msg.Filename));
-        if (!string.IsNullOrWhiteSpace(msg.Subscription))
-        {
-            str = str + " - " + Encode(msg.Subscription);
-        }
+	private void appendMediaOmittedMessage(MediaOmittedMessage msg,
+			StringBuilder sb) {
+		sb.append(String.format("%s\\\\\n", formatSenderAndTime(msg)));
+		sb.append("\\begin{center}");
 
-        sb.AppendLine(str);
-        sb.AppendLine(@"\\");*/
-    }
+		Iterator<String> it = msg.getRelpaths().iterator();
+		while (it.hasNext()) {
+			String str = it.next();
+			sb.append(createLatexImage(Paths.get(ImagePoolDir, str),
+					Encode(str)));
+		}
+
+		sb.append("\\end{center}\n");
+	}
+
+	private void appendMediaMessage(MediaMessage msg, StringBuilder sb) {
+		String str = String.format("%s \\textit{%s}", formatSenderAndTime(msg),
+				Latex.encodeLatex(msg.getFilename()));
+		if (!Misc.isNullOrWhiteSpace(msg.getSubscription())) {
+			str = str + " - " + Encode(msg.getSubscription());
+		}
+
+		sb.append(str + "\n");
+		sb.append("\\\\\n");
+	}
 
 	private class CopyItem {
 
@@ -276,11 +288,19 @@ public class BookCreator implements IEmojiFormatFunction {
 			this.dst = dst;
 		}
 
-		public String getSrc() {
+		public Path getSrcPath() {
+			return Paths.get(src);
+		}
+
+		public Path getDstPath() {
+			return Paths.get(dst);
+		}
+
+		public String getSrcString() {
 			return this.src;
 		}
 
-		public String getDst() {
+		public String getDstString() {
 			return this.dst;
 		}
 	}

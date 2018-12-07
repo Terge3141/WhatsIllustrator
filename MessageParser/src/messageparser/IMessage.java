@@ -1,8 +1,9 @@
 package messageparser;
 
-import java.util.Date;
+import java.util.Calendar;
 
 public interface IMessage {
-	Date getTimepoint();
+	Calendar getTimepoint();
+	String getSender();
 	// TODO
 }
