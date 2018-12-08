@@ -35,7 +35,7 @@ public class EmojiParser {
 		StringBuilder sb = new StringBuilder();
 		int index = 0;
 		while (index < str.length()) {
-			index += parseChars(str, index, sb);
+			index = parseChars(str, index, sb);
 		}
 
 		return sb.toString();
@@ -63,7 +63,7 @@ public class EmojiParser {
         //var quad = new byte[4];
         //Array.Copy(utf32, index, quad, 0, 4);
         //var strHex = Convert(quad);
-        String strHex = String.format("%04x%n", codePoint);
+        String strHex = String.format("%04x", codePoint);
         
 		
         String suggestion = strHex;
@@ -116,11 +116,12 @@ public class EmojiParser {
 	}
 	
 	public static String fromUtf32toString(int codePoint) {
-		if (Character.charCount(codePoint) == 1) {
+		/*if (Character.charCount(codePoint) == 1) {
 			return String.valueOf(codePoint);
 		} else {
 			return new String(Character.toChars(codePoint));
-		}
+		}*/
+		return new String(Character.toChars(codePoint));
 	}
 	
 	

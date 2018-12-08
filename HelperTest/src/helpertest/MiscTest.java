@@ -1,6 +1,10 @@
 package helpertest;
 
 import static org.junit.Assert.*;
+
+import java.util.Arrays;
+import java.util.List;
+
 import helper.Misc;
 
 import org.junit.Test;
@@ -32,5 +36,15 @@ public class MiscTest {
 		assertTrue(Misc.arrayContains(arr, "c"));
 		assertFalse(Misc.arrayContains(arr, "d"));
 		assertFalse(Misc.arrayContains(arr, "ase"));
+	}
+	
+	@Test
+	public void testListContains() {
+		List<String> list = Arrays.asList("asd","b","c");
+		assertTrue(Misc.listContains(list, "asd"));
+		assertTrue(Misc.listContains(list, "b"));
+		assertTrue(Misc.listContains(list, "c"));
+		assertFalse(Misc.listContains(list, "d"));
+		assertFalse(Misc.listContains(list, "ase"));
 	}
 }

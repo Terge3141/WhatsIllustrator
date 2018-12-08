@@ -55,6 +55,7 @@ public class Misc {
 	}
 	
 	public static boolean listContains(List<String> list, String needle){
-		return arrayContains((String[])list.toArray(), needle);
+		String[] arr = list.toArray(new String[list.size()]);
+		return arrayContains(arr, needle);
 	}
 }
