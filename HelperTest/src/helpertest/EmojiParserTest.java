@@ -3,8 +3,6 @@ package helpertest;
 import static org.junit.Assert.*;
 
 import helper.EmojiParser;
-import helper.FileHandler;
-import helper.Misc;
 
 import java.io.IOException;
 import java.util.ArrayList;

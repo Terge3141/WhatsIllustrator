@@ -94,7 +94,7 @@ public class BookCreator implements IEmojiFormatFunction {
 		}
 
 		String txtInputPath = txtFiles.get(0);
-		System.out.format("Using %s as input", txtInputPath);
+		System.out.format("Using %s as input\n", txtInputPath);
 
 		String namePrefix = FileHandler.getFileName(txtInputPath);
 		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
@@ -106,7 +106,7 @@ public class BookCreator implements IEmojiFormatFunction {
 		String matchOutputPath = Paths
 				.get(OutputDir, namePrefix + ".match.xml").toString();
 		ImageMatcher im = new ImageMatcher();
-		if (FileHandler.fileExists(matchInputPath)) {
+		/*if (FileHandler.fileExists(matchInputPath)) {
 			System.out.format("Loading matches '%s'\n", matchInputPath);
 			im.LoadMatches(matchInputPath);
 			im.SearchMode = false;
@@ -119,7 +119,7 @@ public class BookCreator implements IEmojiFormatFunction {
 				im.LoadFiles(ImagePoolDir);
 				im.SearchMode = true;
 			}
-		}
+		}*/
 
 		WhatsappParser parser = new WhatsappParser(txtInputPath, im);
 
@@ -174,7 +174,7 @@ public class BookCreator implements IEmojiFormatFunction {
 
 	public static String formatSenderAndTime(IMessage msg) {
 		String sender = String.format("\\textbf{%s}",
-				Latex.EncodeLatex(msg.getSender()));
+				Latex.encodeLatex(msg.getSender()));
 		return String.format("%s (%s): ", sender,
 				DateUtils.formatTimeString(msg.getTimepoint()));
 	}
@@ -185,7 +185,7 @@ public class BookCreator implements IEmojiFormatFunction {
 		File lister = new File(dir);
 		for (File x : lister.listFiles()) {
 			String fileName = x.getName();
-			String nr = fileName.replace(EMOJIPREFIX, "").replace("\\.png", "");
+			String nr = fileName.replace(EMOJIPREFIX, "").replace(".png", "");
 			list.add(nr);
 
 			String[] excludes = { "0023", "002a", "0030", "0031", "0032",
@@ -207,8 +207,8 @@ public class BookCreator implements IEmojiFormatFunction {
 	}
 
 	private String Encode(String str) {
-		str = Latex.EncodeLatex(str);
-		str = Latex.ReplaceURL(str);
+		str = Latex.encodeLatex(str);
+		str = Latex.replaceURL(str);
 		str = this.emojis.replaceEmojis(str);
 		return str;
 	}
