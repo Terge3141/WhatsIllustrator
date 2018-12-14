@@ -3,11 +3,12 @@ package helper;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 
 public class EmojiParser {
 
 	private List<String> emojiList;
-	private IEmojiFormatFunction emojiFormatFunction;
+	private Function<String, String> emojiFormatFunction;
 
 	private int tokenMax;
 
@@ -16,7 +17,7 @@ public class EmojiParser {
 	private PrintWriter debug = null;
 
 	public EmojiParser(List<String> emojiList,
-			IEmojiFormatFunction emojiFormatFunction) {
+			Function<String, String> emojiFormatFunction) {
 		this.emojiList = emojiList;
 		this.emojiFormatFunction = emojiFormatFunction;
 
@@ -72,7 +73,7 @@ public class EmojiParser {
         {
             if (Misc.listContains(emojiList, suggestion))
             {
-            	sb.append(emojiFormatFunction.format(suggestion));
+            	sb.append(emojiFormatFunction.apply(suggestion));
                 return index + charCnt;
             }
             else
@@ -87,7 +88,7 @@ public class EmojiParser {
                     {
                         if (Misc.listContains(emojiList, alternative))
                         {
-                            replacement = emojiFormatFunction.format(alternative);
+                            replacement = emojiFormatFunction.apply(alternative);
                         }
                     }
 

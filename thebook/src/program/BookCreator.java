@@ -3,7 +3,6 @@ package program;
 import helper.DateUtils;
 import helper.EmojiParser;
 import helper.FileHandler;
-import helper.IEmojiFormatFunction;
 import imagematcher.*;
 import helper.Latex;
 import helper.Misc;
@@ -26,7 +25,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.xml.sax.SAXException;
 
-public class BookCreator implements IEmojiFormatFunction {
+public class BookCreator {
 
 	// The top level input directory. It typically contains the subdirectories
 	// chat and config
@@ -74,7 +73,7 @@ public class BookCreator implements IEmojiFormatFunction {
 		List<String> emojiList = readEmojiList(emojiInputDir);
 		this.emojiInputDir = emojiInputDir;
 
-		this.emojis = new EmojiParser(emojiList, this);
+		this.emojis = new EmojiParser(emojiList, x -> getEmojiPath(x));
 
 		header = Misc.readAllText("header.tex.tmpl");
 		footer = Misc.readAllText("footer.tex.tmpl");
@@ -162,10 +161,6 @@ public class BookCreator implements IEmojiFormatFunction {
 
 		System.out.format("Copy emojis to '%s'\n", emojiOutputDir);
 		copyList();
-	}
-
-	public String format(String str) {
-		return getEmojiPath(str);
 	}
 
 	public static String formatSenderAndTime(IMessage msg) {
