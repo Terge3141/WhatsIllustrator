@@ -47,14 +47,14 @@ public class ImageMatcher {
 		this.matchList = new ArrayList<MatchEntry>();
 	}
 
-	public static ImageMatcher fromXml(String xml)
+	public static ImageMatcher fromXmlString(String xml)
 			throws ParserConfigurationException, SAXException, IOException, ParseException {
 		ImageMatcher im = new ImageMatcher();
 
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
 		Document doc = dBuilder.parse(stream);
 		Element root = doc.getDocumentElement();
 		NodeList nodeList = root.getChildNodes();
@@ -63,7 +63,6 @@ public class ImageMatcher {
 			Node node = nodeList.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				if (node.getNodeName().equals("MatchEntry")) {
-					System.out.println(node.getNodeName());
 					im.matchList.add(MatchEntry.fromNode(node));
 				}
 			}
@@ -71,8 +70,12 @@ public class ImageMatcher {
 
 		return im;
 	}
+	
+	public static ImageMatcher fromXmlFile(String path) throws ParserConfigurationException, SAXException, IOException, ParseException {
+		return fromXmlString(Misc.readAllText(path));
+	}
 
-	public String toXml() throws ParserConfigurationException, TransformerFactoryConfigurationError,
+	public String toXmlString() throws ParserConfigurationException, TransformerFactoryConfigurationError,
 			TransformerException, IOException {
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -98,6 +101,11 @@ public class ImageMatcher {
 
 		return stringWriter.toString();
 	}
+	
+	public void toXmlFile(String path) throws IOException, ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException
+	{
+		Misc.writeAllText(path, toXmlString());
+	}
 
 	public MatchEntry pick(LocalDateTime timepoint, int cnt) {
 		Stream<MatchEntry> stream = this.matchList.stream().filter(x -> (x.getTimePoint().equals(timepoint) && x.getCnt() == cnt));
@@ -111,7 +119,7 @@ public class ImageMatcher {
 				return matchEntry;
 			} else {
 				throw new IllegalArgumentException(
-						String.format("Invalid number of entries found ({qcnt}), 1 expected", scnt));
+						String.format("Invalid number of entries found (%s), 1 expected", scnt));
 			}
 		}
 
@@ -127,9 +135,6 @@ public class ImageMatcher {
 				&& dt1.getDayOfMonth() == dt2.getDayOfMonth();
 	}
 
-	public void loadMatches(String todo) {
-		throw new UnsupportedOperationException();
-	}
 
 	public void loadFiles(String todo) {
 		throw new UnsupportedOperationException();

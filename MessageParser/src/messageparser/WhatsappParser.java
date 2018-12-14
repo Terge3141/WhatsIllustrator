@@ -67,7 +67,7 @@ public class WhatsappParser {
 		LocalDateTime date = null;
 		try {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy, HH:mm");
-			date = LocalDateTime.parse("dd/MM/yyyy, HH:mm", formatter);
+			date = LocalDateTime.parse(dateStr, formatter);
 		} catch (DateTimeParseException dtpe) {
 			throw new IllegalArgumentException(String.format("Invalid date format in line: '%s'", line));
 		}

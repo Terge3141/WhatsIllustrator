@@ -1,25 +1,18 @@
 package program;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.stream.Stream;
 
 import javax.xml.parsers.*;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 
-import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
-import imagematcher.*;
 import helper.Misc;
 import helper.Container;
 
@@ -30,28 +23,35 @@ public class Program {
 	/**
 	 * @param args
 	 * @throws IOException
+	 * @throws ParseException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 * @throws TransformerException
+	 * @throws TransformerFactoryConfigurationError
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException,
+			ParseException, TransformerFactoryConfigurationError, TransformerException {
 		// TODO read command line arguments
 		String inputDir = "/tmp/mychat";
 		String emojiDir = "/tmp/emojis";
+		String imagePoolDir = "/tmp/imagepool";
 
 		Config config = new Config();
 		config.InputDir = inputDir;
 		config.EmojiDir = emojiDir;
+		config.ImagePoolDir = imagePoolDir;
 
-		config.OutputDir = Misc.isNullOrWhiteSpace(config.OutputDir) ? config.InputDir
-				: config.OutputDir;
+		config.OutputDir = Misc.isNullOrWhiteSpace(config.OutputDir) ? config.InputDir : config.OutputDir;
 
 		if (!Misc.isNullOrWhiteSpace(config.DebugDir)) {
-			Container.Debug = new PrintWriter(Paths.get(config.DebugDir,
-					"output.log").toString());
+			Container.Debug = new PrintWriter(Paths.get(config.DebugDir, "output.log").toString());
 		}
 
-		BookCreator creator = new BookCreator(config.InputDir,
-				config.OutputDir, config.EmojiDir);
-		creator.ImagePoolDir = config.OutputDir;
+		BookCreator creator = new BookCreator(config.InputDir, config.OutputDir, config.EmojiDir);
+		creator.ImagePoolDir = config.ImagePoolDir;
 		creator.writeTex();
+
+		System.out.println("Done");
 
 		if (Container.Debug != null) {
 			Container.Debug.close();
@@ -64,8 +64,8 @@ public class Program {
 	// TODO Some Softbank icons don't have a mapping
 	// TODO use streams
 
-	public static void main3(String[] args) throws IOException,
-			ParserConfigurationException, SAXException, ParseException {
+	public static void main3(String[] args)
+			throws IOException, ParserConfigurationException, SAXException, ParseException {
 		ArrayList<String> list = new ArrayList<>();
 		list.add("One");
 		list.add("OneAndOnly");
@@ -78,7 +78,7 @@ public class Program {
 		list.add("Thursday");
 		list.add("");
 		list.add("");
-		
+
 		Stream<String> stream = list.stream().filter(element -> element.contains("d"));
 		stream.forEach(x -> System.out.println(x));
 	}

@@ -30,9 +30,9 @@ class ImageMatcherTest {
 		matchList.add(matchEntry);
 		ImageMatcher imWriter = new ImageMatcher();
 		imWriter.setMatchList(matchList);
-		String matchXML = imWriter.toXml();
+		String matchXML = imWriter.toXmlString();
 
-		ImageMatcher imReader = ImageMatcher.fromXml(matchXML);
+		ImageMatcher imReader = ImageMatcher.fromXmlString(matchXML);
 		imReader.setSearchMode(false);
 
 		MatchEntry entry = imReader.pick(tp);
@@ -54,9 +54,9 @@ class ImageMatcherTest {
 		matchList.add(matchEntry);
 		ImageMatcher imWriter = new ImageMatcher();
 		imWriter.setMatchList(matchList);
-		String matchXML = imWriter.toXml();
+		String matchXML = imWriter.toXmlString();
 
-		ImageMatcher imReader = ImageMatcher.fromXml(matchXML);
+		ImageMatcher imReader = ImageMatcher.fromXmlString(matchXML);
 		imReader.setSearchMode(false);
 
 		try {
