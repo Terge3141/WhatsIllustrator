@@ -1,4 +1,6 @@
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -13,7 +15,9 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
-import imagematcher.*;
+import imagematcher.FileEntry;
+import imagematcher.ImageMatcher;
+import imagematcher.MatchEntry;
 
 class ImageMatcherTest {
 	@Test
