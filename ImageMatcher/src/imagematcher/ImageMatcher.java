@@ -5,14 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,7 +17,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
@@ -34,6 +29,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import helper.FileHandler;
 import helper.Misc;
 
 public class ImageMatcher {
@@ -70,8 +66,9 @@ public class ImageMatcher {
 
 		return im;
 	}
-	
-	public static ImageMatcher fromXmlFile(String path) throws ParserConfigurationException, SAXException, IOException, ParseException {
+
+	public static ImageMatcher fromXmlFile(String path)
+			throws ParserConfigurationException, SAXException, IOException, ParseException {
 		return fromXmlString(Misc.readAllText(path));
 	}
 
@@ -101,15 +98,16 @@ public class ImageMatcher {
 
 		return stringWriter.toString();
 	}
-	
-	public void toXmlFile(String path) throws IOException, ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException
-	{
+
+	public void toXmlFile(String path) throws IOException, ParserConfigurationException,
+			TransformerFactoryConfigurationError, TransformerException {
 		Misc.writeAllText(path, toXmlString());
 	}
 
 	public MatchEntry pick(LocalDateTime timepoint, int cnt) {
-		Stream<MatchEntry> stream = this.matchList.stream().filter(x -> (x.getTimePoint().equals(timepoint) && x.getCnt() == cnt));
-		List<MatchEntry> list=stream.collect(Collectors.toList());
+		Stream<MatchEntry> stream = this.matchList.stream()
+				.filter(x -> (x.getTimePoint().equals(timepoint) && x.getCnt() == cnt));
+		List<MatchEntry> list = stream.collect(Collectors.toList());
 		long scnt = list.size();
 		if (scnt != 1) {
 			if (this.searchMode) {
@@ -135,13 +133,19 @@ public class ImageMatcher {
 				&& dt1.getDayOfMonth() == dt2.getDayOfMonth();
 	}
 
+	public void loadFiles(String dir) throws IOException, ParseException {
+		List<String> files = FileHandler.listDir(dir, ".*jp.*");
+		this.fileList = new ArrayList<FileEntry>();
 
-	public void loadFiles(String todo) {
-		throw new UnsupportedOperationException();
-	}
+		for (String file : files) {
+			FileEntry entry = new FileEntry(file, dir);
 
-	public void save(String path) {
-		throw new UnsupportedOperationException();
+			if (this.fileList.stream().filter(x -> x.getFileName().equals(entry.getFileName())).count() > 0) {
+				System.out.format("Skipping %s\n", entry.getRelPath());
+			} else {
+				this.fileList.add(entry);
+			}
+		}
 	}
 
 	public List<MatchEntry> getMatchList() {

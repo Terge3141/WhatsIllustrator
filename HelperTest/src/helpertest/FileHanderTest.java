@@ -2,15 +2,12 @@ package helpertest;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.FileHandler;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,6 +42,25 @@ public class FileHanderTest {
 		assertEquals(2, list2.size());
 		assertEquals(file1.toString(), list1.get(0));
 		assertEquals(file3.toString(), list1.get(2));
+	}
+	
+	@Test
+	public void testListDir_Recursive() throws IOException {
+		String dir = folder.newFolder("listDir_recursive").toString();
+		Path subDirPath = Paths.get(dir, "subdir");
+		
+		Files.createDirectory(subDirPath);
+						
+		Path fileDir = Paths.get(dir, "a.txt");
+		Path fileSubDir = Paths.get(subDirPath.toString(), "b.txt");
+		
+		Files.createFile(fileDir);
+		Files.createFile(fileSubDir);
+		List<String> list = helper.FileHandler.listDir(dir.toString(), ".*");
+		Collections.sort(list);
+		assertEquals(2, list.size());
+		assertEquals(fileDir.toString(), list.get(0));
+		assertEquals(fileSubDir.toString(), list.get(1));
 	}
 
 	@Test
