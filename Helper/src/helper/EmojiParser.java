@@ -111,11 +111,6 @@ public class EmojiParser {
 	}
 	
 	public static String fromUtf32toString(int codePoint) {
-		/*if (Character.charCount(codePoint) == 1) {
-			return String.valueOf(codePoint);
-		} else {
-			return new String(Character.toChars(codePoint));
-		}*/
 		return new String(Character.toChars(codePoint));
 	}
 	

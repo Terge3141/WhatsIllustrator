@@ -104,11 +104,11 @@ public class Latex {
         int startIndex = 0;
         while (found)
         {
-        	SearchResult result = FirstString(str, new String[] { "http://", "https://" }, startIndex);
+        	SearchResult result = firstString(str, new String[] { "http://", "https://" }, startIndex);
 
             if (result.index != -1)
             {
-                int whiteIndex = FirstString(str, new String[]{ " ", "\n", "\\\\" }, result.index).index;
+                int whiteIndex = firstString(str, new String[]{ " ", "\n", "\\\\" }, result.index).index;
 
                 String left = str.substring(0, result.index);
                 String httpString;
@@ -137,7 +137,7 @@ public class Latex {
         return str;
 	}
 	
-	private static SearchResult FirstString(String str, String[] needles, int startIndex)
+	private static SearchResult firstString(String str, String[] needles, int startIndex)
     {
         String needle = null;
         int index = -1;
