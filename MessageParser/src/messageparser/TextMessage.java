@@ -1,22 +1,22 @@
 package messageparser;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 public class TextMessage implements IMessage {
 	
 	
-	public Calendar timepoint;
+	public LocalDateTime timepoint;
 	public String sender;
 	public String content;
 
-	public TextMessage(Calendar timepoint, String sender,
+	public TextMessage(LocalDateTime timepoint, String sender,
 			String Content) {
 		this.timepoint = timepoint;
 		this.sender = sender;
 		this.content = Content;
 	}
 
-	public Calendar getTimepoint() {
+	public LocalDateTime getTimepoint() {
 		return this.timepoint;
 	}
 

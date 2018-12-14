@@ -31,7 +31,7 @@ public class Program {
 	 * @param args
 	 * @throws IOException
 	 */
-	public static void main2(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException {
 		// TODO read command line arguments
 		String inputDir = "/tmp/mychat";
 		String emojiDir = "/tmp/emojis";
@@ -64,7 +64,7 @@ public class Program {
 	// TODO Some Softbank icons don't have a mapping
 	// TODO use streams
 
-	public static void main(String[] args) throws IOException,
+	public static void main3(String[] args) throws IOException,
 			ParserConfigurationException, SAXException, ParseException {
 		ArrayList<String> list = new ArrayList<>();
 		list.add("One");

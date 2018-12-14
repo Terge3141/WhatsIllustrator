@@ -1,15 +1,15 @@
 package messageparser;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 public class ImageMessage implements IMessage {
 	
-	public Calendar timepoint;
+	public LocalDateTime timepoint;
 	public String sender;
 	public String filename;
 	public String subscription;
 	
-	public ImageMessage(Calendar timepoint, String sender, String filename, String subscription)
+	public ImageMessage(LocalDateTime timepoint, String sender, String filename, String subscription)
     {
         this.timepoint = timepoint;
         this.sender = sender;
@@ -17,7 +17,7 @@ public class ImageMessage implements IMessage {
         this.subscription = subscription;
     }
 
-	public Calendar getTimepoint() {
+	public LocalDateTime getTimepoint() {
 		return this.timepoint;
 	}
 

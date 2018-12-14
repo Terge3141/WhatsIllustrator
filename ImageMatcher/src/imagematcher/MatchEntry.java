@@ -16,7 +16,7 @@ public class MatchEntry {
 	private LocalDateTime timePoint;
 	private List<FileEntry> fileMatches;
 	private int cnt;
-	private boolean isImage;
+	private boolean imageType;
 
 	private MatchEntry() {
 	}
@@ -25,7 +25,7 @@ public class MatchEntry {
 		this.timePoint = timepoint;
 		this.fileMatches = fileMatches;
 		this.cnt = cnt;
-		this.isImage = true;
+		this.imageType = true;
 	}
 
 	public static MatchEntry fromNode(Node node) throws ParseException {
@@ -36,7 +36,7 @@ public class MatchEntry {
 		String tpStr = XmlUtils.GetTextNode(nodeList, "Timepoint");
 		me.timePoint = LocalDateTime.parse(tpStr);
 
-		me.isImage = Boolean.parseBoolean(XmlUtils.GetTextNode(nodeList, "IsImage"));
+		me.imageType = Boolean.parseBoolean(XmlUtils.GetTextNode(nodeList, "IsImage"));
 		me.cnt = Integer.parseInt(XmlUtils.GetTextNode(nodeList, "Cnt"));
 
 		me.fileMatches = new ArrayList<FileEntry>();
@@ -68,7 +68,7 @@ public class MatchEntry {
 		matchEntry.appendChild(timepoint);
 
 		Element isimage = doc.createElement("IsImage");
-		isimage.setTextContent(this.isImage ? "true" : "false");
+		isimage.setTextContent(this.imageType ? "true" : "false");
 		matchEntry.appendChild(isimage);
 
 		Element filematches = doc.createElement("Filematches");
@@ -102,5 +102,9 @@ public class MatchEntry {
 
 	public void setFileMatches(List<FileEntry> fileMatches) {
 		this.fileMatches = fileMatches;
+	}
+	
+	public boolean isImageType() {
+		return this.imageType;
 	}
 }

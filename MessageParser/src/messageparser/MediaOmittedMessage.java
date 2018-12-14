@@ -1,22 +1,22 @@
 package messageparser;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class MediaOmittedMessage implements IMessage {
 
-	public Calendar timepoint;
+	public LocalDateTime timepoint;
 	public String sender;
 	public List<String> relpaths;
 
-	public MediaOmittedMessage(Calendar timepoint, String sender,
+	public MediaOmittedMessage(LocalDateTime timepoint, String sender,
 			List<String> relpaths) {
 		this.timepoint = timepoint;
 		this.sender = sender;
 		this.relpaths = relpaths;
 	}
 
-	public Calendar getTimepoint() {
+	public LocalDateTime getTimepoint() {
 		return this.timepoint;
 	}
 

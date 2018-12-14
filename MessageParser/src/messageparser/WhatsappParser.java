@@ -5,10 +5,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import imagematcher.*;
 
@@ -25,8 +29,7 @@ public class WhatsappParser {
 	private static final String FILE_ATTACHED = "(file attached)";
 	private static final String MEDIA_OMITTED = "<Media omitted>";
 
-	public WhatsappParser(String messagePath, ImageMatcher imageMatcher)
-			throws IOException {
+	public WhatsappParser(String messagePath, ImageMatcher imageMatcher) throws IOException {
 		this.lines = Files.readAllLines(Paths.get(messagePath));
 		index = 0;
 
@@ -41,8 +44,7 @@ public class WhatsappParser {
 
 		String line = this.lines.get(this.index);
 		if (!IsHeader(line)) {
-			throw new IllegalArgumentException(String.format(
-					"Invalid header line: '%s'", line));
+			throw new IllegalArgumentException(String.format("Invalid header line: '%s'", line));
 		}
 
 		this.index++;
@@ -51,18 +53,23 @@ public class WhatsappParser {
 		Pattern p = Pattern.compile("^" + DATEPATTERN);
 		Matcher m = p.matcher(line);
 		if (!m.find()) {
-			throw new IllegalArgumentException(String.format(
-					"Invalid date format in line: '%s'", line));
+			throw new IllegalArgumentException(String.format("Invalid date format in line: '%s'", line));
 		}
 		String dateStr = line.substring(m.start(), m.end());
 
-		Calendar date = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy, HH:mm");
+		/*
+		 * Calendar date = Calendar.getInstance(); SimpleDateFormat sdf = new
+		 * SimpleDateFormat("dd/MM/yyyy, HH:mm"); try {
+		 * date.setTime(sdf.parse(dateStr)); } catch (ParseException pe) { throw new
+		 * IllegalArgumentException(String.format( "Invalid date format in line: '%s'",
+		 * line)); }
+		 */
+		LocalDateTime date = null;
 		try {
-			date.setTime(sdf.parse(dateStr));
-		} catch (ParseException pe) {
-			throw new IllegalArgumentException(String.format(
-					"Invalid date format in line: '%s'", line));
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy, HH:mm");
+			date = LocalDateTime.parse("dd/MM/yyyy, HH:mm", formatter);
+		} catch (DateTimeParseException dtpe) {
+			throw new IllegalArgumentException(String.format("Invalid date format in line: '%s'", line));
 		}
 
 		// TODO use regex
@@ -90,13 +97,14 @@ public class WhatsappParser {
 				return new MediaMessage(date, sender, fileName, subscription);
 			}
 		} else if (contentStr.equals(MEDIA_OMITTED)) {
-			throw new UnsupportedOperationException();
-			/*
-			 * var entry = imageMatcher.Pick(date, GetCnt(date)); if
-			 * (entry.IsImage && entry.Filematches.Count() > 0) { return new
-			 * MediaOmittedMessage(entry, sender); } else { return
-			 * NextMessage(); }
-			 */
+			MatchEntry entry = this.imageMatcher.pick(date, GetCnt(date));
+			if (entry.isImageType() && entry.getFileMatches().size() > 0) {
+				List<String> relpaths = entry.getFileMatches().stream().map(x -> x.getRelPath()).distinct()
+						.collect(Collectors.toList());
+				return new MediaOmittedMessage(entry.getTimePoint(), sender, relpaths);
+			} else {
+				return NextMessage();
+			}
 		} else {
 			contentStr = contentStr + ParseNextLines();
 			contentStr = contentStr.trim();
@@ -110,8 +118,7 @@ public class WhatsappParser {
 
 	private String ParseNextLines() {
 		StringBuilder sb = new StringBuilder();
-		while (this.index < this.lines.size()
-				&& !IsHeader(this.lines.get(this.index))) {
+		while (this.index < this.lines.size() && !IsHeader(this.lines.get(this.index))) {
 			sb.append("\n");
 			sb.append(this.lines.get(this.index));
 			this.index++;
@@ -120,17 +127,30 @@ public class WhatsappParser {
 		return sb.toString();
 	}
 
+	private int GetCnt(LocalDateTime tp) {
+		if (this.lastCnt.cnt == -1) {
+			this.lastCnt = new LastCnt(tp, 0);
+		} else {
+			if (this.lastCnt.date.equals(tp)) {
+				this.lastCnt = new LastCnt(this.lastCnt.date, this.lastCnt.cnt + 1);
+			} else {
+				this.lastCnt = new LastCnt(tp, 0);
+			}
+		}
+
+		return this.lastCnt.cnt;
+	}
+
 	public class LastCnt {
-		private Calendar date;
+		private LocalDateTime date;
 		private int cnt;
 
 		public LastCnt() {
-			this.date = Calendar.getInstance();
-			this.date.setTimeInMillis(0);
+			this.date = LocalDateTime.MIN;
 			this.cnt = 0;
 		}
 
-		public LastCnt(Calendar date, int cnt) {
+		public LastCnt(LocalDateTime date, int cnt) {
 			this.date = date;
 			this.cnt = cnt;
 		}

@@ -18,23 +18,6 @@ import org.xml.sax.SAXException;
 import imagematcher.*;
 
 class ImageMatcherTest {
-
-	@Test
-	public void testFromXml() throws ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException, IOException {
-		List<FileEntry> fileList = new ArrayList<FileEntry>();
-		fileList.add(getFileEntry(2015, 1, 1, "file1.jpg"));
-
-		LocalDateTime tp = LocalDateTime.of(2015, 1, 1, 13, 12, 0);
-		List<MatchEntry> matchList = new ArrayList<MatchEntry>();
-		MatchEntry matchEntry = new MatchEntry(tp, fileList, 0);
-		matchList.add(matchEntry);
-		ImageMatcher imWriter = new ImageMatcher();
-		imWriter.setMatchList(matchList);
-		String xml = imWriter.toXml();
-		
-		//Files.write(Paths.get("/tmp/out.xml"), xml));
-	}
-	
 	@Test
 	public void testPick_Load_SingleMatch()
 			throws ParserConfigurationException, SAXException, IOException, ParseException, TransformerFactoryConfigurationError, TransformerException {
