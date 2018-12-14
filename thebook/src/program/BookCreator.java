@@ -4,7 +4,7 @@ import helper.DateUtils;
 import helper.EmojiParser;
 import helper.FileHandler;
 import helper.IEmojiFormatFunction;
-import helper.ImageMatcher;
+import imagematcher.*;
 import helper.Latex;
 import helper.Misc;
 
@@ -175,7 +175,7 @@ public class BookCreator implements IEmojiFormatFunction {
 	public static String formatSenderAndTime(IMessage msg) {
 		String sender = String.format("\\textbf{%s}",
 				Latex.encodeLatex(msg.getSender()));
-		return String.format("%s (%s): ", sender,
+		return String.format("%s (%s):", sender,
 				DateUtils.formatTimeString(msg.getTimepoint()));
 	}
 
@@ -216,7 +216,7 @@ public class BookCreator implements IEmojiFormatFunction {
 	private String createLatexImage(String path, String subscription) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format(
-				"\\includegraphics[height=0.1\textheight]{%s}\\\\\n", path));
+				"\\includegraphics[height=0.1\\textheight]{%s}\\\\\n", path));
 		sb.append(String
 				.format("\\small{\\textit{%s}}\n", Encode(subscription)));
 		return sb.toString();

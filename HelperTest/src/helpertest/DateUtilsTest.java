@@ -42,13 +42,13 @@ public class DateUtilsTest {
 	
 	@Test
 	public void testFormatDateString() throws ParseException{
-		assertEquals("Sonntag, den 18. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-18")));
-		assertEquals("Montag, den 19. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-19")));
-		assertEquals("Dienstag, den 20. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-20")));
-		assertEquals("Mittwoch, den 21. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-21")));
-		assertEquals("Donnerstag, den 22. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-22")));
-		assertEquals("Freitag, den 23. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-23")));
-		assertEquals("Samstag, den 24. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-24")));
+		assertEquals("Sonntag, der 18. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-18")));
+		assertEquals("Montag, der 19. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-19")));
+		assertEquals("Dienstag, der 20. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-20")));
+		assertEquals("Mittwoch, der 21. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-21")));
+		assertEquals("Donnerstag, der 22. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-22")));
+		assertEquals("Freitag, der 23. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-23")));
+		assertEquals("Samstag, der 24. Oktober 2015", DateUtils.formatDateString(getDate("2015-10-24")));
 	}
 	
 	@Test

@@ -22,7 +22,7 @@ public class DateUtils {
 	public static String formatDateString(Calendar cal) {
 		String dayName = dayNames[cal.get(Calendar.DAY_OF_WEEK) - 1];
 		String monthName = months[cal.get(Calendar.MONTH)];
-		return String.format("%s, den %s. %s %s", dayName,
+		return String.format("%s, der %s. %s %s", dayName,
 				cal.get(Calendar.DAY_OF_MONTH), monthName,
 				cal.get(Calendar.YEAR));
 	}

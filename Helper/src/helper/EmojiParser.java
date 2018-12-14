@@ -59,13 +59,8 @@ public class EmojiParser {
         
         int codePoint = Character.codePointAt(str, index);
         int charCnt= Character.charCount(codePoint);
-		
-        //var quad = new byte[4];
-        //Array.Copy(utf32, index, quad, 0, 4);
-        //var strHex = Convert(quad);
         String strHex = String.format("%04x", codePoint);
         
-		
         String suggestion = strHex;
         if (last != null)
         {

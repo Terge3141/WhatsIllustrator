@@ -1,28 +1,42 @@
 package program;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
+import javax.xml.parsers.*;
+
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
+import imagematcher.*;
 import helper.Misc;
 import helper.Container;
 
+// Parses the old Soft Bank unicode characters to new unicode characters
+// Table from https://github.com/iamcal/emoji-data
 public class Program {
 
 	/**
 	 * @param args
 	 * @throws IOException
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main2(String[] args) throws IOException {
 		// TODO read command line arguments
 		String inputDir = "/tmp/mychat";
-		String emojiDir="/tmp/emojis";
+		String emojiDir = "/tmp/emojis";
 
 		Config config = new Config();
 		config.InputDir = inputDir;
-		config.EmojiDir=emojiDir;
+		config.EmojiDir = emojiDir;
 
 		config.OutputDir = Misc.isNullOrWhiteSpace(config.OutputDir) ? config.InputDir
 				: config.OutputDir;
@@ -42,36 +56,22 @@ public class Program {
 			Container.Debug = null;
 		}
 	}
-	
-	public static void main1(String[] args){
-		String str = "08/08/2011, 18:20 - melvers: Hallo!";
-		//boolean b = str.matches("^[0-9].*");
-		//boolean b = str.matches("^[0-3][0-9]/[0-1][0-9]/[0-9]{4},\\ [0-2][0-9]:[0-5][0-9].*");
-		//System.out.println(b);
-		Pattern p = Pattern.compile("^[0-3][0-9]/[0-1][0-9]/[0-9]{4},\\ [0-2][0-9]:[0-5][0-9]");
-		Matcher m = p.matcher(str);
-		System.out.println(m.find());
-		System.out.println(m.start());
-		System.out.println(m.end());
-	}
 
 	// TODO use of get/set
 	// TODO org.apache.commons.lang3.text.StrBuilder
+	// TODO Some Softbank icons don't have a mapping
 
-	public static void main2(String[] args) throws IOException {
-		String str = Misc
-				.readAllText("/home/michael/whatsappprint/whatsbook/smiler.txt");
-		System.out.println(convert16to32(str));
+	public static void main(String[] args) throws IOException,
+			ParserConfigurationException, SAXException, ParseException {
+		/*String path = "/tmp/try.xml";
+		
+		String xml = Misc.readAllText(path);
+		
+		ImageMatcher.FromXml(xml);*/
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-ddTHH:mm:ss");
+		//SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ss");
+		LocalDate parsedDate = LocalDate.parse("2013-03-31T21:08:00", formatter);
 	}
 
-	public static String convert16to32(String toConvert) {
-		for (int i = 0; i < toConvert.length();) {
-			int codePoint = Character.codePointAt(toConvert, i);
-			i += Character.charCount(codePoint);
-			// System.out.printf("%x%n", codePoint);
-			String utf32 = String.format("0x%x%n", codePoint);
-			return utf32;
-		}
-		return null;
-	}
 }

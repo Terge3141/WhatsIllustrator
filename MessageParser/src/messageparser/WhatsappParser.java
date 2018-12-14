@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import helper.ImageMatcher;
+import imagematcher.*;
 
 public class WhatsappParser {
 
@@ -18,7 +18,6 @@ public class WhatsappParser {
 	private ImageMatcher imageMatcher;
 	private int index;
 	private LastCnt lastCnt;
-	// private Tuple<DateTime, Stri> lastcnt;
 
 	// TODO extend pattern with Nickname and Message
 	private static final String DATEPATTERN = "[0-3][0-9]/[0-1][0-9]/[0-9]{4},\\ [0-2][0-9]:[0-5][0-9]";
@@ -79,7 +78,7 @@ public class WhatsappParser {
 		String contentStr = line.substring(senderEnd + 2);
 
 		if (contentStr.endsWith(FILE_ATTACHED)) {
-			String fileName = contentStr.substring(0, FILE_ATTACHED.length() - 1);
+			String fileName = contentStr.substring(0, contentStr.length() - FILE_ATTACHED.length() - 1);
 			String extension = fileName.substring(fileName.length() - 3);
 
 			switch (extension) {
