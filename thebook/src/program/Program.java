@@ -10,7 +10,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.stream.Stream;
 
 import javax.xml.parsers.*;
 
@@ -60,18 +62,25 @@ public class Program {
 	// TODO use of get/set
 	// TODO org.apache.commons.lang3.text.StrBuilder
 	// TODO Some Softbank icons don't have a mapping
+	// TODO use streams
 
 	public static void main(String[] args) throws IOException,
 			ParserConfigurationException, SAXException, ParseException {
-		/*String path = "/tmp/try.xml";
+		ArrayList<String> list = new ArrayList<>();
+		list.add("One");
+		list.add("OneAndOnly");
+		list.add("Derek");
+		list.add("Change");
+		list.add("factory");
+		list.add("justBefore");
+		list.add("Italy");
+		list.add("Italy");
+		list.add("Thursday");
+		list.add("");
+		list.add("");
 		
-		String xml = Misc.readAllText(path);
-		
-		ImageMatcher.FromXml(xml);*/
-		
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-ddTHH:mm:ss");
-		//SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ss");
-		LocalDate parsedDate = LocalDate.parse("2013-03-31T21:08:00", formatter);
+		Stream<String> stream = list.stream().filter(element -> element.contains("d"));
+		stream.forEach(x -> System.out.println(x));
 	}
 
 }

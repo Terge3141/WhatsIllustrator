@@ -162,7 +162,7 @@ public class BookCreator implements IEmojiFormatFunction {
 		Misc.writeAllText(texOutputPath, sb.toString());
 
 		System.out.format("Writing match file to '%s'\n", matchOutputPath);
-		im.Save(matchOutputPath);
+		im.save(matchOutputPath);
 
 		System.out.format("Copy emojis to '%s'\n", EmojiOutputDir);
 		copyList();

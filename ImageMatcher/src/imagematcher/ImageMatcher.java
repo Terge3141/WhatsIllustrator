@@ -3,17 +3,30 @@ package imagematcher;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -21,9 +34,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import helper.Misc;
+
 public class ImageMatcher {
 
 	private List<MatchEntry> matchList;
+	private List<FileEntry> fileList;
 
 	private boolean searchMode;
 
@@ -31,16 +47,14 @@ public class ImageMatcher {
 		this.matchList = new ArrayList<MatchEntry>();
 	}
 
-	public static ImageMatcher FromXml(String xml)
-			throws ParserConfigurationException, SAXException, IOException,
-			ParseException {
+	public static ImageMatcher fromXml(String xml)
+			throws ParserConfigurationException, SAXException, IOException, ParseException {
 		ImageMatcher im = new ImageMatcher();
 
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		InputStream stream = new ByteArrayInputStream(
-				xml.getBytes(StandardCharsets.UTF_8));
+		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
 		Document doc = dBuilder.parse(stream);
 		Element root = doc.getDocumentElement();
 		NodeList nodeList = root.getChildNodes();
@@ -58,53 +72,95 @@ public class ImageMatcher {
 		return im;
 	}
 
-	public MatchEntry Pick(Calendar timepoint, int cnt) {
-		List<MatchEntry> matches = new ArrayList<>();
-		Iterator<MatchEntry> it = matchList.iterator();
-		while (it.hasNext()) {
-			MatchEntry entry = it.next();
-			if (entry.getTimePoint().equals(timepoint) && entry.getCnt() == cnt) {
-				matches.add(entry);
+	public String toXml() throws ParserConfigurationException, TransformerFactoryConfigurationError,
+			TransformerException, IOException {
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+		Document doc = docBuilder.newDocument();
+		Element root = doc.createElement("ArrayOfMatchEntry");
+
+		for (MatchEntry entry : this.matchList) {
+			root.appendChild(entry.getNode(doc));
+			entry.getNode(doc);
+		}
+
+		doc.appendChild(root);
+
+		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "3");
+		DOMSource source = new DOMSource(doc);
+		StringWriter stringWriter = new StringWriter();
+		StreamResult streamResult = new StreamResult(stringWriter);
+		transformer.transform(source, streamResult);
+
+		Misc.writeAllText("/tmp/out.xml", stringWriter.toString());
+
+		return stringWriter.toString();
+	}
+
+	public MatchEntry pick(LocalDateTime timepoint, int cnt) {
+		Stream<MatchEntry> stream = this.matchList.stream().filter(x -> (x.getTimePoint().equals(timepoint) && x.getCnt() == cnt));
+		List<MatchEntry> list=stream.collect(Collectors.toList());
+		long scnt = list.size();
+		if (scnt != 1) {
+			if (this.searchMode) {
+				Stream<FileEntry> matches = this.fileList.stream().filter(x -> dateEqual(x.getTimePoint(), timepoint));
+				MatchEntry matchEntry = new MatchEntry(timepoint, matches.collect(Collectors.toList()), cnt);
+				this.matchList.add(matchEntry);
+				return matchEntry;
+			} else {
+				throw new IllegalArgumentException(
+						String.format("Invalid number of entries found ({qcnt}), 1 expected", scnt));
 			}
 		}
 
-		if (matches.size() != 1) {
-			if (searchMode) {
-				/*
-				 * MatchEntry matchEntry=new MatchEntry(timepoint, matches,
-				 * cnt); this.matchList.add(matchEntry); return matchEntry;
-				 */
-			}
-		}
-		/*
-		 * var query = _matchList.Where(x => (x.Timepoint.Equals(timepoint) &&
-		 * x.Cnt == cnt)); int qcnt = query.Count(); if (qcnt != 1) { if
-		 * (SearchMode) { var matches = FileList.Where(x =>
-		 * DateEqual(x.Timepoint, timepoint)).ToList(); var matchEntry = new
-		 * MatchEntry(timepoint, matches, cnt); _matchList.Add(matchEntry);
-		 * return matchEntry; } else { throw new
-		 * ArgumentException($"Invalid number of entries found ({qcnt}), 1 expected"
-		 * ); } }
-		 */
+		return list.get(0);
+	}
 
-		// return query.First();
+	public MatchEntry pick(LocalDateTime timepoint) {
+		return pick(timepoint, 0);
+	}
+
+	private boolean dateEqual(LocalDateTime dt1, LocalDateTime dt2) {
+		return dt1.getYear() == dt2.getYear() && dt1.getMonthValue() == dt2.getMonthValue()
+				&& dt1.getDayOfMonth() == dt2.getDayOfMonth();
+	}
+
+	public void loadMatches(String todo) {
 		throw new UnsupportedOperationException();
 	}
 
-	public MatchEntry Pick(Calendar timepoint) {
-		return Pick(timepoint, 0);
-	}
-
-	public void LoadMatches(String todo) {
+	public void loadFiles(String todo) {
 		throw new UnsupportedOperationException();
 	}
 
-	public void LoadFiles(String todo) {
+	public void save(String path) {
 		throw new UnsupportedOperationException();
 	}
 
-	public void Save(String path) {
-		// throw new UnsupportedOperationException();
+	public List<MatchEntry> getMatchList() {
+		return matchList;
+	}
+
+	public void setMatchList(List<MatchEntry> matchList) {
+		this.matchList = matchList;
+	}
+
+	public boolean isSearchMode() {
+		return searchMode;
+	}
+
+	public void setSearchMode(boolean searchMode) {
+		this.searchMode = searchMode;
+	}
+
+	public List<FileEntry> getFileList() {
+		return fileList;
+	}
+
+	public void setFileList(List<FileEntry> fileList) {
+		this.fileList = fileList;
 	}
 
 }
