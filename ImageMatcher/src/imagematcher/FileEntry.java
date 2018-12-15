@@ -15,6 +15,7 @@ import org.w3c.dom.NodeList;
 public class FileEntry {
 	private String relPath;
 	private String fileName;
+	// TODO use LocalDate
 	private LocalDateTime timePoint;
 
 	public FileEntry() {

@@ -125,7 +125,7 @@ public class BookCreator {
 			}
 		}
 
-		WhatsappParser parser = new WhatsappParser(txtInputPath, im);
+		WhatsappParser parser = WhatsappParser.of(txtInputPath, im);
 
 		StringBuilder sb = new StringBuilder();
 		sb.append(header + "\n");

@@ -26,12 +26,17 @@ public class WhatsappParser {
 	private static final String FILE_ATTACHED = "(file attached)";
 	private static final String MEDIA_OMITTED = "<Media omitted>";
 
-	public WhatsappParser(String messagePath, ImageMatcher imageMatcher) throws IOException {
-		this.lines = Files.readAllLines(Paths.get(messagePath));
-		index = 0;
+	public WhatsappParser(List<String> lines, ImageMatcher imageMatcher) {
+		this.lines = lines;
+		this.index = 0;
 
 		this.imageMatcher = imageMatcher;
 		this.lastCnt = new LastCnt();
+	}
+
+	public static WhatsappParser of(String messagePath, ImageMatcher imageMatcher) throws IOException {
+		List<String> lines = Files.readAllLines(Paths.get(messagePath));
+		return new WhatsappParser(lines, imageMatcher);
 	}
 
 	public IMessage nextMessage() {
