@@ -19,8 +19,7 @@ public class Misc {
 		return sb.toString();
 	}
 
-	public static void writeAllText(String path, String text)
-			throws IOException {
+	public static void writeAllText(String path, String text) throws IOException {
 		PrintWriter writer = new PrintWriter(path);
 		writer.print(text);
 		writer.close();
@@ -51,8 +50,8 @@ public class Misc {
 
 		return false;
 	}
-	
-	public static boolean listContains(List<String> list, String needle){
+
+	public static boolean listContains(List<String> list, String needle) {
 		String[] arr = list.toArray(new String[list.size()]);
 		return arrayContains(arr, needle);
 	}

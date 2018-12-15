@@ -9,8 +9,7 @@ public class MediaOmittedMessage implements IMessage {
 	public String sender;
 	public List<String> relpaths;
 
-	public MediaOmittedMessage(LocalDateTime timepoint, String sender,
-			List<String> relpaths) {
+	public MediaOmittedMessage(LocalDateTime timepoint, String sender, List<String> relpaths) {
 		this.timepoint = timepoint;
 		this.sender = sender;
 		this.relpaths = relpaths;

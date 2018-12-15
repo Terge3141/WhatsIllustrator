@@ -23,22 +23,22 @@ public class DateUtilsTest {
 
 	@Test
 	public void testDateDifferYearDiffer() throws ParseException {
-		LocalDateTime date1 = getDate("2015-10-21").atTime(0,0);
-		LocalDateTime date2 = getDate("2016-10-21").atTime(0,0);
+		LocalDateTime date1 = getDate("2015-10-21").atTime(0, 0);
+		LocalDateTime date2 = getDate("2016-10-21").atTime(0, 0);
 		assertTrue(DateUtils.dateDiffer(date1, date2));
 	}
 
 	@Test
 	public void testDateDifferMonthDiffer() throws ParseException {
-		LocalDateTime date1 = getDate("2015-10-21").atTime(0,0);
-		LocalDateTime date2 = getDate("2015-09-21").atTime(0,0);
+		LocalDateTime date1 = getDate("2015-10-21").atTime(0, 0);
+		LocalDateTime date2 = getDate("2015-09-21").atTime(0, 0);
 		assertTrue(DateUtils.dateDiffer(date1, date2));
 	}
 
 	@Test
 	public void testDateDifferDayDiffer() throws ParseException {
-		LocalDateTime date1 = getDate("2015-10-21").atTime(0,0);
-		LocalDateTime date2 = getDate("2015-10-22").atTime(0,0);
+		LocalDateTime date1 = getDate("2015-10-21").atTime(0, 0);
+		LocalDateTime date2 = getDate("2015-10-22").atTime(0, 0);
 		assertTrue(DateUtils.dateDiffer(date1, date2));
 	}
 
@@ -60,12 +60,12 @@ public class DateUtilsTest {
 	}
 
 	private LocalDate getDate(String str) throws ParseException {
-		DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		return LocalDate.parse(str, formatter);
 	}
 
 	private LocalTime getTime(String str) throws ParseException {
-		DateTimeFormatter formatter=DateTimeFormatter.ofPattern("HH:mm");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 		return LocalTime.parse(str, formatter);
 	}
 }

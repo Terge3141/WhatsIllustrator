@@ -132,7 +132,7 @@ public class BookCreator {
 
 		IMessage msg;
 		LocalDateTime last = LocalDateTime.MIN;
-		while ((msg = parser.NextMessage()) != null) {
+		while ((msg = parser.nextMessage()) != null) {
 			if (DateUtils.dateDiffer(last, msg.getTimepoint())) {
 				// TODO via sb.format??
 				sb.append("\\begin{center}" + DateUtils.formatDateString(msg.getTimepoint()) + "\\end{center}\n");
@@ -197,7 +197,7 @@ public class BookCreator {
 		}
 	}
 
-	private String Encode(String str) {
+	private String encode(String str) {
 		str = Latex.encodeLatex(str);
 		str = Latex.replaceURL(str);
 		str = this.emojis.replaceEmojis(str);
@@ -207,7 +207,7 @@ public class BookCreator {
 	private String createLatexImage(String path, String subscription) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format("\\includegraphics[height=0.1\\textheight]{%s}\\\\\n", path));
-		sb.append(String.format("\\small{\\textit{%s}}\n", Encode(subscription)));
+		sb.append(String.format("\\small{\\textit{%s}}\n", encode(subscription)));
 		return sb.toString();
 	}
 
@@ -226,7 +226,7 @@ public class BookCreator {
 
 	private void appendTextMessage(TextMessage msg, StringBuilder sb) {
 		String senderAndTime = formatSenderAndTime(msg);
-		String content = Encode(msg.content);
+		String content = encode(msg.content);
 		sb.append(String.format("%s %s\n", senderAndTime, content));
 		sb.append("\\\\\n");
 	}
@@ -245,7 +245,7 @@ public class BookCreator {
 		Iterator<String> it = msg.getRelpaths().iterator();
 		while (it.hasNext()) {
 			String str = it.next();
-			sb.append(createLatexImage(Paths.get(imagePoolDir, str), Encode(str)));
+			sb.append(createLatexImage(Paths.get(imagePoolDir, str), encode(str)));
 		}
 
 		sb.append("\\end{center}\n");
@@ -254,30 +254,11 @@ public class BookCreator {
 	private void appendMediaMessage(MediaMessage msg, StringBuilder sb) {
 		String str = String.format("%s \\textit{%s}", formatSenderAndTime(msg), Latex.encodeLatex(msg.getFilename()));
 		if (!Misc.isNullOrWhiteSpace(msg.getSubscription())) {
-			str = str + " - " + Encode(msg.getSubscription());
+			str = str + " - " + encode(msg.getSubscription());
 		}
 
 		sb.append(str + "\n");
 		sb.append("\\\\\n");
-	}
-
-	private class CopyItem {
-
-		private String src;
-		private String dst;
-
-		public CopyItem(String src, String dst) {
-			this.src = src;
-			this.dst = dst;
-		}
-
-		public Path getSrcPath() {
-			return Paths.get(src);
-		}
-
-		public Path getDstPath() {
-			return Paths.get(dst);
-		}
 	}
 
 	public String getInputDir() {
@@ -334,5 +315,24 @@ public class BookCreator {
 
 	public void setImagePoolDir(String imagePoolDir) {
 		this.imagePoolDir = imagePoolDir;
+	}
+
+	private class CopyItem {
+
+		private String src;
+		private String dst;
+
+		public CopyItem(String src, String dst) {
+			this.src = src;
+			this.dst = dst;
+		}
+
+		public Path getSrcPath() {
+			return Paths.get(src);
+		}
+
+		public Path getDstPath() {
+			return Paths.get(dst);
+		}
 	}
 }

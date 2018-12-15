@@ -32,8 +32,8 @@ public class Program {
 		options.addOption("o", "outputdir", true, "Output directory, default is input directory");
 		options.addOption("imagepooldir", true,
 				"Directory of the image pool. Only used when 'media omitted' messages are found");
-		options.addOption("debugdir",true,"Directory where debug information is stored");
-		
+		options.addOption("debugdir", true, "Directory where debug information is stored");
+
 		return options;
 	}
 
@@ -45,15 +45,16 @@ public class Program {
 	 * @throws ParserConfigurationException
 	 * @throws TransformerException
 	 * @throws TransformerFactoryConfigurationError
-	 * @throws org.apache.commons.cli.ParseException 
+	 * @throws                                      org.apache.commons.cli.ParseException
 	 */
-	public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException,
-			ParseException, TransformerFactoryConfigurationError, TransformerException, org.apache.commons.cli.ParseException {
+	public static void main(String[] args)
+			throws IOException, ParserConfigurationException, SAXException, ParseException,
+			TransformerFactoryConfigurationError, TransformerException, org.apache.commons.cli.ParseException {
 		// -i "/tmp/mychat" -e "/tmp/emojis" -imagepooldir "/tmp/imagepool"
-		
+
 		Config config = new Config();
-		Options options=getOptions();
-		CommandLineParser parser=new DefaultParser();
+		Options options = getOptions();
+		CommandLineParser parser = new DefaultParser();
 		try {
 			CommandLine line = parser.parse(options, args);
 			config.setInputDir(line.getOptionValue("inputdir"));
@@ -61,9 +62,8 @@ public class Program {
 			config.setOutputDir(line.getOptionValue("outputdir"));
 			config.setImagePoolDir(line.getOptionValue("imagepooldir"));
 			config.setDebugDir(line.getOptionValue("debugdir"));
-			
-		}
-		catch(MissingOptionException moe) {
+
+		} catch (MissingOptionException moe) {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("thebook", options);
 			return;

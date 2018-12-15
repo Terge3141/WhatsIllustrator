@@ -10,16 +10,6 @@ import java.util.stream.Collectors;
 public class FileHandler {
 
 	public static List<String> listDir(String dir, final String searchPattern) throws IOException {
-
-		/*
-		 * FilenameFilter filter = new FilenameFilter() { public boolean accept(File
-		 * dir, String name) { return name.matches(searchPattern); } };
-		 * 
-		 * List<String> list = new ArrayList<String>(); for (File file :
-		 * dir.listFiles(filter)) { list.add(file.getAbsolutePath()); }
-		 * 
-		 * return list;
-		 */
 		return Files.walk(Paths.get(dir)).filter(x -> Files.isRegularFile(x))
 				.filter(x -> x.getFileName().toString().matches(searchPattern)).map(x -> x.toAbsolutePath().toString())
 				.collect(Collectors.toList());

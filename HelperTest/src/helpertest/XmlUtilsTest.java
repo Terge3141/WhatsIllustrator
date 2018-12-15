@@ -22,20 +22,20 @@ import org.xml.sax.SAXException;
 public class XmlUtilsTest {
 
 	@Test
-	public void test() throws ParserConfigurationException, SAXException, IOException {
-		String xml="<root><a>one</a><b><a>wrong</a></b><c>three</c></root>";
-		NodeList nodeList=GetNodeList(xml);
+	public void testGetTextNode() throws ParserConfigurationException, SAXException, IOException {
+		String xml = "<root><a>one</a><b><a>wrong</a></b><c>three</c></root>";
+		NodeList nodeList = GetNodeList(xml);
 		assertEquals("one", XmlUtils.GetTextNode(nodeList, "a"));
 		assertEquals("three", XmlUtils.GetTextNode(nodeList, "c"));
 		assertNull(XmlUtils.GetTextNode(nodeList, "d"));
 	}
 
-	private NodeList GetNodeList(String xml) throws ParserConfigurationException, SAXException, IOException{
+	private NodeList GetNodeList(String xml) throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
-		Document doc=dBuilder.parse(stream);
+		Document doc = dBuilder.parse(stream);
 		Element root = doc.getDocumentElement();
 		return root.getChildNodes();
 	}

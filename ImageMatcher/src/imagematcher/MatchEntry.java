@@ -103,7 +103,7 @@ public class MatchEntry {
 	public void setFileMatches(List<FileEntry> fileMatches) {
 		this.fileMatches = fileMatches;
 	}
-	
+
 	public boolean isImageType() {
 		return this.imageType;
 	}

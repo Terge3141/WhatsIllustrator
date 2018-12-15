@@ -36,24 +36,23 @@ public class FileHanderTest {
 		assertEquals(file2.toString(), list1.get(1));
 		assertEquals(file3.toString(), list1.get(2));
 
-		List<String> list2 = helper.FileHandler.listDir(dir.toString(),
-				".*.txt");
+		List<String> list2 = helper.FileHandler.listDir(dir.toString(), ".*.txt");
 		Collections.sort(list2);
 		assertEquals(2, list2.size());
 		assertEquals(file1.toString(), list1.get(0));
 		assertEquals(file3.toString(), list1.get(2));
 	}
-	
+
 	@Test
 	public void testListDir_Recursive() throws IOException {
 		String dir = folder.newFolder("listDir_recursive").toString();
 		Path subDirPath = Paths.get(dir, "subdir");
-		
+
 		Files.createDirectory(subDirPath);
-						
+
 		Path fileDir = Paths.get(dir, "a.txt");
 		Path fileSubDir = Paths.get(subDirPath.toString(), "b.txt");
-		
+
 		Files.createFile(fileDir);
 		Files.createFile(fileSubDir);
 		List<String> list = helper.FileHandler.listDir(dir.toString(), ".*");
@@ -67,15 +66,15 @@ public class FileHanderTest {
 	public void testGetFileName() {
 		assertEquals("b.txt", helper.FileHandler.getFileName("/blub/b.txt"));
 	}
-	
+
 	@Test
-	public void testFileExists() throws IOException{
+	public void testFileExists() throws IOException {
 		String dir = folder.newFolder("fileExists").toString();
 		Path fileExist = Paths.get(dir, "a.txt");
 		Path fileNotExist = Paths.get(dir, "b.txt");
-		
+
 		Files.createFile(fileExist);
-		
+
 		assertTrue(helper.FileHandler.fileExists(fileExist.toString()));
 		assertFalse(helper.FileHandler.fileExists(fileNotExist.toString()));
 	}

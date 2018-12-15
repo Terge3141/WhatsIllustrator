@@ -23,7 +23,7 @@ public class EmojiParserTest {
 	}
 
 	@Test
-	public void TestReplaceEmojis_Single_InList1() {
+	public void testReplaceEmojis_Single_InList1() {
 		List<String> list = Arrays.asList("1f55e");
 		EmojiParser parser = new EmojiParser(list, x -> formatFunction(x));
 		String input = getUtf32(0x1f55e);
@@ -32,7 +32,7 @@ public class EmojiParserTest {
 	}
 
 	@Test
-	public void TestReplaceEmojis_Single_InList2() {
+	public void testReplaceEmojis_Single_InList2() {
 		List<String> list = Arrays.asList("1f4aa", "1f4aa_1f3fb");
 		EmojiParser parser = new EmojiParser(list, x -> formatFunction(x));
 		String input = getUtf32(0x1f4aa);
@@ -41,7 +41,7 @@ public class EmojiParserTest {
 	}
 
 	@Test
-	public void TestReplaceEmojis_Double_NotInList() {
+	public void testReplaceEmojis_Double_NotInList() {
 		List<String> list = new ArrayList<String>();
 		EmojiParser parser = new EmojiParser(list, x -> formatFunction(x));
 		String input = getUtf32(0x1f4a8) + getUtf32(0x1f4a9);
@@ -50,7 +50,7 @@ public class EmojiParserTest {
 	}
 
 	@Test
-	public void TestReplaceEmojis_Double_InList1() {
+	public void testReplaceEmojis_Double_InList1() {
 		List<String> list = Arrays.asList("1f4aa_1f3fb");
 		EmojiParser parser = new EmojiParser(list, x -> formatFunction(x));
 		String input = getUtf32(0x1f4aa) + getUtf32(0x1f3fb);
@@ -59,7 +59,7 @@ public class EmojiParserTest {
 	}
 
 	@Test
-	public void TestReplaceEmojis_Double_InList2() {
+	public void testReplaceEmojis_Double_InList2() {
 		List<String> list = Arrays.asList("1f4aa", "1f4aa_1f3fb");
 		EmojiParser parser = new EmojiParser(list, x -> formatFunction(x));
 		String input = getUtf32(0x1f4aa) + getUtf32(0x1f3fb);
@@ -68,7 +68,7 @@ public class EmojiParserTest {
 	}
 
 	@Test
-	public void TestReplaceEmojis_List1() {
+	public void testReplaceEmojis_List1() {
 		List<String> list = Arrays.asList("1f4aa");
 		EmojiParser parser = new EmojiParser(list, x -> formatFunction(x));
 		String input = "abcde";
@@ -77,7 +77,7 @@ public class EmojiParserTest {
 	}
 
 	@Test
-	public void TestReplaceEmojis_List2() {
+	public void testReplaceEmojis_List2() {
 		List<String> list = Arrays.asList("1f4aa");
 		EmojiParser parser = new EmojiParser(list, x -> formatFunction(x));
 		String input = "abcdef" + getUtf32(0x1f4aa) + "GHIJKLM";
@@ -108,7 +108,6 @@ public class EmojiParserTest {
 		for (int i = 0; i < toConvert.length();) {
 			int codePoint = Character.codePointAt(toConvert, i);
 			i += Character.charCount(codePoint);
-			// System.out.printf("%x%n", codePoint);
 			String utf32 = String.format("0x%x%n", codePoint);
 			return utf32;
 		}
@@ -118,14 +117,4 @@ public class EmojiParserTest {
 	public String formatFunction(String str) {
 		return String.format("ICON(%s)", str);
 	}
-
-	/*
-	 * String str =
-	 * Misc.readAllText("/home/michael/whatsappprint/whatsbook/smiler.txt"); byte[]
-	 * b = str.getBytes(); String c = "\u1f55e"; String d = newString(0x1f55e);
-	 * String e = d + "abc"; Misc.writeAllText("/tmp/out_c.txt", c);
-	 * Misc.writeAllText("/tmp/out_d.txt", d); int f = e.length();
-	 * System.out.println();
-	 */
-
 }

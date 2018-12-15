@@ -8,12 +8,12 @@ public class XmlUtils {
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node node = nodeList.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				if(node.getNodeName().equals(name)){
+				if (node.getNodeName().equals(name)) {
 					return node.getTextContent();
 				}
 			}
 		}
-		
+
 		return null;
 	}
 }

@@ -1,3 +1,5 @@
+package imagematchertest;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -21,8 +23,8 @@ import imagematcher.MatchEntry;
 
 class ImageMatcherTest {
 	@Test
-	public void testPick_Load_SingleMatch()
-			throws ParserConfigurationException, SAXException, IOException, ParseException, TransformerFactoryConfigurationError, TransformerException {
+	public void testPick_Load_SingleMatch() throws ParserConfigurationException, SAXException, IOException,
+			ParseException, TransformerFactoryConfigurationError, TransformerException {
 		List<FileEntry> fileList = new ArrayList<FileEntry>();
 		fileList.add(getFileEntry(2015, 1, 1, "file1.jpg"));
 
@@ -46,7 +48,8 @@ class ImageMatcherTest {
 	}
 
 	@Test
-	public void testPick_Load_NoMatch() throws ParserConfigurationException, SAXException, IOException, ParseException, TransformerFactoryConfigurationError, TransformerException {
+	public void testPick_Load_NoMatch() throws ParserConfigurationException, SAXException, IOException, ParseException,
+			TransformerFactoryConfigurationError, TransformerException {
 		List<FileEntry> fileList = new ArrayList<FileEntry>();
 		fileList.add(getFileEntry(2015, 1, 1, "file1.jpg"));
 

@@ -13,11 +13,10 @@ public class EmojiParser {
 	private int tokenMax;
 
 	private static final String SEPERATOR = "_";
-	
+
 	private PrintWriter debug = null;
 
-	public EmojiParser(List<String> emojiList,
-			Function<String, String> emojiFormatFunction) {
+	public EmojiParser(List<String> emojiList, Function<String, String> emojiFormatFunction) {
 		this.emojiList = emojiList;
 		this.emojiFormatFunction = emojiFormatFunction;
 
@@ -46,74 +45,58 @@ public class EmojiParser {
 		return parseChars(str, index, sb, null, 0);
 	}
 
-	private int parseChars(String str, int index, StringBuilder sb,
-			String last, int cnt) {
-		if (cnt == tokenMax)
-        {
-            return -1;
-        }
+	private int parseChars(String str, int index, StringBuilder sb, String last, int cnt) {
+		if (cnt == tokenMax) {
+			return -1;
+		}
 
-        if (index == str.length())
-        {
-            return -1;
-        }
-        
-        int codePoint = Character.codePointAt(str, index);
-        int charCnt= Character.charCount(codePoint);
-        String strHex = String.format("%04x", codePoint);
-        
-        String suggestion = strHex;
-        if (last != null)
-        {
-            suggestion = last + SEPERATOR + suggestion;
-        }
+		if (index == str.length()) {
+			return -1;
+		}
 
-        int result = parseChars(str, index + charCnt, sb, suggestion, cnt + 1);
-        if (result == -1)
-        {
-            if (Misc.listContains(emojiList, suggestion))
-            {
-            	sb.append(emojiFormatFunction.apply(suggestion));
-                return index + charCnt;
-            }
-            else
-            {
-                if (cnt == 0)
-                {
-                	String replacement=fromUtf32toString(codePoint);
+		int codePoint = Character.codePointAt(str, index);
+		int charCnt = Character.charCount(codePoint);
+		String strHex = String.format("%04x", codePoint);
 
-                    // See if it is an SoftBank encoded character
-                    String alternative = SoftBankConverter.getNewUnicode(suggestion);
-                    if (alternative != null)
-                    {
-                        if (Misc.listContains(emojiList, alternative))
-                        {
-                            replacement = emojiFormatFunction.apply(alternative);
-                        }
-                    }
+		String suggestion = strHex;
+		if (last != null) {
+			suggestion = last + SEPERATOR + suggestion;
+		}
 
-                    
-                    sb.append(replacement);
-                    if (this.debug != null)
-                    {
-                    	this.debug.format("%d %s", codePoint, alternative);
-                    }
-                    
-                    return index + charCnt;
-                }
-            }
+		int result = parseChars(str, index + charCnt, sb, suggestion, cnt + 1);
+		if (result == -1) {
+			if (Misc.listContains(emojiList, suggestion)) {
+				sb.append(emojiFormatFunction.apply(suggestion));
+				return index + charCnt;
+			} else {
+				if (cnt == 0) {
+					String replacement = fromUtf32toString(codePoint);
 
-            return -1;
-        }
-        else
-        {
-            return result;
-        }
+					// See if it is an SoftBank encoded character
+					String alternative = SoftBankConverter.getNewUnicode(suggestion);
+					if (alternative != null) {
+						if (Misc.listContains(emojiList, alternative)) {
+							replacement = emojiFormatFunction.apply(alternative);
+						}
+					}
+
+					sb.append(replacement);
+					if (this.debug != null) {
+						this.debug.format("%d %s", codePoint, alternative);
+					}
+
+					return index + charCnt;
+				}
+			}
+
+			return -1;
+		} else {
+			return result;
+		}
 	}
-	
+
 	public static String fromUtf32toString(int codePoint) {
 		return new String(Character.toChars(codePoint));
 	}
-	
-	
+
 }

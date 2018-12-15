@@ -34,13 +34,13 @@ public class WhatsappParser {
 		this.lastCnt = new LastCnt();
 	}
 
-	public IMessage NextMessage() {
+	public IMessage nextMessage() {
 		if (this.index == this.lines.size()) {
 			return null;
 		}
 
 		String line = this.lines.get(this.index);
-		if (!IsHeader(line)) {
+		if (!isHeader(line)) {
 			throw new IllegalArgumentException(String.format("Invalid header line: '%s'", line));
 		}
 
@@ -54,13 +54,6 @@ public class WhatsappParser {
 		}
 		String dateStr = line.substring(m.start(), m.end());
 
-		/*
-		 * Calendar date = Calendar.getInstance(); SimpleDateFormat sdf = new
-		 * SimpleDateFormat("dd/MM/yyyy, HH:mm"); try {
-		 * date.setTime(sdf.parse(dateStr)); } catch (ParseException pe) { throw new
-		 * IllegalArgumentException(String.format( "Invalid date format in line: '%s'",
-		 * line)); }
-		 */
 		LocalDateTime date = null;
 		try {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy, HH:mm");
@@ -75,7 +68,7 @@ public class WhatsappParser {
 		// special message, e.g. encryption information
 		if (senderEnd == -1) {
 			System.out.format("No sender found, skipping line '%s'\n", line);
-			return NextMessage();
+			return nextMessage();
 		}
 
 		String sender = line.substring(dateStr.length() + 3, senderEnd);
@@ -87,35 +80,35 @@ public class WhatsappParser {
 
 			switch (extension) {
 			case "jpg":
-				String subscription = ParseNextLines().trim();
+				String subscription = parseNextLines().trim();
 				return new ImageMessage(date, sender, fileName, subscription);
 			default:
-				subscription = ParseNextLines().trim();
+				subscription = parseNextLines().trim();
 				return new MediaMessage(date, sender, fileName, subscription);
 			}
 		} else if (contentStr.equals(MEDIA_OMITTED)) {
-			MatchEntry entry = this.imageMatcher.pick(date, GetCnt(date));
+			MatchEntry entry = this.imageMatcher.pick(date, getCnt(date));
 			if (entry.isImageType() && entry.getFileMatches().size() > 0) {
 				List<String> relpaths = entry.getFileMatches().stream().map(x -> x.getRelPath()).distinct()
 						.collect(Collectors.toList());
 				return new MediaOmittedMessage(entry.getTimePoint(), sender, relpaths);
 			} else {
-				return NextMessage();
+				return nextMessage();
 			}
 		} else {
-			contentStr = contentStr + ParseNextLines();
+			contentStr = contentStr + parseNextLines();
 			contentStr = contentStr.trim();
 			return new TextMessage(date, sender, contentStr);
 		}
 	}
 
-	private boolean IsHeader(String str) {
+	private boolean isHeader(String str) {
 		return str.matches("^" + PATTERN + ".*");
 	}
 
-	private String ParseNextLines() {
+	private String parseNextLines() {
 		StringBuilder sb = new StringBuilder();
-		while (this.index < this.lines.size() && !IsHeader(this.lines.get(this.index))) {
+		while (this.index < this.lines.size() && !isHeader(this.lines.get(this.index))) {
 			sb.append("\n");
 			sb.append(this.lines.get(this.index));
 			this.index++;
@@ -124,7 +117,7 @@ public class WhatsappParser {
 		return sb.toString();
 	}
 
-	private int GetCnt(LocalDateTime tp) {
+	private int getCnt(LocalDateTime tp) {
 		if (this.lastCnt.cnt == -1) {
 			this.lastCnt = new LastCnt(tp, 0);
 		} else {

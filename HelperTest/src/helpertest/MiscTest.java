@@ -30,17 +30,17 @@ public class MiscTest {
 
 	@Test
 	public void testArrayContains() {
-		String[] arr = {"asd","b","c"};
+		String[] arr = { "asd", "b", "c" };
 		assertTrue(Misc.arrayContains(arr, "asd"));
 		assertTrue(Misc.arrayContains(arr, "b"));
 		assertTrue(Misc.arrayContains(arr, "c"));
 		assertFalse(Misc.arrayContains(arr, "d"));
 		assertFalse(Misc.arrayContains(arr, "ase"));
 	}
-	
+
 	@Test
 	public void testListContains() {
-		List<String> list = Arrays.asList("asd","b","c");
+		List<String> list = Arrays.asList("asd", "b", "c");
 		assertTrue(Misc.listContains(list, "asd"));
 		assertTrue(Misc.listContains(list, "b"));
 		assertTrue(Misc.listContains(list, "c"));

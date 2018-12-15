@@ -23,7 +23,7 @@ public class DateUtils {
 		String monthName = months[date.getMonthValue() - 1];
 		return String.format("%s, der %s. %s %s", dayName, date.getDayOfMonth(), monthName, date.getYear());
 	}
-	
+
 	public static String formatDateString(LocalDateTime date) {
 		return formatDateString(date.toLocalDate());
 	}
