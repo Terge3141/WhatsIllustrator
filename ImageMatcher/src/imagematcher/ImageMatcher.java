@@ -50,7 +50,7 @@ public class ImageMatcher {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
+		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
 		Document doc = dBuilder.parse(stream);
 		Element root = doc.getDocumentElement();
 		NodeList nodeList = root.getChildNodes();
