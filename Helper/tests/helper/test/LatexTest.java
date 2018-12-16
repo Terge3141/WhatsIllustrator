@@ -1,4 +1,4 @@
-package helpertest;
+package helper.test;
 
 import static org.junit.Assert.*;
 import helper.Latex;
