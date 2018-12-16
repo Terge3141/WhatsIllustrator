@@ -9,8 +9,12 @@ import helper.Misc;
 
 import messageparser.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
@@ -75,8 +79,8 @@ public class BookCreator {
 
 		this.emojis = new EmojiParser(emojiList, x -> getEmojiPath(x));
 
-		header = Misc.readAllText("header.tex.tmpl");
-		footer = Misc.readAllText("footer.tex.tmpl");
+		header = getRessourceAsString("header.tex.tmpl");
+		footer = getRessourceAsString("footer.tex.tmpl");
 
 		this.inputDir = inputDir;
 		this.outputDir = outputDir;
@@ -166,6 +170,22 @@ public class BookCreator {
 	public static String formatSenderAndTime(IMessage msg) {
 		String sender = String.format("\\textbf{%s}", Latex.encodeLatex(msg.getSender()));
 		return String.format("%s (%s):", sender, DateUtils.formatTimeString(msg.getTimepoint()));
+	}
+
+	private String getRessourceAsString(String name) throws IOException {
+		InputStream inputStream = this.getClass().getResourceAsStream(name);
+
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		int nRead;
+		byte[] data = new byte[1024];
+		while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+			buffer.write(data, 0, nRead);
+		}
+
+		buffer.flush();
+		byte[] byteArray = buffer.toByteArray();
+
+		return new String(byteArray, StandardCharsets.UTF_8);
 	}
 
 	private List<String> readEmojiList(String dir) {
