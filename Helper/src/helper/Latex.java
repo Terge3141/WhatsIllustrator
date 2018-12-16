@@ -102,25 +102,25 @@ public class Latex {
 		boolean found = true;
 		int startIndex = 0;
 		while (found) {
-			SearchResult result = firstString(str, new String[] { "http://", "https://" }, startIndex);
+			int urlIndex = firstString(str, new String[] { "http://", "https://" }, startIndex);
 
-			if (result.index != -1) {
-				int whiteIndex = firstString(str, new String[] { " ", "\n", "\\\\" }, result.index).index;
+			if (urlIndex != -1) {
+				int whiteIndex = firstString(str, new String[] { " ", "\n", "\\\\" }, urlIndex);
 
-				String left = str.substring(0, result.index);
+				String left = str.substring(0, urlIndex);
 				String httpString;
 				String right;
 				if (whiteIndex == -1) {
-					httpString = str.substring(result.index);
+					httpString = str.substring(urlIndex);
 					right = "";
 				} else {
-					httpString = str.substring(result.index, whiteIndex);
+					httpString = str.substring(urlIndex, whiteIndex);
 					right = str.substring(whiteIndex);
 				}
 
 				String replaceStr = String.format("\\url{%s}", httpString);
 				str = left + replaceStr + right;
-				startIndex = result.index + replaceStr.length();
+				startIndex = urlIndex + replaceStr.length();
 			} else {
 				found = false;
 			}
@@ -129,29 +129,15 @@ public class Latex {
 		return str;
 	}
 
-	private static SearchResult firstString(String str, String[] needles, int startIndex) {
-		String needle = null;
+	private static int firstString(String str, String[] needles, int startIndex) {
 		int index = -1;
 		for (String x : needles) {
 			int i = str.indexOf(x, startIndex);
-			if (i != -1 && (i < index || needle == null)) {
+			if (i != -1 && (i < index || index == -1)) {
 				index = i;
-				needle = x;
 			}
 		}
 
-		return new SearchResult(index, needle);
+		return index;
 	}
-
-	public static class SearchResult {
-
-		private int index;
-		private String needle;
-
-		public SearchResult(int index, String needle) {
-			this.index = index;
-			this.needle = needle;
-		}
-	}
-
 }
