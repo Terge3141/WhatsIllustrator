@@ -59,9 +59,6 @@ local.properties
 .worksheet
 
 ### Eclipse Patch ###
-# Eclipse Core
-.project
-
 # Annotation Processing
 .apt_generated
 
