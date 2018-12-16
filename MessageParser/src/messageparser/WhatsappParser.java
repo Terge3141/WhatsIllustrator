@@ -56,7 +56,6 @@ public class WhatsappParser {
 
 		this.index++;
 
-		// TODO check for size
 		Pattern p = Pattern.compile("^" + DATEPATTERN);
 		Matcher m = p.matcher(line);
 		if (!m.find()) {
