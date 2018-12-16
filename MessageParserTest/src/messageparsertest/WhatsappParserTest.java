@@ -14,6 +14,7 @@ import imagematcher.MatchEntry;
 import messageparser.IMessage;
 import messageparser.ImageMessage;
 import messageparser.MediaMessage;
+import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
 import messageparser.WhatsappParser;
 
@@ -113,18 +114,42 @@ class WhatsappParserTest {
 		assertNull(wp.nextMessage());
 	}
 
-	/*@Test
+	@Test
 	void testNextMessage_MediaOmittedMessage() {
 		ImageMatcher im = new ImageMatcher();
-		
-		FileEntry f1 = new FileEntry();
-		f1.setFileName("delorean1.jpg");
-		f1.setTimePoint(LocalDateTime.of(2015, 10, 21, 0, 0));
-		f1.setRelPath("path/to/img");
-		
-		File
-		
-		MatchEntry me = new MatchEntry(LocalDateTime.of(2015, 10, 21, 16, 29), fileMatches, 0);
+
+		FileEntry f1 = getFileEntry("delorean1.jpg", 2015, 10, 21);
+		FileEntry f2 = getFileEntry("delorean2.jpg", 2015, 10, 21);
+		FileEntry f3 = getFileEntry("delorean3.jpg", 2015, 10, 22);
+
+		MatchEntry me1 = new MatchEntry(LocalDateTime.of(2015, 10, 21, 16, 29), Arrays.asList(f1, f2), 0);
+		MatchEntry me2 = new MatchEntry(LocalDateTime.of(2015, 10, 22, 17, 10), Arrays.asList(f3), 0);
+
+		List<MatchEntry> matchList = Arrays.asList(me1, me2);
 		im.setMatchList(matchList);
-	}*/
+		im.setSearchMode(true);
+
+		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: <Media omitted>");
+		WhatsappParser wp = new WhatsappParser(lines, im);
+
+		IMessage msg = wp.nextMessage();
+		assertTrue(msg instanceof MediaOmittedMessage);
+
+		MediaOmittedMessage mom = (MediaOmittedMessage) msg;
+		assertEquals("biff", mom.getSender());
+		assertEquals(LocalDateTime.of(2015, 10, 21, 16, 29), mom.getTimepoint());
+
+		List<String> relPaths = mom.getRelpaths();
+		assertEquals(2, relPaths.size());
+		assertEquals("path/to/img/delorean1.jpg", relPaths.get(0));
+		assertEquals("path/to/img/delorean2.jpg", relPaths.get(1));
+	}
+
+	private FileEntry getFileEntry(String name, int year, int month, int day) {
+		FileEntry f1 = new FileEntry();
+		f1.setFileName(name);
+		f1.setTimePoint(LocalDateTime.of(year, month, day, 0, 0));
+		f1.setRelPath("path/to/img/" + name);
+		return f1;
+	}
 }
