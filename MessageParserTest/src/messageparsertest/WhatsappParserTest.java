@@ -32,6 +32,43 @@ class WhatsappParserTest {
 	}
 
 	@Test
+	void testNextMessage_SeveralMessages() {
+		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: Hmm", "21/10/2015, 16:30 - biffer: Oh",
+				"21/10/2015, 16:30 - biff: Delorean?");
+		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher());
+
+		IMessage msg1 = wp.nextMessage();
+		IMessage msg2 = wp.nextMessage();
+		IMessage msg3 = wp.nextMessage();
+
+		assertNotNull(msg1);
+		assertNotNull(msg2);
+		assertNotNull(msg3);
+
+		assertTrue(msg1 instanceof TextMessage);
+		assertTrue(msg2 instanceof TextMessage);
+		assertTrue(msg3 instanceof TextMessage);
+
+		TextMessage tm1 = (TextMessage) msg1;
+		TextMessage tm2 = (TextMessage) msg2;
+		TextMessage tm3 = (TextMessage) msg3;
+
+		assertEquals("biff", tm1.getSender());
+		assertEquals("biffer", tm2.getSender());
+		assertEquals("biff", tm3.getSender());
+
+		assertEquals(LocalDateTime.of(2015, 10, 21, 16, 29), tm1.getTimepoint());
+		assertEquals(LocalDateTime.of(2015, 10, 21, 16, 30), tm2.getTimepoint());
+		assertEquals(LocalDateTime.of(2015, 10, 21, 16, 30), tm3.getTimepoint());
+
+		assertEquals("Hmm", tm1.getContent());
+		assertEquals("Oh", tm2.getContent());
+		assertEquals("Delorean?", tm3.getContent());
+
+		assertNull(wp.nextMessage());
+	}
+
+	@Test
 	void testNextMessage_TextMessage() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: Hmm");
 		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher());
