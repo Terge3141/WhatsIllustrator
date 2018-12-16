@@ -17,6 +17,7 @@ public class WhatsappParser {
 
 	private List<String> lines;
 	private ImageMatcher imageMatcher;
+	private NameLookup nameLookup;
 	private int index;
 	private LastCnt lastCnt;
 
@@ -26,17 +27,19 @@ public class WhatsappParser {
 	private static final String FILE_ATTACHED = "(file attached)";
 	private static final String MEDIA_OMITTED = "<Media omitted>";
 
-	public WhatsappParser(List<String> lines, ImageMatcher imageMatcher) {
+	public WhatsappParser(List<String> lines, ImageMatcher imageMatcher, NameLookup nameLookup) {
 		this.lines = lines;
 		this.index = 0;
 
 		this.imageMatcher = imageMatcher;
+		this.nameLookup = nameLookup;
 		this.lastCnt = new LastCnt();
 	}
 
-	public static WhatsappParser of(String messagePath, ImageMatcher imageMatcher) throws IOException {
+	public static WhatsappParser of(String messagePath, ImageMatcher imageMatcher, NameLookup nameLookup)
+			throws IOException {
 		List<String> lines = Files.readAllLines(Paths.get(messagePath));
-		return new WhatsappParser(lines, imageMatcher);
+		return new WhatsappParser(lines, imageMatcher, nameLookup);
 	}
 
 	public IMessage nextMessage() {
@@ -77,6 +80,11 @@ public class WhatsappParser {
 		}
 
 		String sender = line.substring(dateStr.length() + 3, senderEnd);
+		// special case: phone numbers have \u202A as start and \u202C as end
+		sender = sender.replaceAll("\u202A", "");
+		sender = sender.replaceAll("\u202C", "");
+		sender = this.nameLookup.tryLookup(sender);
+
 		String contentStr = line.substring(senderEnd + 2);
 
 		if (contentStr.endsWith(FILE_ATTACHED)) {

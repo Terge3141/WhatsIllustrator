@@ -16,6 +16,7 @@ import messageparser.IMessage;
 import messageparser.ImageMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
+import messageparser.NameLookup;
 import messageparser.TextMessage;
 import messageparser.WhatsappParser;
 
@@ -24,7 +25,7 @@ class WhatsappParserTest {
 	@Test
 	void testNextMessage_InvalidHeader() {
 		List<String> lines = Arrays.asList("Something different");
-		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher());
+		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
 		try {
 			wp.nextMessage();
 			fail("No exception thrown");
@@ -36,7 +37,7 @@ class WhatsappParserTest {
 	void testNextMessage_SeveralMessages() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: Hmm", "21/10/2015, 16:30 - biffer: Oh",
 				"21/10/2015, 16:30 - biff: Delorean?");
-		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher());
+		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
 
 		IMessage msg1 = wp.nextMessage();
 		IMessage msg2 = wp.nextMessage();
@@ -70,9 +71,36 @@ class WhatsappParserTest {
 	}
 
 	@Test
+	void testNextMessage_TextMessage_LookUpSender() {
+		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: Hmm", "21/10/2015, 16:29 - buff: Hmm");
+
+		NameLookup nl = new NameLookup();
+		nl.add("biff", "baff");
+		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), nl);
+		
+		IMessage msg1 = wp.nextMessage();
+		IMessage msg2 = wp.nextMessage();
+
+		assertNotNull(msg1);
+		assertNotNull(msg2);
+
+		assertTrue(msg1 instanceof TextMessage);
+		assertTrue(msg2 instanceof TextMessage);
+
+		TextMessage tm1 = (TextMessage) msg1;
+		TextMessage tm2 = (TextMessage) msg2;
+
+		assertEquals("baff", tm1.getSender());
+		assertEquals("buff", tm2.getSender());
+		
+		assertNull(wp.nextMessage());
+
+	}
+
+	@Test
 	void testNextMessage_TextMessage() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: Hmm");
-		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher());
+		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
 
 		IMessage msg = wp.nextMessage();
 		assertTrue(msg instanceof TextMessage);
@@ -88,7 +116,7 @@ class WhatsappParserTest {
 	@Test
 	void testNextMessage_TextMessage_SeveralLines() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: Hmm", "a flying delorean", "Can't be true");
-		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher());
+		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
 
 		IMessage msg = wp.nextMessage();
 		assertTrue(msg instanceof TextMessage);
@@ -104,7 +132,7 @@ class WhatsappParserTest {
 	@Test
 	void testNextMessage_ImageMessage_Nosubscription() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: delorean.jpg (file attached)");
-		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher());
+		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
 
 		IMessage msg = wp.nextMessage();
 		assertTrue(msg instanceof ImageMessage);
@@ -121,7 +149,7 @@ class WhatsappParserTest {
 	@Test
 	void testNextMessage_ImageMessage_Subscription() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: delorean.jpg (file attached)", "Flying delorean");
-		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher());
+		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
 
 		IMessage msg = wp.nextMessage();
 		assertTrue(msg instanceof ImageMessage);
@@ -138,7 +166,7 @@ class WhatsappParserTest {
 	@Test
 	void testNextMessage_MediaMessage() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: mcfly.vcf (file attached)");
-		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher());
+		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
 
 		IMessage msg = wp.nextMessage();
 		assertTrue(msg instanceof MediaMessage);
@@ -168,7 +196,7 @@ class WhatsappParserTest {
 		im.setSearchMode(true);
 
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: <Media omitted>");
-		WhatsappParser wp = new WhatsappParser(lines, im);
+		WhatsappParser wp = new WhatsappParser(lines, im, new NameLookup());
 
 		IMessage msg = wp.nextMessage();
 		assertTrue(msg instanceof MediaOmittedMessage);

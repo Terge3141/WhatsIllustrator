@@ -128,8 +128,18 @@ public class BookCreator {
 			}
 		}
 
-		WhatsappParser parser = WhatsappParser.of(txtInputPath, im);
+		String lookupInputPath = Paths.get(configDir, "namelookup.xml").toString();
+		NameLookup nl;
+		if (FileHandler.fileExists(lookupInputPath)) {
+			System.out.format("Loading name lookup '%s'\n", lookupInputPath);
+			nl = NameLookup.fromXmlFile(lookupInputPath);
+		} else {
+			nl = new NameLookup();
+		}
 
+		WhatsappParser parser = WhatsappParser.of(txtInputPath, im, nl);
+
+		System.out.println("Start parsing messages");
 		StringBuilder sb = new StringBuilder();
 		sb.append(header + "\n");
 
@@ -211,7 +221,6 @@ public class BookCreator {
 
 	private void copyList() throws IOException {
 		for (CopyItem x : this.copyList) {
-			//System.out.format("%s --> %s\n", x.getSrcPath(), x.getDstPath());
 			Files.copy(x.getSrcPath(), x.getDstPath(), StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
