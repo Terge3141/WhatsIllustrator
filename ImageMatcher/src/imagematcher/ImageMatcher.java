@@ -51,7 +51,7 @@ public class ImageMatcher {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
 		Document doc = dBuilder.parse(stream);
 		Element root = doc.getDocumentElement();
 		NodeList nodeList = root.getChildNodes();
@@ -88,6 +88,7 @@ public class ImageMatcher {
 		doc.appendChild(root);
 
 		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-16");
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "3");
 		DOMSource source = new DOMSource(doc);
