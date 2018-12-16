@@ -2,6 +2,7 @@ package messageparsertest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -185,7 +186,7 @@ class WhatsappParserTest {
 	private FileEntry getFileEntry(String name, int year, int month, int day) {
 		FileEntry f1 = new FileEntry();
 		f1.setFileName(name);
-		f1.setTimePoint(LocalDateTime.of(year, month, day, 0, 0));
+		f1.setTimePoint(LocalDate.of(year, month, day));
 		f1.setRelPath("path/to/img/" + name);
 		return f1;
 	}
