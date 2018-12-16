@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,7 +125,7 @@ class ImageMatcherTest {
 	}
 
 	private FileEntry getFileEntry(int year, int month, int day, String filename) {
-		LocalDateTime tp = LocalDateTime.of(year, month, day, 0, 0);
+		LocalDate tp = LocalDate.of(year, month, day);
 		String rp = String.format("path/to/%s", filename);
 		FileEntry fe = new FileEntry();
 		fe.setTimePoint(tp);

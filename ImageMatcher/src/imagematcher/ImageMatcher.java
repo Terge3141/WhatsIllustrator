@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,10 +109,12 @@ public class ImageMatcher {
 		Stream<MatchEntry> stream = this.matchList.stream()
 				.filter(x -> (x.getTimePoint().equals(timepoint) && x.getCnt() == cnt));
 		List<MatchEntry> list = stream.collect(Collectors.toList());
+		
+		LocalDate tpDate = timepoint.toLocalDate();
 		long scnt = list.size();
 		if (scnt != 1) {
 			if (this.searchMode) {
-				Stream<FileEntry> matches = this.fileList.stream().filter(x -> dateEqual(x.getTimePoint(), timepoint));
+				Stream<FileEntry> matches = this.fileList.stream().filter(x -> x.getTimePoint().equals(tpDate));
 				MatchEntry matchEntry = new MatchEntry(timepoint, matches.collect(Collectors.toList()), cnt);
 				this.matchList.add(matchEntry);
 				return matchEntry;
@@ -126,11 +129,6 @@ public class ImageMatcher {
 
 	public MatchEntry pick(LocalDateTime timepoint) {
 		return pick(timepoint, 0);
-	}
-
-	private boolean dateEqual(LocalDateTime dt1, LocalDateTime dt2) {
-		return dt1.getYear() == dt2.getYear() && dt1.getMonthValue() == dt2.getMonthValue()
-				&& dt1.getDayOfMonth() == dt2.getDayOfMonth();
 	}
 
 	public void loadFiles(String dir) throws IOException, ParseException {

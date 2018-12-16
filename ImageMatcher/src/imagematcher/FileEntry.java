@@ -4,7 +4,7 @@ import helper.FileHandler;
 import helper.XmlUtils;
 
 import java.text.ParseException;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import org.w3c.dom.Document;
@@ -15,8 +15,7 @@ import org.w3c.dom.NodeList;
 public class FileEntry {
 	private String relPath;
 	private String fileName;
-	// TODO use LocalDate
-	private LocalDateTime timePoint;
+	private LocalDate timePoint;
 
 	public FileEntry() {
 	}
@@ -48,15 +47,15 @@ public class FileEntry {
 		this.fileName = fileName;
 	}
 
-	public LocalDateTime getTimePoint() {
+	public LocalDate getTimePoint() {
 		return timePoint;
 	}
 
-	public void setTimePoint(LocalDateTime timePoint) {
+	public void setTimePoint(LocalDate timePoint) {
 		this.timePoint = timePoint;
 	}
 
-	private LocalDateTime getTimePointFromFilename(String filename) throws ParseException {
+	private LocalDate getTimePointFromFilename(String filename) throws ParseException {
 
 		String pattern = "IMG-[0-9]{8}-WA[0-9]{4}.jp";
 		// TODO check the filename starts with pattern
@@ -66,7 +65,7 @@ public class FileEntry {
 
 		String dateStr = filename.substring(4, 8);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-		LocalDateTime dateTime = LocalDateTime.parse(dateStr, formatter);
+		LocalDate dateTime = LocalDate.parse(dateStr, formatter);
 
 		return dateTime;
 	}
@@ -77,7 +76,7 @@ public class FileEntry {
 		NodeList nodeList = node.getChildNodes();
 
 		String tpStr = XmlUtils.GetTextNode(nodeList, "Timepoint");
-		fe.timePoint = LocalDateTime.parse(tpStr);
+		fe.timePoint = LocalDate.parse(tpStr);
 
 		fe.fileName = XmlUtils.GetTextNode(nodeList, "Filename");
 		fe.relPath = XmlUtils.GetTextNode(nodeList, "Relpath");
