@@ -212,7 +212,7 @@ public class BookCreator {
 
 	private void copyList() throws IOException {
 		for (CopyItem x : this.copyList) {
-			System.out.format("%s --> %s\n", x.getSrcPath(), x.getDstPath());
+			//System.out.format("%s --> %s\n", x.getSrcPath(), x.getDstPath());
 			Files.copy(x.getSrcPath(), x.getDstPath(), StandardCopyOption.REPLACE_EXISTING);
 		}
 	}

@@ -5,6 +5,7 @@ import helper.XmlUtils;
 
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.w3c.dom.Document;
@@ -76,7 +77,7 @@ public class FileEntry {
 		NodeList nodeList = node.getChildNodes();
 
 		String tpStr = XmlUtils.GetTextNode(nodeList, "Timepoint");
-		fe.timePoint = LocalDate.parse(tpStr);
+		fe.timePoint = LocalDateTime.parse(tpStr).toLocalDate();
 
 		fe.fileName = XmlUtils.GetTextNode(nodeList, "Filename");
 		fe.relPath = XmlUtils.GetTextNode(nodeList, "Relpath");
@@ -88,7 +89,7 @@ public class FileEntry {
 		Element fileEntry = doc.createElement("FileEntry");
 
 		Element timepoint = doc.createElement("Timepoint");
-		timepoint.setTextContent(this.timePoint.toString());
+		timepoint.setTextContent(this.timePoint.atTime(0, 0).toString());
 		fileEntry.appendChild(timepoint);
 
 		Element filename = doc.createElement("Filename");
