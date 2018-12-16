@@ -26,6 +26,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
+import org.apache.commons.text.TextStringBuilder;
 import org.xml.sax.SAXException;
 
 public class BookCreator {
@@ -140,34 +141,33 @@ public class BookCreator {
 		WhatsappParser parser = WhatsappParser.of(txtInputPath, im, nl);
 
 		System.out.println("Start parsing messages");
-		StringBuilder sb = new StringBuilder();
-		sb.append(header + "\n");
+		TextStringBuilder tsb = new TextStringBuilder();
+		tsb.appendln(header);
 
 		IMessage msg;
 		LocalDateTime last = LocalDateTime.MIN;
 		while ((msg = parser.nextMessage()) != null) {
 			if (DateUtils.dateDiffer(last, msg.getTimepoint())) {
-				// TODO via sb.format??
-				sb.append("\\begin{center}" + DateUtils.formatDateString(msg.getTimepoint()) + "\\end{center}\n");
+				tsb.appendln("\\begin{center}%s\\end{center}", DateUtils.formatDateString(msg.getTimepoint()));
 			}
 
 			last = msg.getTimepoint();
 
 			if (msg instanceof TextMessage) {
-				appendTextMessage((TextMessage) msg, sb);
+				appendTextMessage((TextMessage) msg, tsb);
 			} else if (msg instanceof ImageMessage) {
-				appendImageMessage((ImageMessage) msg, sb);
+				appendImageMessage((ImageMessage) msg, tsb);
 			} else if (msg instanceof MediaOmittedMessage) {
-				appendMediaOmittedMessage((MediaOmittedMessage) msg, sb);
+				appendMediaOmittedMessage((MediaOmittedMessage) msg, tsb);
 			} else if (msg instanceof MediaMessage) {
-				appendMediaMessage((MediaMessage) msg, sb);
+				appendMediaMessage((MediaMessage) msg, tsb);
 			}
 		}
 
-		sb.append(this.footer + "\n");
+		tsb.appendln(this.footer);
 
 		System.out.format("Writing tex file to '%s'\n", texOutputPath);
-		Misc.writeAllText(texOutputPath, sb.toString());
+		Misc.writeAllText(texOutputPath, tsb.toString());
 
 		System.out.format("Writing match file to '%s'\n", matchOutputPath);
 		im.toXmlFile(matchOutputPath);
@@ -233,10 +233,10 @@ public class BookCreator {
 	}
 
 	private String createLatexImage(String path, String subscription) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(String.format("\\includegraphics[height=0.1\\textheight]{%s}\\\\\n", path));
-		sb.append(String.format("\\small{\\textit{%s}}\n", encode(subscription)));
-		return sb.toString();
+		TextStringBuilder tsb = new TextStringBuilder();
+		tsb.appendln("\\includegraphics[height=0.1\\textheight]{%s}\\\\", path);
+		tsb.appendln("\\small{\\textit{%s}}", encode(subscription));
+		return tsb.toString();
 	}
 
 	private String createLatexImage(Path path, String subscription) {
@@ -252,41 +252,41 @@ public class BookCreator {
 		return String.format("\\includegraphics[scale=0.075]{emojis/%s.png}", str);
 	}
 
-	private void appendTextMessage(TextMessage msg, StringBuilder sb) {
+	private void appendTextMessage(TextMessage msg, TextStringBuilder tsb) {
 		String senderAndTime = formatSenderAndTime(msg);
 		String content = encode(msg.content);
-		sb.append(String.format("%s %s\n", senderAndTime, content));
-		sb.append("\\\\\n");
+		tsb.appendln("%s %s", senderAndTime, content);
+		tsb.appendln("\\\\");
 	}
 
-	private void appendImageMessage(ImageMessage msg, StringBuilder sb) {
-		sb.append(String.format("%s\\\\\n", formatSenderAndTime(msg)));
-		sb.append("\\begin{center}");
-		sb.append(createLatexImage(Paths.get(imageDir, msg.getFilename()), msg.getSubscription()));
-		sb.append("\\end{center}\n");
+	private void appendImageMessage(ImageMessage msg, TextStringBuilder tsb) {
+		tsb.appendln("%s\\\\", formatSenderAndTime(msg));
+		tsb.append("\\begin{center}");
+		tsb.append(createLatexImage(Paths.get(imageDir, msg.getFilename()), msg.getSubscription()));
+		tsb.appendln("\\end{center}");
 	}
 
-	private void appendMediaOmittedMessage(MediaOmittedMessage msg, StringBuilder sb) {
-		sb.append(String.format("%s\\\\\n", formatSenderAndTime(msg)));
-		sb.append("\\begin{center}");
+	private void appendMediaOmittedMessage(MediaOmittedMessage msg, TextStringBuilder tsb) {
+		tsb.appendln("%s\\\\", formatSenderAndTime(msg));
+		tsb.append("\\begin{center}");
 
 		Iterator<String> it = msg.getRelpaths().iterator();
 		while (it.hasNext()) {
 			String str = it.next();
-			sb.append(createLatexImage(Paths.get(imagePoolDir, str), encode(str)));
+			tsb.append(createLatexImage(Paths.get(imagePoolDir, str), encode(str)));
 		}
 
-		sb.append("\\end{center}\n");
+		tsb.appendln("\\end{center}");
 	}
 
-	private void appendMediaMessage(MediaMessage msg, StringBuilder sb) {
+	private void appendMediaMessage(MediaMessage msg, TextStringBuilder tsb) {
 		String str = String.format("%s \\textit{%s}", formatSenderAndTime(msg), Latex.encodeLatex(msg.getFilename()));
 		if (!Misc.isNullOrWhiteSpace(msg.getSubscription())) {
 			str = str + " - " + encode(msg.getSubscription());
 		}
 
-		sb.append(str + "\n");
-		sb.append("\\\\\n");
+		tsb.appendln(str);
+		tsb.appendln("\\\\");
 	}
 
 	public String getInputDir() {

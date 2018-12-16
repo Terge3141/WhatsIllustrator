@@ -88,7 +88,6 @@ public class Program {
 		}
 	}
 
-	// TODO org.apache.commons.lang3.text.StrBuilder
 	// TODO Some Softbank icons don't have a mapping
 	// TODO use streams
 }

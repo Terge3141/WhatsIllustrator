@@ -11,6 +11,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.text.TextStringBuilder;
+
 import imagematcher.*;
 
 public class WhatsappParser {
@@ -120,14 +122,14 @@ public class WhatsappParser {
 	}
 
 	private String parseNextLines() {
-		StringBuilder sb = new StringBuilder();
+		TextStringBuilder tsb = new TextStringBuilder();
 		while (this.index < this.lines.size() && !isHeader(this.lines.get(this.index))) {
-			sb.append("\n");
-			sb.append(this.lines.get(this.index));
+			tsb.appendNewLine();
+			tsb.append(this.lines.get(this.index));
 			this.index++;
 		}
 
-		return sb.toString();
+		return tsb.toString();
 	}
 
 	private int getCnt(LocalDateTime tp) {

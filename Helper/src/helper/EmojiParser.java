@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.commons.text.TextStringBuilder;
+
 public class EmojiParser {
 
 	private List<String> emojiList;
@@ -32,20 +34,20 @@ public class EmojiParser {
 	}
 
 	public String replaceEmojis(String str) {
-		StringBuilder sb = new StringBuilder();
+		TextStringBuilder tsb = new TextStringBuilder();
 		int index = 0;
 		while (index < str.length()) {
-			index = parseChars(str, index, sb);
+			index = parseChars(str, index, tsb);
 		}
 
-		return sb.toString();
+		return tsb.toString();
 	}
 
-	private int parseChars(String str, int index, StringBuilder sb) {
-		return parseChars(str, index, sb, null, 0);
+	private int parseChars(String str, int index, TextStringBuilder tsb) {
+		return parseChars(str, index, tsb, null, 0);
 	}
 
-	private int parseChars(String str, int index, StringBuilder sb, String last, int cnt) {
+	private int parseChars(String str, int index, TextStringBuilder tsb, String last, int cnt) {
 		if (cnt == tokenMax) {
 			return -1;
 		}
@@ -63,10 +65,10 @@ public class EmojiParser {
 			suggestion = last + SEPERATOR + suggestion;
 		}
 
-		int result = parseChars(str, index + charCnt, sb, suggestion, cnt + 1);
+		int result = parseChars(str, index + charCnt, tsb, suggestion, cnt + 1);
 		if (result == -1) {
 			if (Misc.listContains(emojiList, suggestion)) {
-				sb.append(emojiFormatFunction.apply(suggestion));
+				tsb.append(emojiFormatFunction.apply(suggestion));
 				return index + charCnt;
 			} else {
 				if (cnt == 0) {
@@ -80,7 +82,7 @@ public class EmojiParser {
 						}
 					}
 
-					sb.append(replacement);
+					tsb.append(replacement);
 					if (this.debug != null) {
 						this.debug.format("%d %s", codePoint, alternative);
 					}
