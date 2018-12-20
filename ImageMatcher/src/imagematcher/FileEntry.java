@@ -58,13 +58,13 @@ public class FileEntry {
 
 	private LocalDate getTimePointFromFilename(String filename) throws ParseException {
 
-		String pattern = "IMG-[0-9]{8}-WA[0-9]{4}.jp";
+		String pattern = "IMG-[0-9]{8}-WA[0-9]{4}.jp.*";
 		// TODO check the filename starts with pattern
 		if (!filename.matches(pattern)) {
 			throw new IllegalArgumentException(String.format("Invalid filename '%s'", filename));
 		}
 
-		String dateStr = filename.substring(4, 8);
+		String dateStr = filename.substring(4, 12);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 		LocalDate dateTime = LocalDate.parse(dateStr, formatter);
 

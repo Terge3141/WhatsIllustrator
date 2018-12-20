@@ -126,6 +126,7 @@ public class BookCreator {
 				System.out.format("Loading pool images from '%s'\n", imagePoolDir);
 				im.loadFiles(imagePoolDir);
 				im.setSearchMode(true);
+				System.out.format("%d images found\n", im.getFileList().size());
 			}
 		}
 
@@ -268,15 +269,13 @@ public class BookCreator {
 
 	private void appendMediaOmittedMessage(MediaOmittedMessage msg, TextStringBuilder tsb) {
 		tsb.appendln("%s\\\\", formatSenderAndTime(msg));
-		tsb.append("\\begin{center}");
-
 		Iterator<String> it = msg.getRelpaths().iterator();
 		while (it.hasNext()) {
+			tsb.append("\\begin{center}");
 			String str = it.next();
 			tsb.append(createLatexImage(Paths.get(imagePoolDir, str), encode(str)));
+			tsb.appendln("\\end{center}");
 		}
-
-		tsb.appendln("\\end{center}");
 	}
 
 	private void appendMediaMessage(MediaMessage msg, TextStringBuilder tsb) {
