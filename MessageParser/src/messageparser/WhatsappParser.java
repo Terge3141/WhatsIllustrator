@@ -71,7 +71,6 @@ public class WhatsappParser {
 			throw new IllegalArgumentException(String.format("Invalid date format in line: '%s'", line));
 		}
 
-		// TODO use regex
 		int senderEnd = line.indexOf(":", dateStr.length());
 
 		// special message, e.g. encryption information
