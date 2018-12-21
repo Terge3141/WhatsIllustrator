@@ -47,13 +47,16 @@ public class Excluder {
 			return;
 		}
 		
+		System.out.format("Reading xml from '%s'\n", inputMatchPath);
 		ImageMatcher im=ImageMatcher.fromXmlFile(inputMatchPath);
 		
+		System.out.format("Reading exlude from '%s'\n", excludePath);
 		List<String>lines=Files.readAllLines(Paths.get(excludePath));
 		for(String line :lines) {
 			im.excludeExcept(line);
 		}
 		
+		System.out.format("Writing output file to '%s'\n", outputMatchPath);
 		im.toXmlFile(outputMatchPath);
 	}
 
