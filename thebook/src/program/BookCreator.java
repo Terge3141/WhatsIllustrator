@@ -272,8 +272,9 @@ public class BookCreator {
 		Iterator<String> it = msg.getRelpaths().iterator();
 		while (it.hasNext()) {
 			tsb.append("\\begin{center}");
-			String str = it.next();
-			tsb.append(createLatexImage(Paths.get(imagePoolDir, str), encode(str)));
+			String relPath = it.next();
+			String str = String.format("%s;%s;%d", msg.getTimepoint(), relPath, msg.getCnt());
+			tsb.append(createLatexImage(Paths.get(imagePoolDir, relPath), encode(str)));
 			tsb.appendln("\\end{center}");
 		}
 	}

@@ -5,14 +5,16 @@ import java.util.List;
 
 public class MediaOmittedMessage implements IMessage {
 
-	public LocalDateTime timepoint;
-	public String sender;
-	public List<String> relpaths;
+	private LocalDateTime timepoint;
+	private String sender;
+	private List<String> relpaths;
+	private int cnt;
 
-	public MediaOmittedMessage(LocalDateTime timepoint, String sender, List<String> relpaths) {
+	public MediaOmittedMessage(LocalDateTime timepoint, String sender, List<String> relpaths, int cnt) {
 		this.timepoint = timepoint;
 		this.sender = sender;
 		this.relpaths = relpaths;
+		this.cnt = cnt;
 	}
 
 	public LocalDateTime getTimepoint() {
@@ -25,5 +27,9 @@ public class MediaOmittedMessage implements IMessage {
 
 	public List<String> getRelpaths() {
 		return this.relpaths;
+	}
+
+	public int getCnt() {
+		return this.cnt;
 	}
 }

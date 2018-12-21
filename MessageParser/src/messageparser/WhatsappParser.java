@@ -104,7 +104,7 @@ public class WhatsappParser {
 			if (entry.isImageType() && entry.getFileMatches().size() > 0) {
 				List<String> relpaths = entry.getFileMatches().stream().map(x -> x.getRelPath()).distinct()
 						.collect(Collectors.toList());
-				return new MediaOmittedMessage(entry.getTimePoint(), sender, relpaths);
+				return new MediaOmittedMessage(entry.getTimePoint(), sender, relpaths, entry.getCnt());
 			} else {
 				return nextMessage();
 			}

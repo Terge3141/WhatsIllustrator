@@ -90,4 +90,5 @@ public class Program {
 
 	// TODO Some Softbank icons don't have a mapping
 	// TODO use streams
+	// TODO Use new XML lib everywhere
 }

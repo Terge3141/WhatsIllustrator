@@ -110,7 +110,7 @@ public class ImageMatcher {
 		Stream<MatchEntry> stream = this.matchList.stream()
 				.filter(x -> (x.getTimePoint().equals(timepoint) && x.getCnt() == cnt));
 		List<MatchEntry> list = stream.collect(Collectors.toList());
-		
+
 		LocalDate tpDate = timepoint.toLocalDate();
 		long scnt = list.size();
 		if (scnt != 1) {
@@ -118,14 +118,22 @@ public class ImageMatcher {
 				Stream<FileEntry> matches = this.fileList.stream().filter(x -> x.getTimePoint().equals(tpDate));
 				MatchEntry matchEntry = new MatchEntry(timepoint, matches.collect(Collectors.toList()), cnt);
 				this.matchList.add(matchEntry);
+
 				return matchEntry;
 			} else {
-				throw new IllegalArgumentException(
-						String.format("Invalid number of entries found (%s), 1 expected", scnt));
+				throw new IllegalArgumentException(String.format(
+						"Invalid number of entries found (%d), 1 expected timepoint %s, cnt %d", scnt, timepoint, cnt));
 			}
 		}
 
-		return list.get(0);
+		MatchEntry matchEntry = list.get(0);
+		int fmCnt = matchEntry.getFileMatches().size();
+		if (fmCnt > 1) {
+			System.out.format("Warning, searchmode is of put more than one entry (%d) found for timepoint %s, cnt %d\n",
+					fmCnt, timepoint, cnt);
+		}
+
+		return matchEntry;
 	}
 
 	public MatchEntry pick(LocalDateTime timepoint) {
