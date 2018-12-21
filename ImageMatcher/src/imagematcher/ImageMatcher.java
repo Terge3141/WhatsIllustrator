@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -107,9 +108,7 @@ public class ImageMatcher {
 	}
 
 	public MatchEntry pick(LocalDateTime timepoint, int cnt) {
-		Stream<MatchEntry> stream = this.matchList.stream()
-				.filter(x -> (x.getTimePoint().equals(timepoint) && x.getCnt() == cnt));
-		List<MatchEntry> list = stream.collect(Collectors.toList());
+		List<MatchEntry> list = find(timepoint, cnt);
 
 		LocalDate tpDate = timepoint.toLocalDate();
 		long scnt = list.size();
@@ -138,6 +137,47 @@ public class ImageMatcher {
 
 	public MatchEntry pick(LocalDateTime timepoint) {
 		return pick(timepoint, 0);
+	}
+
+	// exclude all other possibilities for a given date except the one given
+	public void excludeExcept(LocalDateTime timepoint, String relPath, int cnt) {
+		List<MatchEntry> list = find(timepoint, cnt);
+		int entryCnt = list.size();
+
+		if (entryCnt != 1) {
+			throw new IllegalArgumentException(
+					String.format("Exactly one match entry expected for timepoint %s and cnt %d but %d found",
+							timepoint, cnt, entryCnt));
+		}
+
+		MatchEntry matchEntry = list.get(0);
+		List<FileEntry> fileMatches = matchEntry.getFileMatches();
+		List<FileEntry> query = fileMatches.stream().filter(x -> x.getRelPath().equals(relPath))
+				.collect(Collectors.toList());
+
+		// TODO test
+		int queryCnt = query.size();
+		if (queryCnt != 1) {
+			throw new IllegalArgumentException(
+					String.format("Exactly one file entry expected for timepoint %s, cnt %d, relpath %s but %d found",
+							timepoint, cnt, relPath, queryCnt));
+		}
+
+		matchEntry.setFileMatches(Arrays.asList(query.get(0)));
+	}
+
+	// excludeStr = timepoint;Sent/relpath;cnt
+	public void excludeExcept(String excludeStr) {
+		String[] tokens = excludeStr.split(";");
+		if (tokens.length != 3) {
+			throw new IllegalArgumentException(String.format("Exclude string '%s' has incorrect format", excludeStr));
+		}
+
+		LocalDateTime timepoint = LocalDateTime.parse(tokens[0]);
+		String relPath = tokens[1];
+		int cnt = Integer.parseInt(tokens[2]);
+		
+		excludeExcept(timepoint, relPath, cnt);
 	}
 
 	public void loadFiles(String dir) throws IOException, ParseException {
@@ -179,4 +219,10 @@ public class ImageMatcher {
 		this.fileList = fileList;
 	}
 
+	private List<MatchEntry> find(LocalDateTime timepoint, int cnt) {
+		Stream<MatchEntry> stream = this.matchList.stream()
+				.filter(x -> (x.getTimePoint().equals(timepoint) && x.getCnt() == cnt));
+		List<MatchEntry> list = stream.collect(Collectors.toList());
+		return list;
+	}
 }
