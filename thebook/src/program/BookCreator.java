@@ -79,8 +79,8 @@ public class BookCreator {
 
 		this.emojis = new EmojiParser(emojiList, x -> getEmojiPath(x));
 
-		header = getRessourceAsString("header.tex.tmpl");
-		footer = getRessourceAsString("footer.tex.tmpl");
+		this.header = getRessourceAsString("header.tex.tmpl");
+		this.footer = getRessourceAsString("footer.tex.tmpl");
 
 		this.inputDir = inputDir;
 		this.outputDir = outputDir;
@@ -256,8 +256,7 @@ public class BookCreator {
 	private void appendTextMessage(TextMessage msg, TextStringBuilder tsb) {
 		String senderAndTime = formatSenderAndTime(msg);
 		String content = encode(msg.content);
-		tsb.appendln("%s %s", senderAndTime, content);
-		tsb.appendln("\\\\");
+		tsb.appendln("%s %s\\\\", senderAndTime, content);
 	}
 
 	private void appendImageMessage(ImageMessage msg, TextStringBuilder tsb) {
@@ -362,5 +361,21 @@ public class BookCreator {
 		public Path getDstPath() {
 			return Paths.get(dst);
 		}
+	}
+
+	public String getHeader() {
+		return header;
+	}
+
+	public void setHeader(String header) {
+		this.header = header;
+	}
+
+	public String getFooter() {
+		return footer;
+	}
+
+	public void setFooter(String footer) {
+		this.footer = footer;
 	}
 }
