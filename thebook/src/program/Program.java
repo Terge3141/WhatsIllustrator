@@ -92,4 +92,5 @@ public class Program {
 	// TODO use streams
 	// TODO Use new XML lib everywhere
 	// TODO check if directories exist
+	// TODO Change path to type Path
 }

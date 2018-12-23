@@ -11,6 +11,7 @@ import messageparser.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -70,8 +71,10 @@ public class BookCreator {
 	private String footer;
 
 	private final String EMOJIPREFIX = "emoji_u";
+	private final String DEFAULT_LOCALE = "en";
 
 	private List<CopyItem> copyList;
+	private DateUtils dateUtils;
 
 	public BookCreator(String inputDir, String outputDir, String emojiInputDir) throws IOException {
 		List<String> emojiList = readEmojiList(emojiInputDir);
@@ -141,6 +144,18 @@ public class BookCreator {
 
 		WhatsappParser parser = WhatsappParser.of(txtInputPath, im, nl);
 
+		String propertiesInputPath = Paths.get(configDir, "bookcreator.properties").toString();
+		// file should contain
+		// locale=language
+		String locale = this.DEFAULT_LOCALE;
+		if (FileHandler.fileExists(propertiesInputPath)) {
+			Properties properties = new Properties();
+			properties.load(new FileInputStream(propertiesInputPath));
+			String tmp = properties.getProperty("locale");
+			locale = tmp == null ? locale : tmp;
+		}
+		this.dateUtils = new DateUtils(locale);
+
 		System.out.println("Start parsing messages");
 		TextStringBuilder tsb = new TextStringBuilder();
 		tsb.appendln(header);
@@ -150,7 +165,7 @@ public class BookCreator {
 		while ((msg = parser.nextMessage()) != null) {
 			if (DateUtils.dateDiffer(last, msg.getTimepoint())) {
 				tsb.appendln("\\begin{center}%s\\end{center}",
-						Latex.encodeLatex(DateUtils.formatDateString(msg.getTimepoint())));
+						Latex.encodeLatex(this.dateUtils.formatDateString(msg.getTimepoint())));
 			}
 
 			last = msg.getTimepoint();
@@ -178,9 +193,9 @@ public class BookCreator {
 		copyList();
 	}
 
-	public static String formatSenderAndTime(IMessage msg) {
+	private String formatSenderAndTime(IMessage msg) {
 		String sender = String.format("\\textbf{%s}", Latex.encodeLatex(msg.getSender()));
-		return String.format("%s (%s):", sender, DateUtils.formatTimeString(msg.getTimepoint()));
+		return String.format("%s (%s):", sender, this.dateUtils.formatTimeString(msg.getTimepoint()));
 	}
 
 	private String getRessourceAsString(String name) throws IOException {
