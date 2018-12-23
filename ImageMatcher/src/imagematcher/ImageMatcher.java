@@ -15,22 +15,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.Node;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
 
 import helper.FileHandler;
 import helper.Misc;
@@ -46,38 +38,59 @@ public class ImageMatcher {
 		this.matchList = new ArrayList<MatchEntry>();
 	}
 
-	public static ImageMatcher fromXmlString(String xml)
-			throws ParserConfigurationException, SAXException, IOException, ParseException {
+	public static ImageMatcher fromXmlString(String xml)  {
 		ImageMatcher im = new ImageMatcher();
 
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
-		Document doc = dBuilder.parse(stream);
-		Element root = doc.getDocumentElement();
-		NodeList nodeList = root.getChildNodes();
+		/*
+		 * DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		 * dbFactory = DocumentBuilderFactory.newInstance(); DocumentBuilder dBuilder =
+		 * dbFactory.newDocumentBuilder(); InputStream stream = new
+		 * ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16)); Document doc =
+		 * dBuilder.parse(stream); Element root = doc.getDocumentElement(); NodeList
+		 * nodeList = root.getChildNodes();
+		 * 
+		 * for (int i = 0; i < nodeList.getLength(); i++) { Node node =
+		 * nodeList.item(i); if (node.getNodeType() == Node.ELEMENT_NODE) { if
+		 * (node.getNodeName().equals("MatchEntry")) {
+		 * im.matchList.add(MatchEntry.fromNode(node)); } } }
+		 */
 
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node node = nodeList.item(i);
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				if (node.getNodeName().equals("MatchEntry")) {
-					im.matchList.add(MatchEntry.fromNode(node));
-				}
-			}
+		try {
+		SAXReader reader = new SAXReader();
+		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
+		Document document = reader.read(stream);
+		List<Node> nodes = document.selectNodes("//ArrayOfMatchEntry/MatchEntry");
+		for (Node node : nodes) {
+			im.matchList.add(MatchEntry.fromNode(node));
+		}}
+		catch(DocumentException de) {
+			throw new IllegalArgumentException("Bad xml format", de);
 		}
 
 		return im;
 	}
 
-	public static ImageMatcher fromXmlFile(Path path)
-			throws ParserConfigurationException, SAXException, IOException, ParseException {
+	public static ImageMatcher fromXmlFile(Path path) throws IOException {
 		return fromXmlString(Misc.readAllText(path));
 	}
 
-	public String toXmlString() throws ParserConfigurationException, TransformerFactoryConfigurationError,
-			TransformerException, IOException {
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+	public String toXmlString() throws IOException {
+		Document document = DocumentHelper.createDocument();
+        Element root = document.addElement( "ArrayOfMatchEntry" );
+        
+        for (MatchEntry entry : this.matchList) {
+        	entry.addNode(root);
+		}
+        
+        OutputFormat format = OutputFormat.createPrettyPrint();
+        format.setEncoding("UTF-16");
+        StringWriter stringWriter = new StringWriter();
+        XMLWriter writer;
+        writer = new XMLWriter( stringWriter, format );
+        writer.write( document );
+        
+        return stringWriter.toString();
+		/*DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 		Document doc = docBuilder.newDocument();
 		Element root = doc.createElement("ArrayOfMatchEntry");
@@ -98,11 +111,10 @@ public class ImageMatcher {
 		StreamResult streamResult = new StreamResult(stringWriter);
 		transformer.transform(source, streamResult);
 
-		return stringWriter.toString();
+		return stringWriter.toString();*/
 	}
 
-	public void toXmlFile(Path path) throws IOException, ParserConfigurationException,
-			TransformerFactoryConfigurationError, TransformerException {
+	public void toXmlFile(Path path) throws IOException {
 		Misc.writeAllText(path, toXmlString());
 	}
 
@@ -175,7 +187,7 @@ public class ImageMatcher {
 		LocalDateTime timepoint = LocalDateTime.parse(tokens[0]);
 		String relPath = tokens[1];
 		int cnt = Integer.parseInt(tokens[2]);
-		
+
 		excludeExcept(timepoint, relPath, cnt);
 	}
 

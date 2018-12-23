@@ -25,7 +25,7 @@ public class NameLookup {
 
 	public static NameLookup fromXmlString(String xml) {
 		try {
-			NameLookup nr = new NameLookup();
+			NameLookup nl = new NameLookup();
 
 			SAXReader reader = new SAXReader();
 			InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
@@ -34,10 +34,10 @@ public class NameLookup {
 			for (Node element : elements) {
 				String oldName = element.selectSingleNode("oldName").getText();
 				String newName = element.selectSingleNode("newName").getText();
-				nr.add(oldName, newName);
+				nl.add(oldName, newName);
 			}
 			
-			return nr;
+			return nl;
 		} catch (DocumentException de) {
 			throw new IllegalArgumentException("Cannot parse string",de);
 		}

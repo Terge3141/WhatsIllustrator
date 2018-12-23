@@ -5,9 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -16,7 +13,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.xml.sax.SAXException;
+import org.dom4j.DocumentException;
 
 import imagematcher.ImageMatcher;
 
@@ -31,8 +28,7 @@ public class Excluder {
 		return options;
 	}
 
-	public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException,
-			SAXException, java.text.ParseException, TransformerFactoryConfigurationError, TransformerException {
+	public static void main(String[] args) throws ParseException, DocumentException, IOException {
 		Options options = getOptions();
 		CommandLineParser parser = new DefaultParser();
 		String inputMatchPath;

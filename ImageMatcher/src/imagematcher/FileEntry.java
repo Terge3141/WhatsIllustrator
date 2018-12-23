@@ -1,17 +1,15 @@
 package imagematcher;
 
-import helper.XmlUtils;
-
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.dom4j.Element;
+import org.dom4j.Node;
+
+
 
 public class FileEntry {
 	private String relPath;
@@ -71,35 +69,28 @@ public class FileEntry {
 		return dateTime;
 	}
 
-	public static FileEntry fromNode(Node node) throws ParseException {
+	public static FileEntry fromNode(Node node) {
 		FileEntry fe = new FileEntry();
-
-		NodeList nodeList = node.getChildNodes();
-
-		String tpStr = XmlUtils.GetTextNode(nodeList, "Timepoint");
+		
+		String tpStr = node.selectSingleNode("Timepoint").getText();
 		fe.timePoint = LocalDateTime.parse(tpStr).toLocalDate();
 
-		fe.fileName = XmlUtils.GetTextNode(nodeList, "Filename");
-		fe.relPath = XmlUtils.GetTextNode(nodeList, "Relpath");
+		fe.fileName = node.selectSingleNode( "Filename").getText();
+		fe.relPath = node.selectSingleNode( "Relpath").getText();
 
 		return fe;
 	}
 
-	public Element getNode(Document doc) {
-		Element fileEntry = doc.createElement("FileEntry");
+	public void addNode(Element root) {
+		Element fileEntry = root.addElement("FileEntry");
 
-		Element timepoint = doc.createElement("Timepoint");
-		timepoint.setTextContent(this.timePoint.atTime(0, 0).toString());
-		fileEntry.appendChild(timepoint);
+		Element timepoint = fileEntry.addElement("Timepoint");
+		timepoint.setText(this.timePoint.atTime(0, 0).toString());
 
-		Element filename = doc.createElement("Filename");
-		filename.setTextContent(this.fileName);
-		fileEntry.appendChild(filename);
+		Element filename = fileEntry.addElement("Filename");
+		filename.setText(this.fileName);
 
-		Element relpath = doc.createElement("Relpath");
-		relpath.setTextContent(this.relPath);
-		fileEntry.appendChild(relpath);
-
-		return fileEntry;
+		Element relpath = fileEntry.addElement("Relpath");
+		relpath.setText(this.relPath);
 	}
 }

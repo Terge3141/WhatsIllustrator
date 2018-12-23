@@ -1,16 +1,11 @@
 package imagematcher;
 
-import helper.XmlUtils;
-
-import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.dom4j.Element;
+import org.dom4j.Node;
 
 public class MatchEntry {
 	private LocalDateTime timePoint;
@@ -28,18 +23,22 @@ public class MatchEntry {
 		this.imageType = true;
 	}
 
-	public static MatchEntry fromNode(Node node) throws ParseException {
+	public static MatchEntry fromNode(Node node) {
 		MatchEntry me = new MatchEntry();
-
-		NodeList nodeList = node.getChildNodes();
-
-		String tpStr = XmlUtils.GetTextNode(nodeList, "Timepoint");
-		me.timePoint = LocalDateTime.parse(tpStr);
-
-		me.imageType = Boolean.parseBoolean(XmlUtils.GetTextNode(nodeList, "IsImage"));
-		me.cnt = Integer.parseInt(XmlUtils.GetTextNode(nodeList, "Cnt"));
-
+		
+		String tpStr=node.selectSingleNode("Timepoint").getText();
+		me.timePoint=LocalDateTime.parse(tpStr);
+		
+		me.imageType=Boolean.parseBoolean(node.selectSingleNode("IsImage").getText());
+		me.cnt=Integer.parseInt(node.selectSingleNode("Cnt").getText());
+		
 		me.fileMatches = new ArrayList<FileEntry>();
+		Node fileMatchesNode=node.selectSingleNode("Filematches");
+		for(Node fileEntryNode : fileMatchesNode.selectNodes("FileEntry")) {
+			me.fileMatches.add(FileEntry.fromNode(fileEntryNode));
+		}
+
+		/*me.fileMatches = new ArrayList<FileEntry>();
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node subNode = nodeList.item(i);
 			if (subNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -55,31 +54,27 @@ public class MatchEntry {
 					}
 				}
 			}
-		}
+		}*/
 
 		return me;
 	}
 
-	public Element getNode(Document doc) {
-		Element matchEntry = doc.createElement("MatchEntry");
+	public Element addNode(Element root) {
+		Element matchEntry = root.addElement("MatchEntry");
 
-		Element timepoint = doc.createElement("Timepoint");
-		timepoint.setTextContent(this.timePoint.toString());
-		matchEntry.appendChild(timepoint);
+		Element timepoint = matchEntry.addElement("Timepoint");
+		timepoint.addText(this.timePoint.toString());
 
-		Element isimage = doc.createElement("IsImage");
-		isimage.setTextContent(this.imageType ? "true" : "false");
-		matchEntry.appendChild(isimage);
+		Element isimage = matchEntry.addElement("IsImage");
+		isimage.addText(this.imageType ? "true" : "false");
 
-		Element filematches = doc.createElement("Filematches");
+		Element filematches = matchEntry.addElement("Filematches");
 		for (FileEntry fileEntry : fileMatches) {
-			filematches.appendChild(fileEntry.getNode(doc));
+			fileEntry.addNode(filematches);
 		}
-		matchEntry.appendChild(filematches);
 
-		Element cnt = doc.createElement("Cnt");
-		cnt.setTextContent(Integer.toString(this.cnt));
-		matchEntry.appendChild(cnt);
+		Element cnt = matchEntry.addElement("Cnt");
+		cnt.addText(Integer.toString(this.cnt));
 
 		return matchEntry;
 	}

@@ -5,19 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-
 import org.junit.jupiter.api.Test;
-import org.xml.sax.SAXException;
 
 import imagematcher.FileEntry;
 import imagematcher.ImageMatcher;
@@ -25,8 +19,7 @@ import imagematcher.MatchEntry;
 
 class ImageMatcherTest {
 	@Test
-	public void testPick_Load_SingleMatch() throws ParserConfigurationException, SAXException, IOException,
-			ParseException, TransformerFactoryConfigurationError, TransformerException {
+	public void testPick_Load_SingleMatch() throws IOException  {
 		List<FileEntry> fileList = new ArrayList<FileEntry>();
 		fileList.add(getFileEntry(2015, 1, 1, "file1.jpg"));
 
@@ -50,8 +43,7 @@ class ImageMatcherTest {
 	}
 
 	@Test
-	public void testPick_Load_NoMatch() throws ParserConfigurationException, SAXException, IOException, ParseException,
-			TransformerFactoryConfigurationError, TransformerException {
+	public void testPick_Load_NoMatch() throws IOException  {
 		List<FileEntry> fileList = new ArrayList<FileEntry>();
 		fileList.add(getFileEntry(2015, 1, 1, "file1.jpg"));
 
@@ -62,7 +54,7 @@ class ImageMatcherTest {
 		ImageMatcher imWriter = new ImageMatcher();
 		imWriter.setMatchList(matchList);
 		String matchXML = imWriter.toXmlString();
-
+		
 		ImageMatcher imReader = ImageMatcher.fromXmlString(matchXML);
 		imReader.setSearchMode(false);
 

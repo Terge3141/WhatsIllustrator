@@ -23,12 +23,7 @@ import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-
 import org.apache.commons.text.TextStringBuilder;
-import org.xml.sax.SAXException;
 
 public class BookCreator {
 
@@ -96,10 +91,7 @@ public class BookCreator {
 		emojiOutputDir.toFile().mkdir();
 	}
 
-	public void writeTex() throws IOException, ParserConfigurationException, SAXException, ParseException,
-			TransformerFactoryConfigurationError, TransformerException {
-		this.copyList = new ArrayList<BookCreator.CopyItem>();
-
+	public void writeTex() throws IOException, ParseException {
 		List<String> txtFiles = FileHandler.listDir(chatDir, ".*.txt");
 		if (txtFiles.size() != 1) {
 			throw new IllegalArgumentException(
