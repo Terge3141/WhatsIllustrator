@@ -76,8 +76,9 @@ public class Program {
 			Container.Debug = new PrintWriter(Paths.get(config.getDebugDir(), "output.log").toString());
 		}
 
-		BookCreator creator = new BookCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir());
-		creator.setImagePoolDir(config.getImagePoolDir());
+		BookCreator creator = new BookCreator(Paths.get(config.getInputDir()), Paths.get(config.getOutputDir()),
+				Paths.get(config.getEmojiDir()));
+		creator.setImagePoolDir(Paths.get(config.getImagePoolDir()));
 		creator.writeTex();
 
 		System.out.println("Done");

@@ -2,7 +2,7 @@ package messageparser;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -38,9 +38,9 @@ public class WhatsappParser {
 		this.lastCnt = new LastCnt();
 	}
 
-	public static WhatsappParser of(String messagePath, ImageMatcher imageMatcher, NameLookup nameLookup)
+	public static WhatsappParser of(Path messagePath, ImageMatcher imageMatcher, NameLookup nameLookup)
 			throws IOException {
-		List<String> lines = Files.readAllLines(Paths.get(messagePath));
+		List<String> lines = Files.readAllLines(messagePath);
 		return new WhatsappParser(lines, imageMatcher, nameLookup);
 	}
 

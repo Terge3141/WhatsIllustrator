@@ -3,14 +3,14 @@ package helper;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 
 public class Misc {
 
-	public static String readAllText(String path) throws IOException {
+	public static String readAllText(Path path) throws IOException {
 		StringBuilder sb = new StringBuilder();
-		List<String> lines = Files.readAllLines(Paths.get(path));
+		List<String> lines = Files.readAllLines(path);
 		for (String line : lines) {
 			sb.append(line);
 			sb.append("\n");
@@ -19,8 +19,8 @@ public class Misc {
 		return sb.toString();
 	}
 
-	public static void writeAllText(String path, String text) throws IOException {
-		PrintWriter writer = new PrintWriter(path);
+	public static void writeAllText(Path path, String text) throws IOException {
+		PrintWriter writer = new PrintWriter(path.toFile());
 		writer.print(text);
 		writer.close();
 	}

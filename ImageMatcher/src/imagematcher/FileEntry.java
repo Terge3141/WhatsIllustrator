@@ -1,8 +1,8 @@
 package imagematcher;
 
-import helper.FileHandler;
 import helper.XmlUtils;
 
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,7 +28,7 @@ public class FileEntry {
 		}
 
 		this.relPath = fullpath.substring(prefix.length() + 1);
-		this.fileName = FileHandler.getFileName(fullpath);
+		this.fileName=Paths.get(fullpath).getFileName().toString();
 		this.timePoint = getTimePointFromFilename(this.fileName);
 	}
 

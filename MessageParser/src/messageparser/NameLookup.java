@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class NameLookup {
 
 	}
 
-	public static NameLookup fromXmlFile(String path) throws IOException   {
+	public static NameLookup fromXmlFile(Path path) throws IOException   {
 		return fromXmlString(Misc.readAllText(path));
 	}
 

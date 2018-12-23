@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -69,7 +70,7 @@ public class ImageMatcher {
 		return im;
 	}
 
-	public static ImageMatcher fromXmlFile(String path)
+	public static ImageMatcher fromXmlFile(Path path)
 			throws ParserConfigurationException, SAXException, IOException, ParseException {
 		return fromXmlString(Misc.readAllText(path));
 	}
@@ -97,12 +98,10 @@ public class ImageMatcher {
 		StreamResult streamResult = new StreamResult(stringWriter);
 		transformer.transform(source, streamResult);
 
-		Misc.writeAllText("/tmp/out.xml", stringWriter.toString());
-
 		return stringWriter.toString();
 	}
 
-	public void toXmlFile(String path) throws IOException, ParserConfigurationException,
+	public void toXmlFile(Path path) throws IOException, ParserConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException {
 		Misc.writeAllText(path, toXmlString());
 	}
@@ -180,12 +179,12 @@ public class ImageMatcher {
 		excludeExcept(timepoint, relPath, cnt);
 	}
 
-	public void loadFiles(String dir) throws IOException, ParseException {
+	public void loadFiles(Path dir) throws IOException, ParseException {
 		List<String> files = FileHandler.listDir(dir, ".*jp.*");
 		this.fileList = new ArrayList<FileEntry>();
 
 		for (String file : files) {
-			FileEntry entry = new FileEntry(file, dir);
+			FileEntry entry = new FileEntry(file, dir.toString());
 
 			if (this.fileList.stream().filter(x -> x.getFileName().equals(entry.getFileName())).count() > 0) {
 				System.out.format("Skipping %s\n", entry.getRelPath());

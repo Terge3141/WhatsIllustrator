@@ -34,36 +34,36 @@ public class BookCreator {
 
 	// The top level input directory. It typically contains the subdirectories
 	// chat and config
-	private String inputDir;
+	private Path inputDir;
 
 	// This is the directory where the tex file and other output files are
 	// written
-	private String outputDir;
+	private Path outputDir;
 
 	// This is the directory where the used written emojis are written to.
 	// Default is OutputDir/emojis
-	private String emojiOutputDir;
+	private Path emojiOutputDir;
 
 	// It is the directory where the chat txt file and the images are stored.
 	// These files can be obtained by exporting the chat in the Whatsapp app
 	// By default the directory is set to InputDir/Chat
-	private String chatDir;
+	private Path chatDir;
 
 	// In this directory all configuration files are, e.g. the
 	// chatname.match.xml file
-	private String configDir;
+	private Path configDir;
 
 	// It contains all images for the chat.
 	// By default it is set to ChatDir
-	private String imageDir;
+	private Path imageDir;
 
 	// It should contain all whatsapp images.
 	// This directory is used if there "<Media omitted>" lines in the chat file.
 	// and if no chatname.match.xml file is available.
 	// It is set to null by default.
-	private String imagePoolDir;
+	private Path imagePoolDir;
 
-	private String emojiInputDir;
+	private Path emojiInputDir;
 
 	private EmojiParser emojis;
 
@@ -76,7 +76,7 @@ public class BookCreator {
 	private List<CopyItem> copyList;
 	private DateUtils dateUtils;
 
-	public BookCreator(String inputDir, String outputDir, String emojiInputDir) throws IOException {
+	public BookCreator(Path inputDir, Path outputDir, Path emojiInputDir) throws IOException {
 		List<String> emojiList = readEmojiList(emojiInputDir);
 		this.emojiInputDir = emojiInputDir;
 
@@ -87,14 +87,13 @@ public class BookCreator {
 
 		this.inputDir = inputDir;
 		this.outputDir = outputDir;
-		this.chatDir = Paths.get(this.inputDir, "chat").toString();
-		this.configDir = Paths.get(this.inputDir, "config").toString();
-		this.imageDir = Paths.get(this.chatDir).toString();
+		this.chatDir = this.inputDir.resolve("chat");
+		this.configDir = this.inputDir.resolve("config");
+		this.imageDir = this.chatDir;
 		this.imagePoolDir = null;
-		this.emojiOutputDir = Paths.get(this.outputDir, "emojis").toString();
+		this.emojiOutputDir = this.outputDir.resolve("emojis");
 
-		File dir = new File(emojiOutputDir);
-		dir.mkdir();
+		emojiOutputDir.toFile().mkdir();
 	}
 
 	public void writeTex() throws IOException, ParserConfigurationException, SAXException, ParseException,
@@ -107,17 +106,17 @@ public class BookCreator {
 					String.format("Invalid number of .txt-files found: %d", txtFiles.size()));
 		}
 
-		String txtInputPath = txtFiles.get(0);
+		Path txtInputPath = Paths.get( txtFiles.get(0));
 		System.out.format("Using %s as input\n", txtInputPath);
 
-		String namePrefix = FileHandler.getFileName(txtInputPath);
+		String namePrefix=txtInputPath.toFile().getName();
 		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
-		String texOutputPath = Paths.get(outputDir, namePrefix + ".tex").toString();
+		Path texOutputPath = this.outputDir.resolve(namePrefix + ".tex");
 
-		String matchInputPath = Paths.get(configDir, namePrefix + ".match.xml").toString();
-		String matchOutputPath = Paths.get(outputDir, namePrefix + ".match.xml").toString();
+		Path matchInputPath = this.configDir.resolve(namePrefix + ".match.xml");
+		Path matchOutputPath = this.outputDir.resolve(namePrefix + ".match.xml");
 		ImageMatcher im = null;
-		if (FileHandler.fileExists(matchInputPath)) {
+		if (matchInputPath.toFile().exists()) {
 			System.out.format("Loading matches '%s'\n", matchInputPath);
 			im = ImageMatcher.fromXmlFile(matchInputPath);
 			im.setSearchMode(false);
@@ -133,9 +132,9 @@ public class BookCreator {
 			}
 		}
 
-		String lookupInputPath = Paths.get(configDir, "namelookup.xml").toString();
+		Path lookupInputPath = this.configDir.resolve("namelookup.xml");
 		NameLookup nl;
-		if (FileHandler.fileExists(lookupInputPath)) {
+		if (lookupInputPath.toFile().exists()) {
 			System.out.format("Loading name lookup '%s'\n", lookupInputPath);
 			nl = NameLookup.fromXmlFile(lookupInputPath);
 		} else {
@@ -144,13 +143,13 @@ public class BookCreator {
 
 		WhatsappParser parser = WhatsappParser.of(txtInputPath, im, nl);
 
-		String propertiesInputPath = Paths.get(configDir, "bookcreator.properties").toString();
+		Path propertiesInputPath = this.configDir.resolve("bookcreator.properties");
 		// file should contain
 		// locale=language
 		String locale = this.DEFAULT_LOCALE;
-		if (FileHandler.fileExists(propertiesInputPath)) {
+		if (propertiesInputPath.toFile().isFile()) {
 			Properties properties = new Properties();
-			properties.load(new FileInputStream(propertiesInputPath));
+			properties.load(new FileInputStream(propertiesInputPath.toFile()));
 			String tmp = properties.getProperty("locale");
 			locale = tmp == null ? locale : tmp;
 		}
@@ -214,11 +213,10 @@ public class BookCreator {
 		return new String(byteArray, StandardCharsets.UTF_8);
 	}
 
-	private List<String> readEmojiList(String dir) {
+	private List<String> readEmojiList(Path dir) {
 		List<String> list = new ArrayList<>();
 
-		File lister = new File(dir);
-		for (File x : lister.listFiles()) {
+		for (File x : dir.toFile().listFiles()) {
 			String fileName = x.getName();
 			String nr = fileName.replace(EMOJIPREFIX, "").replace(".png", "");
 			list.add(nr);
@@ -278,7 +276,7 @@ public class BookCreator {
 	private void appendImageMessage(ImageMessage msg, TextStringBuilder tsb) {
 		tsb.appendln("%s\\\\", formatSenderAndTime(msg));
 		tsb.append("\\begin{center}");
-		tsb.append(createLatexImage(Paths.get(imageDir, msg.getFilename()), msg.getSubscription()));
+		tsb.append(createLatexImage(this.imageDir.resolve(msg.getFilename()), msg.getSubscription()));
 		tsb.appendln("\\end{center}");
 	}
 
@@ -289,7 +287,7 @@ public class BookCreator {
 			tsb.append("\\begin{center}");
 			String relPath = it.next();
 			String str = String.format("%s;%s;%d", msg.getTimepoint(), relPath, msg.getCnt());
-			tsb.append(createLatexImage(Paths.get(imagePoolDir, relPath), encode(str)));
+			tsb.append(createLatexImage(this.imagePoolDir.resolve(relPath), encode(str)));
 			tsb.appendln("\\end{center}");
 		}
 	}
@@ -304,59 +302,59 @@ public class BookCreator {
 		tsb.appendln("\\\\");
 	}
 
-	public String getInputDir() {
+	public Path getInputDir() {
 		return inputDir;
 	}
 
-	public void setInputDir(String inputDir) {
+	public void setInputDir(Path inputDir) {
 		this.inputDir = inputDir;
 	}
 
-	public String getOutputDir() {
+	public Path getOutputDir() {
 		return outputDir;
 	}
 
-	public void setOutputDir(String outputDir) {
+	public void setOutputDir(Path outputDir) {
 		this.outputDir = outputDir;
 	}
 
-	public String getEmojiOutputDir() {
+	public Path getEmojiOutputDir() {
 		return emojiOutputDir;
 	}
 
-	public void setEmojiOutputDir(String emojiOutputDir) {
+	public void setEmojiOutputDir(Path emojiOutputDir) {
 		this.emojiOutputDir = emojiOutputDir;
 	}
 
-	public String getChatDir() {
+	public Path getChatDir() {
 		return chatDir;
 	}
 
-	public void setChatDir(String chatDir) {
+	public void setChatDir(Path chatDir) {
 		this.chatDir = chatDir;
 	}
 
-	public String getConfigDir() {
+	public Path getConfigDir() {
 		return configDir;
 	}
 
-	public void setConfigDir(String configDir) {
+	public void setConfigDir(Path configDir) {
 		this.configDir = configDir;
 	}
 
-	public String getImageDir() {
+	public Path getImageDir() {
 		return imageDir;
 	}
 
-	public void setImageDir(String imageDir) {
+	public void setImageDir(Path imageDir) {
 		this.imageDir = imageDir;
 	}
 
-	public String getImagePoolDir() {
+	public Path getImagePoolDir() {
 		return imagePoolDir;
 	}
 
-	public void setImagePoolDir(String imagePoolDir) {
+	public void setImagePoolDir(Path imagePoolDir) {
 		this.imagePoolDir = imagePoolDir;
 	}
 

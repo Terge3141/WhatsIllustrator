@@ -97,7 +97,7 @@ public class BookCreatorTest {
 			Files.write(configDir.resolve("bookcreator.properties"), propLines);
 		}
 
-		BookCreator bk = new BookCreator(inputDir.toString(), outputDir.toString(), emojiDir.toString());
+		BookCreator bk = new BookCreator(inputDir, outputDir, emojiDir);
 		bk.setHeader("header");
 		bk.setFooter("footer");
 		bk.writeTex();
@@ -106,6 +106,4 @@ public class BookCreatorTest {
 		assertTrue(Files.exists(texFile));
 		return texFile;
 	}
-
-	// TODO test english
 }
