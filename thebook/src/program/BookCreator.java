@@ -92,6 +92,8 @@ public class BookCreator {
 	}
 
 	public void writeTex() throws IOException, ParseException {
+		this.copyList = new ArrayList<BookCreator.CopyItem>();
+		
 		List<String> txtFiles = FileHandler.listDir(chatDir, ".*.txt");
 		if (txtFiles.size() != 1) {
 			throw new IllegalArgumentException(
