@@ -61,16 +61,4 @@ public class FileHanderTest {
 		assertEquals(fileDir.toString(), list.get(0));
 		assertEquals(fileSubDir.toString(), list.get(1));
 	}
-
-	@Test
-	public void testFileExists() throws IOException {
-		String dir = folder.newFolder("fileExists").toString();
-		Path fileExist = Paths.get(dir, "a.txt");
-		Path fileNotExist = Paths.get(dir, "b.txt");
-
-		Files.createFile(fileExist);
-
-		assertTrue(helper.FileHandler.fileExists(fileExist.toString()));
-		assertFalse(helper.FileHandler.fileExists(fileNotExist.toString()));
-	}
 }

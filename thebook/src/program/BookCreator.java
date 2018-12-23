@@ -116,7 +116,7 @@ public class BookCreator {
 		Path matchInputPath = this.configDir.resolve(namePrefix + ".match.xml");
 		Path matchOutputPath = this.outputDir.resolve(namePrefix + ".match.xml");
 		ImageMatcher im = null;
-		if (matchInputPath.toFile().exists()) {
+		if (matchInputPath.toFile().isFile()) {
 			System.out.format("Loading matches '%s'\n", matchInputPath);
 			im = ImageMatcher.fromXmlFile(matchInputPath);
 			im.setSearchMode(false);
@@ -134,7 +134,7 @@ public class BookCreator {
 
 		Path lookupInputPath = this.configDir.resolve("namelookup.xml");
 		NameLookup nl;
-		if (lookupInputPath.toFile().exists()) {
+		if (lookupInputPath.toFile().isFile()) {
 			System.out.format("Loading name lookup '%s'\n", lookupInputPath);
 			nl = NameLookup.fromXmlFile(lookupInputPath);
 		} else {
