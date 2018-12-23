@@ -2,12 +2,12 @@ package thebook.test;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,7 +19,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.xml.sax.SAXException;
 
-import helper.Misc;
 import program.BookCreator;
 
 public class BookCreatorTest {
@@ -28,9 +27,10 @@ public class BookCreatorTest {
 	
 	@Test
 	public void testWriteTex() throws IOException, ParserConfigurationException, SAXException, ParseException, TransformerFactoryConfigurationError, TransformerException {
-		String line="16/03/2018, 21:46 - Firstname Surname: This is my message\n16/03/2018, 21:47 - Firstname Surname: This is my message2";
-		assertEquals(1, 1);
-		// TODO change
+		List<String> lines = new ArrayList<String>();
+		lines.add("16/03/2018, 21:46 - Firstname Surname: This is my message");
+		lines.add("16/03/2018, 21:47 - Firstname Surname: This is my message2");
+
 		//String dir = folder.newFolder("testWriteTex").toString();
 		String dir = "/tmp/testWriteText"; Files.createDirectories(Paths.get(dir));
 		Path inputDir=Paths.get(dir, "input");
@@ -44,7 +44,7 @@ public class BookCreatorTest {
 		Files.createDirectories(emojiDir);
 		Files.createDirectories(chatDir);
 		
-		Misc.writeAllText(chatDir.resolve("WhatsApp Chat with Firstname Surname.txt").toString(), line);
+		Files.write(chatDir.resolve("WhatsApp Chat with Firstname Surname.txt"), lines);
 		
 		BookCreator bk=new BookCreator(inputDir.toString(), outputDir.toString(), emojiDir.toString());
 		bk.setHeader("header");

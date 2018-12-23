@@ -10,7 +10,7 @@ public class DateUtils {
 	public static final String[] dayNames = { "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag",
 			"Sonntag" };
 	// TODO provide list externally
-	public static final String[] months = { "Januar", "Februar", "M\\\"arz", "April", "Mai", "Juni", "Juli", "August",
+	public static final String[] months = { "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August",
 			"September", "Oktober", "November", "Dezember" };
 
 	public static boolean dateDiffer(LocalDateTime date1, LocalDateTime date2) {

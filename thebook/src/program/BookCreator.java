@@ -149,7 +149,8 @@ public class BookCreator {
 		LocalDateTime last = LocalDateTime.MIN;
 		while ((msg = parser.nextMessage()) != null) {
 			if (DateUtils.dateDiffer(last, msg.getTimepoint())) {
-				tsb.appendln("\\begin{center}%s\\end{center}", DateUtils.formatDateString(msg.getTimepoint()));
+				tsb.appendln("\\begin{center}%s\\end{center}",
+						Latex.encodeLatex(DateUtils.formatDateString(msg.getTimepoint())));
 			}
 
 			last = msg.getTimepoint();
