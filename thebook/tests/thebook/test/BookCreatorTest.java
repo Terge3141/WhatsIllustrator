@@ -33,9 +33,9 @@ public class BookCreatorTest {
 	@Test
 	public void testWriteTextTex_DE() throws IOException, ParserConfigurationException, SAXException, ParseException,
 			TransformerFactoryConfigurationError, TransformerException {
-		Path texFile = createTextTexFile("de");
+		BookCreator bk = createTextTexFile("de");
 
-		List<String> texLines = Files.readAllLines(texFile);
+		List<String> texLines = Files.readAllLines(bk.getTexOutputPath());
 		assertEquals(5, texLines.size());
 		assertEquals("header", texLines.get(0));
 		assertEquals("\\begin{center}Freitag, der 16. M\\\"arz 2018\\end{center}", texLines.get(1));
@@ -47,9 +47,9 @@ public class BookCreatorTest {
 	@Test
 	public void testWriteTextTex_EN() throws IOException, ParserConfigurationException, SAXException, ParseException,
 			TransformerFactoryConfigurationError, TransformerException {
-		Path texFile = createTextTexFile("en");
+		BookCreator bk = createTextTexFile("en");
 
-		List<String> texLines = Files.readAllLines(texFile);
+		List<String> texLines = Files.readAllLines(bk.getTexOutputPath());
 		assertEquals(5, texLines.size());
 		assertEquals("header", texLines.get(0));
 		assertEquals("\\begin{center}16 March 2018\\end{center}", texLines.get(1));
@@ -61,9 +61,9 @@ public class BookCreatorTest {
 	@Test
 	public void testWriteTextTex_Default() throws IOException, ParserConfigurationException, SAXException,
 			ParseException, TransformerFactoryConfigurationError, TransformerException {
-		Path texFile = createTextTexFile(null);
+		BookCreator bk = createTextTexFile(null);
 
-		List<String> texLines = Files.readAllLines(texFile);
+		List<String> texLines = Files.readAllLines(bk.getTexOutputPath());
 		assertEquals(5, texLines.size());
 		assertEquals("header", texLines.get(0));
 		assertEquals("\\begin{center}16 March 2018\\end{center}", texLines.get(1));
@@ -108,15 +108,9 @@ public class BookCreatorTest {
 		assertEquals("footer", texLines.get(6));
 	}
 
-	private BookCreator createMediaOmittedTexFile(boolean hints) throws IOException, ParseException {
-		List<String> chatLines = new ArrayList<String>();
-		chatLines.add("16/03/2018, 08:46 - Firstname Surname: <Media omitted>");
-
-		List<String> propLines = new ArrayList<String>();
-		propLines.add("locale=en");
-		propLines.add("mediaomittedhints=" + Boolean.toString(hints));
-
-		String dir = folder.newFolder("testWriteMediaOmittedTex").toString();
+	private BookCreator createTexFile(List<String> chatLines, List<String> propLines)
+			throws IOException, ParseException {
+		String dir=this.folder.newFolder("test").toString();
 
 		Path inputDir = Paths.get(dir, "input");
 		Path outputDir = Paths.get(dir, "output");
@@ -156,40 +150,27 @@ public class BookCreatorTest {
 		return bk;
 	}
 
-	private Path createTextTexFile(String locale) throws IOException, ParseException {
+	private BookCreator createTextTexFile(String locale) throws IOException, ParseException {
 		List<String> chatLines = new ArrayList<String>();
 		chatLines.add("16/03/2018, 08:46 - Firstname Surname: This is my message");
 		chatLines.add("16/03/2018, 21:47 - Firstname Surname: This is my message2");
 
 		List<String> propLines = new ArrayList<String>();
-		propLines.add(String.format("locale=%s", locale));
-
-		String dir = folder.newFolder("testWriteTex").toString();
-		Path inputDir = Paths.get(dir, "input");
-		Path outputDir = Paths.get(dir, "output");
-		Path emojiDir = Paths.get(dir, "emojis");
-
-		Path chatDir = inputDir.resolve("chat");
-		Path configDir = inputDir.resolve("config");
-
-		Files.createDirectories(inputDir);
-		Files.createDirectories(outputDir);
-		Files.createDirectories(emojiDir);
-		Files.createDirectories(chatDir);
-		Files.createDirectories(configDir);
-
-		Files.write(chatDir.resolve("WhatsApp Chat with Firstname Surname.txt"), chatLines);
 		if (locale != null) {
-			Files.write(configDir.resolve("bookcreator.properties"), propLines);
+			propLines.add(String.format("locale=%s", locale));
 		}
 
-		BookCreator bk = new BookCreator(inputDir, outputDir, emojiDir);
-		bk.setHeader("header");
-		bk.setFooter("footer");
-		bk.writeTex();
+		return createTexFile(chatLines, propLines);
+	}
 
-		Path texFile = outputDir.resolve("WhatsApp Chat with Firstname Surname.tex");
-		assertTrue(Files.exists(texFile));
-		return texFile;
+	private BookCreator createMediaOmittedTexFile(boolean hints) throws IOException, ParseException {
+		List<String> chatLines = new ArrayList<String>();
+		chatLines.add("16/03/2018, 08:46 - Firstname Surname: <Media omitted>");
+
+		List<String> propLines = new ArrayList<String>();
+		propLines.add("locale=en");
+		propLines.add("mediaomittedhints=" + Boolean.toString(hints));
+
+		return createTexFile(chatLines, propLines);
 	}
 }

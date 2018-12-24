@@ -151,7 +151,6 @@ public class BookCreator {
 			properties.load(new FileInputStream(propertiesInputPath.toFile()));
 
 			locale = properties.getProperty("locale", locale);
-			// TODO test
 			this.writeMediaOmittedHints = Boolean.parseBoolean(
 					properties.getProperty("mediaomittedhints", Boolean.toString(this.writeMediaOmittedHints)));
 		}

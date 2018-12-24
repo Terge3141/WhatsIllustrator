@@ -166,7 +166,6 @@ public class ImageMatcher {
 		List<FileEntry> query = fileMatches.stream().filter(x -> x.getRelPath().equals(relPath))
 				.collect(Collectors.toList());
 
-		// TODO test
 		int queryCnt = query.size();
 		if (queryCnt != 1) {
 			throw new IllegalArgumentException(
