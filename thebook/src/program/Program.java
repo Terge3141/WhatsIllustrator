@@ -95,6 +95,7 @@ public class Program {
 	
 	public static void main(String args[]) {
 		logger.error("Moin");
+		logger.fatal("Fatal");
 	}
 
 	// TODO Some Softbank icons don't have a mapping
