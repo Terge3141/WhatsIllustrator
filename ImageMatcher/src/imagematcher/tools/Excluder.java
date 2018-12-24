@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -13,11 +12,16 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dom4j.DocumentException;
 
 import imagematcher.ImageMatcher;
 
 public class Excluder {
+
+	private static Logger logger = LogManager.getLogger(Excluder.class);
+
 	public static Options getOptions() {
 		Options options = new Options();
 		options.addRequiredOption("m", "matchfile", true, "Path of the match.xml input file");
@@ -45,16 +49,16 @@ public class Excluder {
 			return;
 		}
 
-		System.out.format("Reading xml from '%s'\n", inputMatchPath);
+		logger.info("Reading xml from '%s'\n", inputMatchPath);
 		ImageMatcher im = ImageMatcher.fromXmlFile(Paths.get(inputMatchPath));
 
-		System.out.format("Reading exlude from '%s'\n", excludePath);
+		logger.info("Reading exlude from '%s'\n", excludePath);
 		List<String> lines = Files.readAllLines(Paths.get(excludePath));
 		for (String line : lines) {
 			im.excludeExcept(line);
 		}
 
-		System.out.format("Writing output file to '%s'\n", outputMatchPath);
+		logger.info("Writing output file to '%s'\n", outputMatchPath);
 		im.toXmlFile(Paths.get(outputMatchPath));
 	}
 

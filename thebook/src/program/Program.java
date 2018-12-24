@@ -1,13 +1,8 @@
 package program;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.text.ParseException;
-
-import javax.xml.parsers.*;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -17,15 +12,13 @@ import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.xml.sax.SAXException;
 
 import helper.Misc;
-import helper.Container;
 
 // Parses the old Soft Bank unicode characters to new unicode characters
 // Table from https://github.com/iamcal/emoji-data
 public class Program {
-	
+
 	private static Logger logger = LogManager.getLogger(Program.class);
 
 	public static Options getOptions() {
@@ -41,19 +34,7 @@ public class Program {
 		return options;
 	}
 
-	/**
-	 * @param args
-	 * @throws IOException
-	 * @throws ParseException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws TransformerException
-	 * @throws TransformerFactoryConfigurationError
-	 * @throws                                      org.apache.commons.cli.ParseException
-	 */
-	public static void main2(String[] args)
-			throws IOException, ParserConfigurationException, SAXException, ParseException,
-			TransformerFactoryConfigurationError, TransformerException, org.apache.commons.cli.ParseException {
+	public static void main(String[] args) throws org.apache.commons.cli.ParseException, IOException, ParseException {
 		// -i "/tmp/mychat" -e "/tmp/emojis" -imagepooldir "/tmp/imagepool"
 
 		Config config = new Config();
@@ -76,26 +57,12 @@ public class Program {
 		config.setOutputDir(
 				Misc.isNullOrWhiteSpace(config.getOutputDir()) ? config.getInputDir() : config.getOutputDir());
 
-		if (!Misc.isNullOrWhiteSpace(config.getDebugDir())) {
-			Container.Debug = new PrintWriter(Paths.get(config.getDebugDir(), "output.log").toString());
-		}
-
 		BookCreator creator = new BookCreator(Paths.get(config.getInputDir()), Paths.get(config.getOutputDir()),
 				Paths.get(config.getEmojiDir()));
 		creator.setImagePoolDir(Paths.get(config.getImagePoolDir()));
 		creator.writeTex();
 
-		System.out.println("Done");
-
-		if (Container.Debug != null) {
-			Container.Debug.close();
-			Container.Debug = null;
-		}
-	}
-	
-	public static void main(String args[]) {
-		logger.error("Moin");
-		logger.fatal("Fatal");
+		logger.info("Done");
 	}
 
 	// TODO Some Softbank icons don't have a mapping

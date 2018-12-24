@@ -12,10 +12,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.text.TextStringBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import imagematcher.*;
 
 public class WhatsappParser {
+	
+	private static Logger logger = LogManager.getLogger(WhatsappParser.class);
 
 	private List<String> lines;
 	private ImageMatcher imageMatcher;
@@ -75,7 +79,7 @@ public class WhatsappParser {
 
 		// special message, e.g. encryption information
 		if (senderEnd == -1) {
-			System.out.format("No sender found, skipping line '%s'\n", line);
+			logger.warn("No sender found, skipping line '%s'\n", line);
 			return nextMessage();
 		}
 

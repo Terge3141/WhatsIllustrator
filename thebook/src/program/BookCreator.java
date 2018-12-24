@@ -24,8 +24,12 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import org.apache.commons.text.TextStringBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class BookCreator {
+	
+	private static Logger logger = LogManager.getLogger(BookCreator.class);
 
 	// The top level input directory. It typically contains the subdirectories
 	// chat and config
@@ -104,7 +108,7 @@ public class BookCreator {
 		}
 
 		Path txtInputPath = Paths.get(txtFiles.get(0));
-		System.out.format("Using %s as input\n", txtInputPath);
+		logger.info("Using %s as input\n", txtInputPath);
 
 		String namePrefix = txtInputPath.toFile().getName();
 		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
@@ -114,7 +118,7 @@ public class BookCreator {
 		Path matchOutputPath = this.outputDir.resolve(namePrefix + ".match.xml");
 		ImageMatcher im = null;
 		if (matchInputPath.toFile().isFile()) {
-			System.out.format("Loading matches '%s'\n", matchInputPath);
+			logger.info("Loading matches '%s'\n", matchInputPath);
 			im = ImageMatcher.fromXmlFile(matchInputPath);
 			im.setSearchMode(false);
 		} else {
@@ -122,17 +126,17 @@ public class BookCreator {
 			if (imagePoolDir == null) {
 				im.setSearchMode(false);
 			} else {
-				System.out.format("Loading pool images from '%s'\n", imagePoolDir);
+				logger.info("Loading pool images from '%s'\n", imagePoolDir);
 				im.loadFiles(imagePoolDir);
 				im.setSearchMode(true);
-				System.out.format("%d images found\n", im.getFileList().size());
+				logger.info("%d images found\n", im.getFileList().size());
 			}
 		}
 
 		Path lookupInputPath = this.configDir.resolve("namelookup.xml");
 		NameLookup nl;
 		if (lookupInputPath.toFile().isFile()) {
-			System.out.format("Loading name lookup '%s'\n", lookupInputPath);
+			logger.info("Loading name lookup '%s'\n", lookupInputPath);
 			nl = NameLookup.fromXmlFile(lookupInputPath);
 		} else {
 			nl = new NameLookup();
@@ -146,7 +150,7 @@ public class BookCreator {
 		String locale = this.DEFAULT_LOCALE;
 		this.writeMediaOmittedHints = false;
 		if (propertiesInputPath.toFile().isFile()) {
-			System.out.format("Using properties file '%s'\n", propertiesInputPath);
+			logger.info("Using properties file '%s'\n", propertiesInputPath);
 			Properties properties = new Properties();
 			properties.load(new FileInputStream(propertiesInputPath.toFile()));
 
@@ -156,7 +160,7 @@ public class BookCreator {
 		}
 		this.dateUtils = new DateUtils(locale);
 
-		System.out.println("Start parsing messages");
+		logger.info("Start parsing messages");
 		TextStringBuilder tsb = new TextStringBuilder();
 		tsb.appendln(header);
 
@@ -183,13 +187,13 @@ public class BookCreator {
 
 		tsb.appendln(this.footer);
 
-		System.out.format("Writing tex file to '%s'\n", texOutputPath);
+		logger.info("Writing tex file to '%s'\n", texOutputPath);
 		Misc.writeAllText(texOutputPath, tsb.toString());
 
-		System.out.format("Writing match file to '%s'\n", matchOutputPath);
+		logger.info("Writing match file to '%s'\n", matchOutputPath);
 		im.toXmlFile(matchOutputPath);
 
-		System.out.format("Copy emojis to '%s'\n", emojiOutputDir);
+		logger.info("Copy emojis to '%s'\n", emojiOutputDir);
 		copyList();
 	}
 
@@ -230,7 +234,7 @@ public class BookCreator {
 			}
 		}
 
-		System.out.format("Loaded %d entries from %s\n", list.size(), dir);
+		logger.info("Loaded %d entries from %s\n", list.size(), dir);
 
 		return list;
 	}

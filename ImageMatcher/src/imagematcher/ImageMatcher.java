@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -28,6 +30,8 @@ import helper.FileHandler;
 import helper.Misc;
 
 public class ImageMatcher {
+	
+	private static Logger logger = LogManager.getLogger(ImageMatcher.class);
 
 	private List<MatchEntry> matchList;
 	private List<FileEntry> fileList;
@@ -103,8 +107,8 @@ public class ImageMatcher {
 		MatchEntry matchEntry = list.get(0);
 		int fmCnt = matchEntry.getFileMatches().size();
 		if (fmCnt > 1) {
-			System.out.format(
-					"Warning, searchmode is off but more than one entry (%d) found for timepoint %s, cnt %d\n", fmCnt,
+			logger.warn(
+					"Searchmode is off but more than one entry (%d) found for timepoint %s, cnt %d\n", fmCnt,
 					timepoint, cnt);
 		}
 
@@ -163,7 +167,7 @@ public class ImageMatcher {
 			FileEntry entry = new FileEntry(file, dir.toString());
 
 			if (this.fileList.stream().filter(x -> x.getFileName().equals(entry.getFileName())).count() > 0) {
-				System.out.format("Skipping %s\n", entry.getRelPath());
+				logger.info("Skipping %s\n", entry.getRelPath());
 			} else {
 				this.fileList.add(entry);
 			}
