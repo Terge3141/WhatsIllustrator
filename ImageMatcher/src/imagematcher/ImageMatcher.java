@@ -38,32 +38,18 @@ public class ImageMatcher {
 		this.matchList = new ArrayList<MatchEntry>();
 	}
 
-	public static ImageMatcher fromXmlString(String xml)  {
+	public static ImageMatcher fromXmlString(String xml) {
 		ImageMatcher im = new ImageMatcher();
 
-		/*
-		 * DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		 * dbFactory = DocumentBuilderFactory.newInstance(); DocumentBuilder dBuilder =
-		 * dbFactory.newDocumentBuilder(); InputStream stream = new
-		 * ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16)); Document doc =
-		 * dBuilder.parse(stream); Element root = doc.getDocumentElement(); NodeList
-		 * nodeList = root.getChildNodes();
-		 * 
-		 * for (int i = 0; i < nodeList.getLength(); i++) { Node node =
-		 * nodeList.item(i); if (node.getNodeType() == Node.ELEMENT_NODE) { if
-		 * (node.getNodeName().equals("MatchEntry")) {
-		 * im.matchList.add(MatchEntry.fromNode(node)); } } }
-		 */
-
 		try {
-		SAXReader reader = new SAXReader();
-		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
-		Document document = reader.read(stream);
-		List<Node> nodes = document.selectNodes("//ArrayOfMatchEntry/MatchEntry");
-		for (Node node : nodes) {
-			im.matchList.add(MatchEntry.fromNode(node));
-		}}
-		catch(DocumentException de) {
+			SAXReader reader = new SAXReader();
+			InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
+			Document document = reader.read(stream);
+			List<Node> nodes = document.selectNodes("//ArrayOfMatchEntry/MatchEntry");
+			for (Node node : nodes) {
+				im.matchList.add(MatchEntry.fromNode(node));
+			}
+		} catch (DocumentException de) {
 			throw new IllegalArgumentException("Bad xml format", de);
 		}
 
@@ -76,42 +62,20 @@ public class ImageMatcher {
 
 	public String toXmlString() throws IOException {
 		Document document = DocumentHelper.createDocument();
-        Element root = document.addElement( "ArrayOfMatchEntry" );
-        
-        for (MatchEntry entry : this.matchList) {
-        	entry.addNode(root);
-		}
-        
-        OutputFormat format = OutputFormat.createPrettyPrint();
-        format.setEncoding("UTF-16");
-        StringWriter stringWriter = new StringWriter();
-        XMLWriter writer;
-        writer = new XMLWriter( stringWriter, format );
-        writer.write( document );
-        
-        return stringWriter.toString();
-		/*DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-		Document doc = docBuilder.newDocument();
-		Element root = doc.createElement("ArrayOfMatchEntry");
+		Element root = document.addElement("ArrayOfMatchEntry");
 
 		for (MatchEntry entry : this.matchList) {
-			root.appendChild(entry.getNode(doc));
-			entry.getNode(doc);
+			entry.addNode(root);
 		}
 
-		doc.appendChild(root);
-
-		Transformer transformer = TransformerFactory.newInstance().newTransformer();
-		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-16");
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "3");
-		DOMSource source = new DOMSource(doc);
+		OutputFormat format = OutputFormat.createPrettyPrint();
+		format.setEncoding("UTF-16");
 		StringWriter stringWriter = new StringWriter();
-		StreamResult streamResult = new StreamResult(stringWriter);
-		transformer.transform(source, streamResult);
+		XMLWriter writer;
+		writer = new XMLWriter(stringWriter, format);
+		writer.write(document);
 
-		return stringWriter.toString();*/
+		return stringWriter.toString();
 	}
 
 	public void toXmlFile(Path path) throws IOException {
@@ -139,8 +103,9 @@ public class ImageMatcher {
 		MatchEntry matchEntry = list.get(0);
 		int fmCnt = matchEntry.getFileMatches().size();
 		if (fmCnt > 1) {
-			System.out.format("Warning, searchmode is off but more than one entry (%d) found for timepoint %s, cnt %d\n",
-					fmCnt, timepoint, cnt);
+			System.out.format(
+					"Warning, searchmode is off but more than one entry (%d) found for timepoint %s, cnt %d\n", fmCnt,
+					timepoint, cnt);
 		}
 
 		return matchEntry;
