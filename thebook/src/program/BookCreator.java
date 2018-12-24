@@ -70,6 +70,7 @@ public class BookCreator {
 
 	private List<CopyItem> copyList;
 	private DateUtils dateUtils;
+	private boolean writeMediaOmittedHints;
 
 	public BookCreator(Path inputDir, Path outputDir, Path emojiInputDir) throws IOException {
 		List<String> emojiList = readEmojiList(emojiInputDir);
@@ -93,17 +94,17 @@ public class BookCreator {
 
 	public void writeTex() throws IOException, ParseException {
 		this.copyList = new ArrayList<BookCreator.CopyItem>();
-		
+
 		List<String> txtFiles = FileHandler.listDir(chatDir, ".*.txt");
 		if (txtFiles.size() != 1) {
 			throw new IllegalArgumentException(
 					String.format("Invalid number of .txt-files found: %d", txtFiles.size()));
 		}
 
-		Path txtInputPath = Paths.get( txtFiles.get(0));
+		Path txtInputPath = Paths.get(txtFiles.get(0));
 		System.out.format("Using %s as input\n", txtInputPath);
 
-		String namePrefix=txtInputPath.toFile().getName();
+		String namePrefix = txtInputPath.toFile().getName();
 		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
 		Path texOutputPath = this.outputDir.resolve(namePrefix + ".tex");
 
@@ -141,11 +142,16 @@ public class BookCreator {
 		// file should contain
 		// locale=language
 		String locale = this.DEFAULT_LOCALE;
+		this.writeMediaOmittedHints = false;
 		if (propertiesInputPath.toFile().isFile()) {
+			System.out.format("Using properties file '%s'\n", propertiesInputPath);
 			Properties properties = new Properties();
 			properties.load(new FileInputStream(propertiesInputPath.toFile()));
-			String tmp = properties.getProperty("locale");
-			locale = tmp == null ? locale : tmp;
+
+			locale = properties.getProperty("locale", locale);
+			// TODO test
+			writeMediaOmittedHints = Boolean.parseBoolean(
+					properties.getProperty("mediaomittedhints", Boolean.toString(this.writeMediaOmittedHints)));
 		}
 		this.dateUtils = new DateUtils(locale);
 
@@ -280,8 +286,12 @@ public class BookCreator {
 		while (it.hasNext()) {
 			tsb.append("\\begin{center}");
 			String relPath = it.next();
-			String str = String.format("%s;%s;%d", msg.getTimepoint(), relPath, msg.getCnt());
-			tsb.append(createLatexImage(this.imagePoolDir.resolve(relPath), encode(str)));
+			String str = "";
+			if (this.writeMediaOmittedHints) {
+				str = String.format("%s;%s;%d", msg.getTimepoint(), relPath, msg.getCnt());
+			}
+
+			tsb.append(createLatexImage(this.imagePoolDir.resolve(relPath), str));
 			tsb.appendln("\\end{center}");
 		}
 	}
