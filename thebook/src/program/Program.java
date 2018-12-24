@@ -15,6 +15,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Options;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
 import helper.Misc;
@@ -23,6 +25,8 @@ import helper.Container;
 // Parses the old Soft Bank unicode characters to new unicode characters
 // Table from https://github.com/iamcal/emoji-data
 public class Program {
+	
+	private static Logger logger = LogManager.getLogger(Program.class);
 
 	public static Options getOptions() {
 		Options options = new Options();
@@ -47,7 +51,7 @@ public class Program {
 	 * @throws TransformerFactoryConfigurationError
 	 * @throws                                      org.apache.commons.cli.ParseException
 	 */
-	public static void main(String[] args)
+	public static void main2(String[] args)
 			throws IOException, ParserConfigurationException, SAXException, ParseException,
 			TransformerFactoryConfigurationError, TransformerException, org.apache.commons.cli.ParseException {
 		// -i "/tmp/mychat" -e "/tmp/emojis" -imagepooldir "/tmp/imagepool"
@@ -87,6 +91,10 @@ public class Program {
 			Container.Debug.close();
 			Container.Debug = null;
 		}
+	}
+	
+	public static void main(String args[]) {
+		logger.error("Moin");
 	}
 
 	// TODO Some Softbank icons don't have a mapping
