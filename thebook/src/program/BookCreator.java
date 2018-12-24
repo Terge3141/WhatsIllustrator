@@ -59,6 +59,8 @@ public class BookCreator {
 	private Path imagePoolDir;
 
 	private Path emojiInputDir;
+	
+	private Path texOutputPath;
 
 	private EmojiParser emojis;
 
@@ -106,7 +108,7 @@ public class BookCreator {
 
 		String namePrefix = txtInputPath.toFile().getName();
 		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
-		Path texOutputPath = this.outputDir.resolve(namePrefix + ".tex");
+		this.texOutputPath = this.outputDir.resolve(namePrefix + ".tex");
 
 		Path matchInputPath = this.configDir.resolve(namePrefix + ".match.xml");
 		Path matchOutputPath = this.outputDir.resolve(namePrefix + ".match.xml");
@@ -150,7 +152,7 @@ public class BookCreator {
 
 			locale = properties.getProperty("locale", locale);
 			// TODO test
-			writeMediaOmittedHints = Boolean.parseBoolean(
+			this.writeMediaOmittedHints = Boolean.parseBoolean(
 					properties.getProperty("mediaomittedhints", Boolean.toString(this.writeMediaOmittedHints)));
 		}
 		this.dateUtils = new DateUtils(locale);
@@ -395,5 +397,9 @@ public class BookCreator {
 
 	public void setFooter(String footer) {
 		this.footer = footer;
+	}
+
+	public Path getTexOutputPath() {
+		return texOutputPath;
 	}
 }
