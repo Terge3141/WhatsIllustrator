@@ -139,7 +139,7 @@ public class ImageMatcher {
 		MatchEntry matchEntry = list.get(0);
 		int fmCnt = matchEntry.getFileMatches().size();
 		if (fmCnt > 1) {
-			System.out.format("Warning, searchmode is of put more than one entry (%d) found for timepoint %s, cnt %d\n",
+			System.out.format("Warning, searchmode is off but more than one entry (%d) found for timepoint %s, cnt %d\n",
 					fmCnt, timepoint, cnt);
 		}
 
