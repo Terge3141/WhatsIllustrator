@@ -1,13 +1,23 @@
 package helper;
 
-import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
 import org.apache.commons.text.TextStringBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+/**
+ * Parses a string for emojis and replaces them using a lambda function which is
+ * passed as an argument
+ * 
+ * @author Michael Elvers
+ *
+ */
 public class EmojiParser {
+
+	private static Logger logger = LogManager.getLogger();
 
 	private List<String> emojiList;
 	private Function<String, String> emojiFormatFunction;
@@ -16,8 +26,17 @@ public class EmojiParser {
 
 	private static final String SEPERATOR = "_";
 
-	private PrintWriter debug = null;
-
+	/**
+	 * Constructor
+	 * 
+	 * @param emojiList           A list of emoji codes that should be replaced. If
+	 *                            an emoji is made of more than one unicode the
+	 *                            unicodes are separted by the character '_', for
+	 *                            example 270d_1f3fd
+	 * @param emojiFormatFunction The lambda function that is when an emoji is
+	 *                            found. The unicode(s) are passed to the function
+	 *                            and the formatted code is returned.
+	 */
 	public EmojiParser(List<String> emojiList, Function<String, String> emojiFormatFunction) {
 		this.emojiList = emojiList;
 		this.emojiFormatFunction = emojiFormatFunction;
@@ -33,6 +52,11 @@ public class EmojiParser {
 		this.tokenMax++;
 	}
 
+	/**
+	 * Replaces The emojis for a given string.
+	 * @param str The string to replaced
+	 * @return The replaced string
+	 */
 	public String replaceEmojis(String str) {
 		TextStringBuilder tsb = new TextStringBuilder();
 		int index = 0;
@@ -83,9 +107,7 @@ public class EmojiParser {
 					}
 
 					tsb.append(replacement);
-					if (this.debug != null) {
-						this.debug.format("%d %s", codePoint, alternative);
-					}
+					logger.debug("%d %s", codePoint, alternative);
 
 					return index + charCnt;
 				}
@@ -97,8 +119,7 @@ public class EmojiParser {
 		}
 	}
 
-	public static String fromUtf32toString(int codePoint) {
+	private static String fromUtf32toString(int codePoint) {
 		return new String(Character.toChars(codePoint));
 	}
-
 }
