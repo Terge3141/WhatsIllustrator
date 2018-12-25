@@ -29,9 +29,9 @@ public class EmojiParser {
 	/**
 	 * Constructor
 	 * 
-	 * @param emojiList           A list of emoji codes that should be replaced. If
-	 *                            an emoji is made of more than one unicode the
-	 *                            unicodes are separted by the character '_', for
+	 * @param emojiList           A list of emoji codes that can be replaced. If an
+	 *                            emoji is made of more than one unicode the
+	 *                            unicodes are separated by the character '_', for
 	 *                            example 270d_1f3fd
 	 * @param emojiFormatFunction The lambda function that is when an emoji is
 	 *                            found. The unicode(s) are passed to the function
@@ -54,6 +54,7 @@ public class EmojiParser {
 
 	/**
 	 * Replaces The emojis for a given string.
+	 * 
 	 * @param str The string to replaced
 	 * @return The replaced string
 	 */
@@ -71,6 +72,17 @@ public class EmojiParser {
 		return parseChars(str, index, tsb, null, 0);
 	}
 
+	/**
+	 * Recursively parses one or more unicode characters starting at index
+	 * 
+	 * @param str   String to be parsed
+	 * @param index start index
+	 * @param tsb   StringBuilder were the result is written to
+	 * @param last  Unicode from last character, null for iteration cnt 0
+	 * @param cnt   Iteration cnt, starting at 0
+	 * @return index of the next character to be parsed, -1 if unicode chain was not
+	 *         found or end of string was reached
+	 */
 	private int parseChars(String str, int index, TextStringBuilder tsb, String last, int cnt) {
 		if (cnt == tokenMax) {
 			return -1;
