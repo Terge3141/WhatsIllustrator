@@ -79,7 +79,7 @@ public class WhatsappParser {
 
 		// special message, e.g. encryption information
 		if (senderEnd == -1) {
-			logger.warn("No sender found, skipping line '%s'\n", line);
+			logger.warn("No sender found, skipping line '{}'", line);
 			return nextMessage();
 		}
 

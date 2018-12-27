@@ -108,7 +108,7 @@ public class ImageMatcher {
 		int fmCnt = matchEntry.getFileMatches().size();
 		if (fmCnt > 1) {
 			logger.warn(
-					"Searchmode is off but more than one entry (%d) found for timepoint %s, cnt %d\n", fmCnt,
+					"Searchmode is off but more than one entry ({}) found for timepoint {}, cnt {}", fmCnt,
 					timepoint, cnt);
 		}
 
@@ -167,7 +167,7 @@ public class ImageMatcher {
 			FileEntry entry = new FileEntry(file, dir.toString());
 
 			if (this.fileList.stream().filter(x -> x.getFileName().equals(entry.getFileName())).count() > 0) {
-				logger.info("Skipping %s\n", entry.getRelPath());
+				logger.info("Skipping {}", entry.getRelPath());
 			} else {
 				this.fileList.add(entry);
 			}

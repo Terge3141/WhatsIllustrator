@@ -108,7 +108,7 @@ public class BookCreator {
 		}
 
 		Path txtInputPath = Paths.get(txtFiles.get(0));
-		logger.info("Using %s as input\n", txtInputPath);
+		logger.info("Using {} as input", txtInputPath);
 
 		String namePrefix = txtInputPath.toFile().getName();
 		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
@@ -118,7 +118,7 @@ public class BookCreator {
 		Path matchOutputPath = this.outputDir.resolve(namePrefix + ".match.xml");
 		ImageMatcher im = null;
 		if (matchInputPath.toFile().isFile()) {
-			logger.info("Loading matches '%s'\n", matchInputPath);
+			logger.info("Loading matches '{}'", matchInputPath);
 			im = ImageMatcher.fromXmlFile(matchInputPath);
 			im.setSearchMode(false);
 		} else {
@@ -126,17 +126,17 @@ public class BookCreator {
 			if (imagePoolDir == null) {
 				im.setSearchMode(false);
 			} else {
-				logger.info("Loading pool images from '%s'\n", imagePoolDir);
+				logger.info("Loading pool images from '{}'", imagePoolDir);
 				im.loadFiles(imagePoolDir);
 				im.setSearchMode(true);
-				logger.info("%d images found\n", im.getFileList().size());
+				logger.info("{} images found", im.getFileList().size());
 			}
 		}
 
 		Path lookupInputPath = this.configDir.resolve("namelookup.xml");
 		NameLookup nl;
 		if (lookupInputPath.toFile().isFile()) {
-			logger.info("Loading name lookup '%s'\n", lookupInputPath);
+			logger.info("Loading name lookup '{}'", lookupInputPath);
 			nl = NameLookup.fromXmlFile(lookupInputPath);
 		} else {
 			nl = new NameLookup();
@@ -150,7 +150,7 @@ public class BookCreator {
 		String locale = this.DEFAULT_LOCALE;
 		this.writeMediaOmittedHints = false;
 		if (propertiesInputPath.toFile().isFile()) {
-			logger.info("Using properties file '%s'\n", propertiesInputPath);
+			logger.info("Using properties file '{}'", propertiesInputPath);
 			Properties properties = new Properties();
 			properties.load(new FileInputStream(propertiesInputPath.toFile()));
 
@@ -187,13 +187,13 @@ public class BookCreator {
 
 		tsb.appendln(this.footer);
 
-		logger.info("Writing tex file to '%s'\n", texOutputPath);
+		logger.info("Writing tex file to '{}'", texOutputPath);
 		Misc.writeAllText(texOutputPath, tsb.toString());
 
-		logger.info("Writing match file to '%s'\n", matchOutputPath);
+		logger.info("Writing match file to '{}'", matchOutputPath);
 		im.toXmlFile(matchOutputPath);
 
-		logger.info("Copy emojis to '%s'\n", emojiOutputDir);
+		logger.info("Copy emojis to '{}'", emojiOutputDir);
 		copyList();
 	}
 
@@ -234,7 +234,7 @@ public class BookCreator {
 			}
 		}
 
-		logger.info("Loaded %d entries from %s\n", list.size(), dir);
+		logger.info("Loaded {} entries from {}", list.size(), dir);
 
 		return list;
 	}
