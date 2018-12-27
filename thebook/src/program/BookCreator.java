@@ -220,7 +220,6 @@ public class BookCreator {
 
 	private List<String> readEmojiList(Path dir) {
 		List<String> list = new ArrayList<>();
-
 		for (File x : dir.toFile().listFiles()) {
 			String fileName = x.getName();
 			String nr = fileName.replace(EMOJIPREFIX, "").replace(".png", "");

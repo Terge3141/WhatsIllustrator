@@ -44,9 +44,11 @@ public class Program {
 			CommandLine line = parser.parse(options, args);
 			config.setInputDir(line.getOptionValue("inputdir"));
 			config.setEmojiDir(line.getOptionValue("emojidir"));
-			config.setOutputDir(line.getOptionValue("outputdir"));
 			config.setImagePoolDir(line.getOptionValue("imagepooldir"));
 			config.setDebugDir(line.getOptionValue("debugdir"));
+
+			String outputDirStr = line.getOptionValue("outputdir");
+			config.setOutputDir(Misc.isNullOrWhiteSpace(outputDirStr) ? config.getInputDir() : Paths.get(outputDirStr));
 
 		} catch (MissingOptionException moe) {
 			HelpFormatter formatter = new HelpFormatter();
@@ -54,12 +56,8 @@ public class Program {
 			return;
 		}
 
-		config.setOutputDir(
-				Misc.isNullOrWhiteSpace(config.getOutputDir()) ? config.getInputDir() : config.getOutputDir());
-
-		BookCreator creator = new BookCreator(Paths.get(config.getInputDir()), Paths.get(config.getOutputDir()),
-				Paths.get(config.getEmojiDir()));
-		creator.setImagePoolDir(Paths.get(config.getImagePoolDir()));
+		BookCreator creator = new BookCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir());
+		creator.setImagePoolDir(config.getImagePoolDir());
 		creator.writeTex();
 
 		logger.info("Done");
@@ -67,6 +65,5 @@ public class Program {
 
 	// TODO Some Softbank icons don't have a mapping
 	// TODO use streams
-	// TODO check if directories exist
 	// TODO file header everywhere
 }
