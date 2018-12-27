@@ -30,7 +30,7 @@ import helper.FileHandler;
 import helper.Misc;
 
 public class ImageMatcher {
-	
+
 	private static Logger logger = LogManager.getLogger(ImageMatcher.class);
 
 	private List<MatchEntry> matchList;
@@ -106,9 +106,8 @@ public class ImageMatcher {
 
 		MatchEntry matchEntry = list.get(0);
 		int fmCnt = matchEntry.getFileMatches().size();
-		if (fmCnt > 1) {
-			logger.warn(
-					"Searchmode is off but more than one entry ({}) found for timepoint {}, cnt {}", fmCnt,
+		if (fmCnt > 1 && matchEntry.isImageType()) {
+			logger.warn("Searchmode is off but more than one entry ({}) found for timepoint {}, cnt {}", fmCnt,
 					timepoint, cnt);
 		}
 
