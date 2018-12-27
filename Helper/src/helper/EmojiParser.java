@@ -119,7 +119,7 @@ public class EmojiParser {
 					}
 
 					tsb.append(replacement);
-					logger.debug("{} {}", codePoint, alternative);
+					logger.trace("{} {}", codePoint, alternative);
 
 					return index + charCnt;
 				}
