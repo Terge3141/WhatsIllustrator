@@ -28,7 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class BookCreator {
-	
+
 	private static Logger logger = LogManager.getLogger(BookCreator.class);
 
 	// The top level input directory. It typically contains the subdirectories
@@ -63,7 +63,7 @@ public class BookCreator {
 	private Path imagePoolDir;
 
 	private Path emojiInputDir;
-	
+
 	private Path texOutputPath;
 
 	private EmojiParser emojis;
@@ -278,9 +278,12 @@ public class BookCreator {
 	}
 
 	private void appendImageMessage(ImageMessage msg, TextStringBuilder tsb) {
+		Path absoluteImgPath = this.imageDir.resolve(msg.getFilename());
+		Path relativeImgPath = this.outputDir.relativize(absoluteImgPath);
+
 		tsb.appendln("%s\\\\", formatSenderAndTime(msg));
 		tsb.append("\\begin{center}");
-		tsb.append(createLatexImage(this.imageDir.resolve(msg.getFilename()), msg.getSubscription()));
+		tsb.append(createLatexImage(relativeImgPath, msg.getSubscription()));
 		tsb.appendln("\\end{center}");
 	}
 
