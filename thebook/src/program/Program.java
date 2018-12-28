@@ -13,6 +13,7 @@ import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import creator.OdfCreator;
 import helper.Misc;
 
 // Parses the old Soft Bank unicode characters to new unicode characters
@@ -34,7 +35,7 @@ public class Program {
 		return options;
 	}
 
-	public static void main(String[] args) throws org.apache.commons.cli.ParseException, IOException, ParseException {
+	public static void main(String[] args) throws Exception {
 		// -i "/tmp/mychat" -e "/tmp/emojis" -imagepooldir "/tmp/imagepool"
 
 		Config config = new Config();
@@ -56,9 +57,11 @@ public class Program {
 			return;
 		}
 
-		BookCreator creator = new BookCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir());
+		/*BookCreator creator = new BookCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir());
 		creator.setImagePoolDir(config.getImagePoolDir());
-		creator.writeTex();
+		creator.writeTex();*/
+		OdfCreator creator=new OdfCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir());
+		creator.writeOdf();
 
 		logger.info("Done");
 	}
