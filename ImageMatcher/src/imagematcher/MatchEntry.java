@@ -7,15 +7,26 @@ import java.util.List;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
+/**
+ * Handles a list of possible file matches for a given date and time
+ * 
+ * @author Michael Elvers
+ *
+ */
 public class MatchEntry {
 	private LocalDateTime timePoint;
 	private List<FileEntry> fileMatches;
 	private int cnt;
 	private boolean imageType;
 
-	private MatchEntry() {
-	}
-
+	/**
+	 * Constructor
+	 * 
+	 * @param timepoint   Date and time of the message entry
+	 * @param fileMatches List of possible matching files
+	 * @param cnt         Instance count, e.g. if two match entries exist for the
+	 *                    timepoint, first one has cnt=0, second one has cnt=1
+	 */
 	public MatchEntry(LocalDateTime timepoint, List<FileEntry> fileMatches, int cnt) {
 		this.timePoint = timepoint;
 		this.fileMatches = fileMatches;
@@ -23,24 +34,36 @@ public class MatchEntry {
 		this.imageType = true;
 	}
 
+	private MatchEntry() {
+	}
+
+	/**
+	 * Creates a MatchEntry object for a given xml node.
+	 * @param node Node containing the match entry information
+	 * @return The created MatchEntry
+	 */
 	public static MatchEntry fromNode(Node node) {
 		MatchEntry me = new MatchEntry();
-		
-		String tpStr=node.selectSingleNode("Timepoint").getText();
-		me.timePoint=LocalDateTime.parse(tpStr);
-		
-		me.imageType=Boolean.parseBoolean(node.selectSingleNode("IsImage").getText());
-		me.cnt=Integer.parseInt(node.selectSingleNode("Cnt").getText());
-		
+
+		String tpStr = node.selectSingleNode("Timepoint").getText();
+		me.timePoint = LocalDateTime.parse(tpStr);
+
+		me.imageType = Boolean.parseBoolean(node.selectSingleNode("IsImage").getText());
+		me.cnt = Integer.parseInt(node.selectSingleNode("Cnt").getText());
+
 		me.fileMatches = new ArrayList<FileEntry>();
-		Node fileMatchesNode=node.selectSingleNode("Filematches");
-		for(Node fileEntryNode : fileMatchesNode.selectNodes("FileEntry")) {
+		Node fileMatchesNode = node.selectSingleNode("Filematches");
+		for (Node fileEntryNode : fileMatchesNode.selectNodes("FileEntry")) {
 			me.fileMatches.add(FileEntry.fromNode(fileEntryNode));
 		}
-		
+
 		return me;
 	}
 
+	/**
+	 * Adds the object information to a given root node
+	 * @param root The root node
+	 */
 	public Element addNode(Element root) {
 		Element matchEntry = root.addElement("MatchEntry");
 
@@ -59,10 +82,6 @@ public class MatchEntry {
 		cnt.addText(Integer.toString(this.cnt));
 
 		return matchEntry;
-	}
-
-	public String toXml() {
-		throw new UnsupportedOperationException();
 	}
 
 	public LocalDateTime getTimePoint() {

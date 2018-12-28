@@ -1,5 +1,12 @@
 package helper;
 
+/**
+ * Converts the old Soft Bank unicode characters to new unicode characters Table
+ * from https://github.com/iamcal/emoji-data
+ * 
+ * @author Michael Elvers
+ *
+ */
 public class SoftBankConverter {
 
 	private static final String[][] MAPPING = { { "e210", "0023-fe0f-20e3" }, { "e225", "0030-fe0f-20e3" },
@@ -103,9 +110,16 @@ public class SoftBankConverter {
 			{ "e233", "2b07-fe0f" }, { "e32f", "2b50" }, { "e332", "2b55" }, { "e12c", "303d-fe0f" },
 			{ "e30d", "3297-fe0f" }, { "e315", "3299-fe0f" }, };
 
-	public static String getNewUnicode(String suggestion) {
+	/**
+	 * Converts the old Soft Bank unicode characters to new unicode characters
+	 * 
+	 * @param softBankUnicode The hexadecimal representation as a string, e.g. e303
+	 * @return The unicode hexadecimal representation as a string, e.g. 3297-fe0f,
+	 *         null if Soft Bank unicode was not found
+	 */
+	public static String getNewUnicode(String softBankUnicode) {
 		for (String[] x : MAPPING) {
-			if (x[0].equals(suggestion)) {
+			if (x[0].equals(softBankUnicode)) {
 				return x[1];
 			}
 		}

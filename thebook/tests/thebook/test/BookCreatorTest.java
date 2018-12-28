@@ -110,7 +110,7 @@ public class BookCreatorTest {
 
 	private BookCreator createTexFile(List<String> chatLines, List<String> propLines)
 			throws IOException, ParseException {
-		String dir=this.folder.newFolder("test").toString();
+		String dir = this.folder.newFolder("test").toString();
 
 		Path inputDir = Paths.get(dir, "input");
 		Path outputDir = Paths.get(dir, "output");

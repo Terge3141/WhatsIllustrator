@@ -6,19 +6,32 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.apache.commons.text.TextStringBuilder;
+
 public class Misc {
 
+	/**
+	 * Return the content of a given file to a string.
+	 * @param path The path of the file
+	 * @return The content of the file
+	 * @throws IOException
+	 */
 	public static String readAllText(Path path) throws IOException {
-		StringBuilder sb = new StringBuilder();
+		TextStringBuilder tsb = new TextStringBuilder();
 		List<String> lines = Files.readAllLines(path);
 		for (String line : lines) {
-			sb.append(line);
-			sb.append("\n");
+			tsb.appendln(line);
 		}
 
-		return sb.toString();
+		return tsb.toString();
 	}
 
+	/**
+	 * Writes as string to a given file
+	 * @param path Path of the file
+	 * @param text Text to be written
+	 * @throws IOException
+	 */
 	public static void writeAllText(Path path, String text) throws IOException {
 		PrintWriter writer = new PrintWriter(path.toFile());
 		writer.print(text);
