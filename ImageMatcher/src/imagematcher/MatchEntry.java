@@ -37,25 +37,7 @@ public class MatchEntry {
 		for(Node fileEntryNode : fileMatchesNode.selectNodes("FileEntry")) {
 			me.fileMatches.add(FileEntry.fromNode(fileEntryNode));
 		}
-
-		/*me.fileMatches = new ArrayList<FileEntry>();
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node subNode = nodeList.item(i);
-			if (subNode.getNodeType() == Node.ELEMENT_NODE) {
-				if (subNode.getNodeName().equals("Filematches")) {
-					NodeList subNodeList = subNode.getChildNodes();
-					for (int j = 0; j < subNodeList.getLength(); j++) {
-						Node subSubNode = subNodeList.item(j);
-						if (subSubNode.getNodeType() == Node.ELEMENT_NODE) {
-							if (subSubNode.getNodeName().equals("FileEntry")) {
-								me.fileMatches.add(FileEntry.fromNode(subSubNode));
-							}
-						}
-					}
-				}
-			}
-		}*/
-
+		
 		return me;
 	}
 
