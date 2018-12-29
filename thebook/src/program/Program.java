@@ -61,6 +61,7 @@ public class Program {
 		creator.setImagePoolDir(config.getImagePoolDir());
 		creator.writeTex();*/
 		OdfCreator creator=new OdfCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir());
+		creator.setImagePoolDir(config.getImagePoolDir());
 		creator.writeOdf();
 
 		logger.info("Done");

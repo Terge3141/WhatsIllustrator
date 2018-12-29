@@ -5,6 +5,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,28 +53,25 @@ public class OdfCreator {
 	private Path inputDir;
 	private Path outputDir;
 	private Path chatDir;
-
+	private Path configDir;
 	private Path imageDir;
-	/*
-	 * private Path configDir; private Object imagePoolDir;
-	 */
+	private Path imagePoolDir;
 
 	private Path odfOutputPath;
 
 	private DateUtils dateUtils;
 
 	private boolean firstDateHeader = true;
+	// TODO make configurable
+	private boolean writeMediaOmittedHints = true;
 
 	public OdfCreator(Path inputDir, Path outputDir, Path emojiInputDir) {
 		this.inputDir = inputDir;
 		this.outputDir = outputDir;
 		this.chatDir = this.inputDir.resolve("chat");
-
+		this.configDir = this.inputDir.resolve("config");
 		this.imageDir = this.chatDir;
-		/*
-		 * this.configDir = this.inputDir.resolve("config"); this.imageDir =
-		 * this.chatDir; this.imagePoolDir = null;
-		 */
+		this.imagePoolDir = null;
 
 		this.dateUtils = new DateUtils("de");
 	}
@@ -95,9 +93,28 @@ public class OdfCreator {
 		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
 		this.odfOutputPath = this.outputDir.resolve(namePrefix + ".odt");
 
+		Path matchInputPath = this.configDir.resolve(namePrefix + ".match.xml");
+		Path matchOutputPath = this.outputDir.resolve(namePrefix + ".match.xml");
+		ImageMatcher im = null;
+		if (matchInputPath.toFile().isFile()) {
+			logger.info("Loading matches '{}'", matchInputPath);
+			im = ImageMatcher.fromXmlFile(matchInputPath);
+			im.setSearchMode(false);
+		} else {
+			im = new ImageMatcher();
+			if (imagePoolDir == null) {
+				im.setSearchMode(false);
+			} else {
+				logger.info("Loading pool images from '{}'", imagePoolDir);
+				im.loadFiles(imagePoolDir);
+				im.setSearchMode(true);
+				logger.info("{} images found", im.getFileList().size());
+			}
+		}
+
 		// TODO replace
 		// WhatsappParser parser = WhatsappParser.of(txtInputPath, im, nl);
-		WhatsappParser parser = WhatsappParser.of(txtInputPath, new ImageMatcher(), new NameLookup());
+		WhatsappParser parser = WhatsappParser.of(txtInputPath, im, new NameLookup());
 
 		TextDocument doc = TextDocument.newTextDocument();
 
@@ -116,15 +133,62 @@ public class OdfCreator {
 			} else if (msg instanceof ImageMessage) {
 				appendImageMessage(doc, (ImageMessage) msg);
 			} else if (msg instanceof MediaOmittedMessage) {
-				logger.warn("MediaOmittedMessage not implemented");
-				// appendMediaOmittedMessage((MediaOmittedMessage) msg, tsb);
+				appendMediaOmittedMessage(doc, (MediaOmittedMessage) msg);
 			} else if (msg instanceof MediaMessage) {
 				logger.warn("MediaMessage not implemented");
 				// appendMediaMessage((MediaMessage) msg, tsb);
 			}
 		}
 
+		logger.info("Writing tex file to '{}'", this.odfOutputPath);
 		doc.save(this.odfOutputPath.toFile());
+	}
+
+	private void appendImage(TextDocument doc, Path path, String subscription) {
+		Paragraph imageParagraph = doc.addParagraph("");
+		imageParagraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
+		Image image = Image.newImage(imageParagraph, path.toUri());
+		FrameRectangle rectangle = image.getRectangle();
+		double scaleFactor = IMAGE_HEIGHT_CM / rectangle.getHeight();
+		rectangle.setWidth(rectangle.getWidth() * scaleFactor);
+		rectangle.setHeight(IMAGE_HEIGHT_CM);
+		image.setRectangle(rectangle);
+
+		FrameStyleHandler imageStyleHandler = image.getStyleHandler();
+		imageStyleHandler.setAchorType(AnchorType.AS_CHARACTER);
+
+		if (subscription != null) {
+			Paragraph subscriptionParagraph = doc.addParagraph(subscription + "\n");
+			subscriptionParagraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
+			ParagraphStyleHandler styleHandler = subscriptionParagraph.getStyleHandler();
+			Font font = subscriptionParagraph.getFont();
+			font.setFontStyle(FontStyle.ITALIC);
+			styleHandler.getTextPropertiesForWrite().setFont(font);
+		}
+
+	}
+
+	private void appendTextMessage(TextDocument doc, TextMessage msg) {
+		appendSenderAndDate(doc, msg, msg.content);
+	}
+
+	private void appendImageMessage(TextDocument doc, ImageMessage msg) {
+		appendSenderAndDate(doc, msg, null);
+
+		Path absoluteImgPath = this.imageDir.resolve(msg.getFilename());
+
+		appendImage(doc, absoluteImgPath, msg.getSubscription());
+	}
+
+	private void appendMediaOmittedMessage(TextDocument doc, MediaOmittedMessage msg) {
+		appendSenderAndDate(doc, msg, null);
+		Iterator<String> it = msg.getRelpaths().iterator();
+		while (it.hasNext()) {
+			String relPath=it.next();
+			String hint = this.writeMediaOmittedHints ? String.format("%s;%s;%d", msg.getTimepoint(), relPath, msg.getCnt()) : null;
+			
+			appendImage(doc, this.imagePoolDir.resolve(relPath), hint);
+		}
 	}
 
 	private void appendDateHeader(TextDocument doc, String dateStr) {
@@ -140,19 +204,21 @@ public class OdfCreator {
 		this.firstDateHeader = false;
 	}
 
-	private void appendTextMessage(TextDocument doc, TextMessage msg) {
+	private void appendSenderAndDate(TextDocument doc, IMessage msg, String extraText) {
 		String sender = msg.getSender();
-		String time = this.dateUtils.formatTimeString(msg.timepoint);
-		String content = msg.getContent();
+		String time = this.dateUtils.formatTimeString(msg.getTimepoint());
 
 		String uuid = UUID.randomUUID().toString();
-
 		String senderDummy = String.format("@@@@%s@@@@", uuid);
 
-		String str = String.format("%s (%s): %s", senderDummy, time, content);
+		String str = String.format("%s (%s):", senderDummy, time);
+		if (extraText != null) {
+			str = str + " " + extraText;
+		}
 
 		Paragraph paragraph = doc.addParagraph(str);
 		paragraph.setHorizontalAlignment(HorizontalAlignmentType.LEFT);
+
 		TextNavigation textNavigation = new TextNavigation(senderDummy, doc);
 		TextSelection textSelection = (TextSelection) textNavigation.nextSelection();
 
@@ -163,53 +229,9 @@ public class OdfCreator {
 		DefaultStyleHandler styleHandler = span.getStyleHandler();
 		styleHandler.getTextPropertiesForWrite().setFont(font);
 	}
-
-	private void appendImageMessage(TextDocument doc, ImageMessage msg) {
-		String sender = msg.getSender();
-		String time = this.dateUtils.formatTimeString(msg.timepoint);
-
-		Path absoluteImgPath = this.imageDir.resolve(msg.getFilename());
-
-		String uuid = UUID.randomUUID().toString();
-
-		String senderDummy = String.format("@@@@%s@@@@", uuid);
-
-		String str = String.format("%s (%s):", senderDummy, time);
-
-		Paragraph paragraph = doc.addParagraph(str);
-		paragraph.setHorizontalAlignment(HorizontalAlignmentType.LEFT);
-
-		Paragraph imageParagraph = doc.addParagraph("");
-		imageParagraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
-		Image image = Image.newImage(imageParagraph, absoluteImgPath.toUri());
-		// image.setHorizontalPosition(FrameHorizontalPosition.CENTER);
-		FrameRectangle rectangle = image.getRectangle();
-		double scaleFactor = IMAGE_HEIGHT_CM / rectangle.getHeight();
-		rectangle.setWidth(rectangle.getWidth() * scaleFactor);
-		rectangle.setHeight(IMAGE_HEIGHT_CM);
-		image.setRectangle(rectangle);
-
-		FrameStyleHandler imageStyleHandler = image.getStyleHandler();
-		imageStyleHandler.setAchorType(AnchorType.AS_CHARACTER);
-
-		if (msg.getSubscription() != null) {
-			Paragraph subscriptionParagraph = doc.addParagraph(msg.getSubscription() + "\n");
-			subscriptionParagraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
-			ParagraphStyleHandler styleHandler = subscriptionParagraph.getStyleHandler();
-			Font font = subscriptionParagraph.getFont();
-			font.setFontStyle(FontStyle.ITALIC);
-			styleHandler.getTextPropertiesForWrite().setFont(font);
-		}
-
-		TextNavigation textNavigation = new TextNavigation(senderDummy, doc);
-		TextSelection textSelection = (TextSelection) textNavigation.nextSelection();
-
-		Font font = imageParagraph.getFont();
-		font.setFontStyle(FontStyle.BOLD);
-		Span span = Span.newSpan(textSelection);
-		span.setTextContent(sender);
-		DefaultStyleHandler styleHandler = span.getStyleHandler();
-		styleHandler.getTextPropertiesForWrite().setFont(font);
+	
+	public void setImagePoolDir(Path imagePoolDir) {
+		this.imagePoolDir = imagePoolDir;
 	}
 
 	/*
