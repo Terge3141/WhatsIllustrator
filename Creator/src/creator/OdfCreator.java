@@ -28,6 +28,7 @@ import org.odftoolkit.simple.style.StyleTypeDefinitions.FrameVerticalPosition;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.HorizontalAlignmentType;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.TextLinePosition;
 import org.odftoolkit.simple.text.Paragraph;
+import org.odftoolkit.simple.text.ParagraphStyleHandler;
 import org.odftoolkit.simple.text.Span;
 
 import helper.DateUtils;
@@ -61,6 +62,8 @@ public class OdfCreator {
 
 	private DateUtils dateUtils;
 
+	private boolean firstDateHeader = true;
+
 	public OdfCreator(Path inputDir, Path outputDir, Path emojiInputDir) {
 		this.inputDir = inputDir;
 		this.outputDir = outputDir;
@@ -76,6 +79,9 @@ public class OdfCreator {
 	}
 
 	public void writeOdf() throws Exception {
+
+		this.firstDateHeader = true;
+
 		List<String> txtFiles = FileHandler.listDir(chatDir, ".*.txt");
 		if (txtFiles.size() != 1) {
 			throw new IllegalArgumentException(
@@ -89,6 +95,7 @@ public class OdfCreator {
 		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
 		this.odfOutputPath = this.outputDir.resolve(namePrefix + ".odt");
 
+		// TODO replace
 		// WhatsappParser parser = WhatsappParser.of(txtInputPath, im, nl);
 		WhatsappParser parser = WhatsappParser.of(txtInputPath, new ImageMatcher(), new NameLookup());
 
@@ -121,8 +128,16 @@ public class OdfCreator {
 	}
 
 	private void appendDateHeader(TextDocument doc, String dateStr) {
-		Paragraph paragraph = doc.addParagraph(dateStr);
+		Paragraph paragraph;
+		if (this.firstDateHeader) {
+			paragraph = doc.getParagraphByIndex(0, false);
+		} else {
+			paragraph = doc.addParagraph("\n");
+		}
+
+		paragraph.appendTextContent(dateStr + "\n");
 		paragraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
+		this.firstDateHeader = false;
 	}
 
 	private void appendTextMessage(TextDocument doc, TextMessage msg) {
@@ -137,6 +152,7 @@ public class OdfCreator {
 		String str = String.format("%s (%s): %s", senderDummy, time, content);
 
 		Paragraph paragraph = doc.addParagraph(str);
+		paragraph.setHorizontalAlignment(HorizontalAlignmentType.LEFT);
 		TextNavigation textNavigation = new TextNavigation(senderDummy, doc);
 		TextSelection textSelection = (TextSelection) textNavigation.nextSelection();
 
@@ -158,9 +174,10 @@ public class OdfCreator {
 
 		String senderDummy = String.format("@@@@%s@@@@", uuid);
 
-		String str = String.format("%s (%s):\n", senderDummy, time);
+		String str = String.format("%s (%s):", senderDummy, time);
 
-		doc.addParagraph(str);
+		Paragraph paragraph = doc.addParagraph(str);
+		paragraph.setHorizontalAlignment(HorizontalAlignmentType.LEFT);
 
 		Paragraph imageParagraph = doc.addParagraph("");
 		imageParagraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
@@ -176,8 +193,12 @@ public class OdfCreator {
 		imageStyleHandler.setAchorType(AnchorType.AS_CHARACTER);
 
 		if (msg.getSubscription() != null) {
-			Paragraph subscriptionParagraph = doc.addParagraph(msg.getSubscription());
+			Paragraph subscriptionParagraph = doc.addParagraph(msg.getSubscription() + "\n");
 			subscriptionParagraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
+			ParagraphStyleHandler styleHandler = subscriptionParagraph.getStyleHandler();
+			Font font = subscriptionParagraph.getFont();
+			font.setFontStyle(FontStyle.ITALIC);
+			styleHandler.getTextPropertiesForWrite().setFont(font);
 		}
 
 		TextNavigation textNavigation = new TextNavigation(senderDummy, doc);
@@ -203,12 +224,14 @@ public class OdfCreator {
 	 * System.out.println("Done"); }
 	 */
 
-	public static void main(String args[]) throws Exception {
+	public static void main2(String args[]) throws Exception {
 		TextDocument textDoc = TextDocument.newTextDocument();
+		// Paragraph paragraph1 =textDoc.getParagraphByIndex(0, false);
+		// paragraph1.appendTextContent("First Paragraph");
 		Paragraph paragraph1 = textDoc.addParagraph("First Paragraph");
-		Paragraph paragraph2 = textDoc.addParagraph("Second Paragraph\nAnd some more words");
-
 		paragraph1.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
+		Paragraph paragraph2 = textDoc.addParagraph("Second Paragraph\nAnd some more words");
+		paragraph2.setHorizontalAlignment(HorizontalAlignmentType.LEFT);
 
 		/*
 		 * Font font = paragraph2.getFont(); font.setFontStyle(FontStyle.BOLD);
