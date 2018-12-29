@@ -1,6 +1,5 @@
 package creator;
 
-import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,12 +19,8 @@ import org.odftoolkit.simple.draw.FrameStyleHandler;
 import org.odftoolkit.simple.draw.Image;
 import org.odftoolkit.simple.style.DefaultStyleHandler;
 import org.odftoolkit.simple.style.Font;
-import org.odftoolkit.simple.style.GraphicProperties;
-import org.odftoolkit.simple.style.ParagraphProperties;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.AnchorType;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.FontStyle;
-import org.odftoolkit.simple.style.StyleTypeDefinitions.FrameHorizontalPosition;
-import org.odftoolkit.simple.style.StyleTypeDefinitions.FrameVerticalPosition;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.HorizontalAlignmentType;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.TextLinePosition;
 import org.odftoolkit.simple.text.Paragraph;
@@ -34,6 +29,7 @@ import org.odftoolkit.simple.text.Span;
 
 import helper.DateUtils;
 import helper.FileHandler;
+import helper.Misc;
 import imagematcher.ImageMatcher;
 import messageparser.IMessage;
 import messageparser.ImageMessage;
@@ -135,8 +131,7 @@ public class OdfCreator {
 			} else if (msg instanceof MediaOmittedMessage) {
 				appendMediaOmittedMessage(doc, (MediaOmittedMessage) msg);
 			} else if (msg instanceof MediaMessage) {
-				logger.warn("MediaMessage not implemented");
-				// appendMediaMessage((MediaMessage) msg, tsb);
+				appendMediaMessage(doc, (MediaMessage) msg);
 			}
 		}
 
@@ -184,11 +179,23 @@ public class OdfCreator {
 		appendSenderAndDate(doc, msg, null);
 		Iterator<String> it = msg.getRelpaths().iterator();
 		while (it.hasNext()) {
-			String relPath=it.next();
-			String hint = this.writeMediaOmittedHints ? String.format("%s;%s;%d", msg.getTimepoint(), relPath, msg.getCnt()) : null;
-			
+			String relPath = it.next();
+			String hint = this.writeMediaOmittedHints
+					? String.format("%s;%s;%d", msg.getTimepoint(), relPath, msg.getCnt())
+					: null;
+
 			appendImage(doc, this.imagePoolDir.resolve(relPath), hint);
 		}
+	}
+
+	private void appendMediaMessage(TextDocument doc, MediaMessage msg) {
+		// TODO filename italic
+		String str = msg.getFilename();
+		if (!Misc.isNullOrWhiteSpace(msg.getSubscription())) {
+			str = str + " - " + msg.getSubscription();
+		}
+
+		appendSenderAndDate(doc, msg, str);
 	}
 
 	private void appendDateHeader(TextDocument doc, String dateStr) {
@@ -229,7 +236,7 @@ public class OdfCreator {
 		DefaultStyleHandler styleHandler = span.getStyleHandler();
 		styleHandler.getTextPropertiesForWrite().setFont(font);
 	}
-	
+
 	public void setImagePoolDir(Path imagePoolDir) {
 		this.imagePoolDir = imagePoolDir;
 	}
