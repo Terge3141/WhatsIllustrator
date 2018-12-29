@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 public class ImageMessage implements IMessage {
 
+	// TODO change to private
 	public LocalDateTime timepoint;
 	public String sender;
 	public String filename;
