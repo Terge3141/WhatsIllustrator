@@ -139,30 +139,6 @@ public class OdfCreator {
 		doc.save(this.odfOutputPath.toFile());
 	}
 
-	private void appendImage(TextDocument doc, Path path, String subscription) {
-		Paragraph imageParagraph = doc.addParagraph("");
-		imageParagraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
-		Image image = Image.newImage(imageParagraph, path.toUri());
-		FrameRectangle rectangle = image.getRectangle();
-		double scaleFactor = IMAGE_HEIGHT_CM / rectangle.getHeight();
-		rectangle.setWidth(rectangle.getWidth() * scaleFactor);
-		rectangle.setHeight(IMAGE_HEIGHT_CM);
-		image.setRectangle(rectangle);
-
-		FrameStyleHandler imageStyleHandler = image.getStyleHandler();
-		imageStyleHandler.setAchorType(AnchorType.AS_CHARACTER);
-
-		if (subscription != null) {
-			Paragraph subscriptionParagraph = doc.addParagraph(subscription + "\n");
-			subscriptionParagraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
-			ParagraphStyleHandler styleHandler = subscriptionParagraph.getStyleHandler();
-			Font font = subscriptionParagraph.getFont();
-			font.setFontStyle(FontStyle.ITALIC);
-			styleHandler.getTextPropertiesForWrite().setFont(font);
-		}
-
-	}
-
 	private void appendTextMessage(TextDocument doc, TextMessage msg) {
 		appendSenderAndDate(doc, msg, msg.content);
 	}
@@ -189,16 +165,53 @@ public class OdfCreator {
 	}
 
 	private void appendMediaMessage(TextDocument doc, MediaMessage msg) {
-		// TODO filename italic
+		String uuid = UUID.randomUUID().toString();
+		String strDummy = String.format("@@@@%s@@@@", uuid);
+		Paragraph paragraph = appendSenderAndDate(doc, msg, strDummy);
+
 		String str = msg.getFilename();
 		if (!Misc.isNullOrWhiteSpace(msg.getSubscription())) {
 			str = str + " - " + msg.getSubscription();
 		}
 
-		appendSenderAndDate(doc, msg, str);
+		TextNavigation textNavigation = new TextNavigation(strDummy, doc);
+		TextSelection textSelection = (TextSelection) textNavigation.nextSelection();
+
+		Font font = paragraph.getFont();
+		font.setFontStyle(FontStyle.ITALIC);
+		Span span = Span.newSpan(textSelection);
+		span.setTextContent(str);
+		DefaultStyleHandler styleHandler = span.getStyleHandler();
+		styleHandler.getTextPropertiesForWrite().setFont(font);
+
 	}
 
-	private void appendDateHeader(TextDocument doc, String dateStr) {
+	private Paragraph appendImage(TextDocument doc, Path path, String subscription) {
+		Paragraph paragraph = doc.addParagraph("");
+		paragraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
+		Image image = Image.newImage(paragraph, path.toUri());
+		FrameRectangle rectangle = image.getRectangle();
+		double scaleFactor = IMAGE_HEIGHT_CM / rectangle.getHeight();
+		rectangle.setWidth(rectangle.getWidth() * scaleFactor);
+		rectangle.setHeight(IMAGE_HEIGHT_CM);
+		image.setRectangle(rectangle);
+
+		FrameStyleHandler imageStyleHandler = image.getStyleHandler();
+		imageStyleHandler.setAchorType(AnchorType.AS_CHARACTER);
+
+		if (subscription != null) {
+			Paragraph subscriptionParagraph = doc.addParagraph(subscription + "\n");
+			subscriptionParagraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
+			ParagraphStyleHandler styleHandler = subscriptionParagraph.getStyleHandler();
+			Font font = subscriptionParagraph.getFont();
+			font.setFontStyle(FontStyle.ITALIC);
+			styleHandler.getTextPropertiesForWrite().setFont(font);
+		}
+
+		return paragraph;
+	}
+
+	private Paragraph appendDateHeader(TextDocument doc, String dateStr) {
 		Paragraph paragraph;
 		if (this.firstDateHeader) {
 			paragraph = doc.getParagraphByIndex(0, false);
@@ -209,9 +222,11 @@ public class OdfCreator {
 		paragraph.appendTextContent(dateStr + "\n");
 		paragraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
 		this.firstDateHeader = false;
+
+		return paragraph;
 	}
 
-	private void appendSenderAndDate(TextDocument doc, IMessage msg, String extraText) {
+	private Paragraph appendSenderAndDate(TextDocument doc, IMessage msg, String extraText) {
 		String sender = msg.getSender();
 		String time = this.dateUtils.formatTimeString(msg.getTimepoint());
 
@@ -235,6 +250,8 @@ public class OdfCreator {
 		span.setTextContent(sender);
 		DefaultStyleHandler styleHandler = span.getStyleHandler();
 		styleHandler.getTextPropertiesForWrite().setFont(font);
+
+		return paragraph;
 	}
 
 	public void setImagePoolDir(Path imagePoolDir) {
