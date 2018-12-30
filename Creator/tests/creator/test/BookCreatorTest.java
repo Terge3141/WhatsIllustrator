@@ -1,4 +1,4 @@
-package thebook.test;
+package creator.test;
 
 import static org.junit.Assert.*;
 
@@ -27,13 +27,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import creator.BookCreator;
 import creator.IWriterPlugin;
 import creator.TexWriterPlugin;
 import creator.WriterException;
 import imagematcher.FileEntry;
 import imagematcher.ImageMatcher;
 import imagematcher.MatchEntry;
-import program.BookCreator;
 
 public class BookCreatorTest {
 	@Rule
