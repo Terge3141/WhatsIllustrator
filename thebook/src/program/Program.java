@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import creator.BookCreator;
 import creator.IWriterPlugin;
-import creator.OdfCreator;
+import creator.OdfWriterPlugin;
 import creator.TexWriterPlugin;
 import helper.Misc;
 
@@ -62,12 +62,11 @@ public class Program {
 
 		List<IWriterPlugin> plugins = new ArrayList<IWriterPlugin>();
 		plugins.add(new TexWriterPlugin());
+		plugins.add(new OdfWriterPlugin());
+		
 		BookCreator creator = new BookCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir(),plugins);
 		creator.getWriterConfig().setImagePoolDir(config.getImagePoolDir());
 		creator.write();
-		/*OdfCreator creator=new OdfCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir());
-		creator.setImagePoolDir(config.getImagePoolDir());
-		creator.writeOdf();*/
 
 		logger.info("Done");
 	}

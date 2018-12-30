@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Iterator;
-import java.util.List;
 import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
@@ -27,147 +26,97 @@ import org.odftoolkit.simple.text.Paragraph;
 import org.odftoolkit.simple.text.ParagraphStyleHandler;
 import org.odftoolkit.simple.text.Span;
 
-import helper.DateUtils;
-import helper.FileHandler;
 import helper.Misc;
-import imagematcher.ImageMatcher;
 import messageparser.IMessage;
 import messageparser.ImageMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
-import messageparser.NameLookup;
 import messageparser.TextMessage;
-import messageparser.WhatsappParser;
 
-public class OdfCreator {
+public class OdfWriterPlugin implements IWriterPlugin {
 
-	// TODO remove static
-	private static final double IMAGE_HEIGHT_CM = 2.0;
+	private final double IMAGE_HEIGHT_CM = 2.0;
 
-	private static Logger logger = LogManager.getLogger(OdfCreator.class);
-
-	private Path inputDir;
-	private Path outputDir;
-	private Path chatDir;
-	private Path configDir;
-	private Path imageDir;
-	private Path imagePoolDir;
+	private static Logger logger = LogManager.getLogger(OdfWriterPlugin.class);
 
 	private Path odfOutputPath;
 
-	private DateUtils dateUtils;
-
 	private boolean firstDateHeader = true;
-	// TODO make configurable
-	private boolean writeMediaOmittedHints = true;
+	private TextDocument doc;
 
-	public OdfCreator(Path inputDir, Path outputDir, Path emojiInputDir) {
-		this.inputDir = inputDir;
-		this.outputDir = outputDir;
-		this.chatDir = this.inputDir.resolve("chat");
-		this.configDir = this.inputDir.resolve("config");
-		this.imageDir = this.chatDir;
-		this.imagePoolDir = null;
+	private WriterConfig config;
 
-		this.dateUtils = new DateUtils("de");
-	}
-
-	public void writeOdf() throws Exception {
+	@Override
+	public void preAppend(WriterConfig config) throws WriterException {
+		this.config = config;
 
 		this.firstDateHeader = true;
+		this.odfOutputPath = this.config.getOutputDir().resolve(this.config.getNamePrefix() + ".odt");
 
-		List<String> txtFiles = FileHandler.listDir(chatDir, ".*.txt");
-		if (txtFiles.size() != 1) {
-			throw new IllegalArgumentException(
-					String.format("Invalid number of .txt-files found: %d", txtFiles.size()));
+		try {
+			this.doc = TextDocument.newTextDocument();
+		} catch (Exception e) {
+			throw new WriterException(e);
 		}
+	}
 
-		Path txtInputPath = Paths.get(txtFiles.get(0));
-		logger.info("Using {} as input", txtInputPath);
+	@Override
+	public void postAppend() throws WriterException {
+		logger.info("Writing odf file to '{}'", this.odfOutputPath);
+		try {
+			doc.save(this.odfOutputPath.toFile());
+		} catch (Exception e) {
+			throw new WriterException(e);
+		}
+	}
 
-		String namePrefix = txtInputPath.toFile().getName();
-		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
-		this.odfOutputPath = this.outputDir.resolve(namePrefix + ".odt");
-
-		Path matchInputPath = this.configDir.resolve(namePrefix + ".match.xml");
-		Path matchOutputPath = this.outputDir.resolve(namePrefix + ".match.xml");
-		ImageMatcher im = null;
-		if (matchInputPath.toFile().isFile()) {
-			logger.info("Loading matches '{}'", matchInputPath);
-			im = ImageMatcher.fromXmlFile(matchInputPath);
-			im.setSearchMode(false);
+	@Override
+	public void appendDateHeader(LocalDateTime timepoint) throws WriterException {
+		Paragraph paragraph;
+		if (this.firstDateHeader) {
+			paragraph = doc.getParagraphByIndex(0, false);
 		} else {
-			im = new ImageMatcher();
-			if (imagePoolDir == null) {
-				im.setSearchMode(false);
-			} else {
-				logger.info("Loading pool images from '{}'", imagePoolDir);
-				im.loadFiles(imagePoolDir);
-				im.setSearchMode(true);
-				logger.info("{} images found", im.getFileList().size());
-			}
+			paragraph = doc.addParagraph("\n");
 		}
 
-		// TODO replace
-		// WhatsappParser parser = WhatsappParser.of(txtInputPath, im, nl);
-		WhatsappParser parser = WhatsappParser.of(txtInputPath, im, new NameLookup());
-
-		TextDocument doc = TextDocument.newTextDocument();
-
-		IMessage msg;
-		LocalDateTime last = LocalDateTime.MIN;
-		while ((msg = parser.nextMessage()) != null) {
-
-			if (DateUtils.dateDiffer(last, msg.getTimepoint())) {
-				appendDateHeader(doc, this.dateUtils.formatDateString(msg.getTimepoint()));
-			}
-
-			last = msg.getTimepoint();
-
-			if (msg instanceof TextMessage) {
-				appendTextMessage(doc, (TextMessage) msg);
-			} else if (msg instanceof ImageMessage) {
-				appendImageMessage(doc, (ImageMessage) msg);
-			} else if (msg instanceof MediaOmittedMessage) {
-				appendMediaOmittedMessage(doc, (MediaOmittedMessage) msg);
-			} else if (msg instanceof MediaMessage) {
-				appendMediaMessage(doc, (MediaMessage) msg);
-			}
-		}
-
-		logger.info("Writing tex file to '{}'", this.odfOutputPath);
-		doc.save(this.odfOutputPath.toFile());
+		paragraph.appendTextContent(this.config.getDateUtils().formatDateString(timepoint) + "\n");
+		paragraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
+		this.firstDateHeader = false;
 	}
 
-	private void appendTextMessage(TextDocument doc, TextMessage msg) {
-		appendSenderAndDate(doc, msg, msg.content);
+	@Override
+	public void appendTextMessage(TextMessage msg) throws WriterException {
+		appendSenderAndDate(msg, msg.content);
 	}
 
-	private void appendImageMessage(TextDocument doc, ImageMessage msg) {
-		appendSenderAndDate(doc, msg, null);
+	@Override
+	public void appendImageMessage(ImageMessage msg) throws WriterException {
+		appendSenderAndDate(msg, null);
 
-		Path absoluteImgPath = this.imageDir.resolve(msg.getFilename());
+		Path absoluteImgPath = this.config.getImageDir().resolve(msg.getFilename());
 
-		appendImage(doc, absoluteImgPath, msg.getSubscription());
+		appendImage( absoluteImgPath, msg.getSubscription());
 	}
 
-	private void appendMediaOmittedMessage(TextDocument doc, MediaOmittedMessage msg) {
-		appendSenderAndDate(doc, msg, null);
+	@Override
+	public void appendMediaOmittedMessage(MediaOmittedMessage msg) throws WriterException {
+		appendSenderAndDate(msg, null);
 		Iterator<String> it = msg.getRelpaths().iterator();
 		while (it.hasNext()) {
 			String relPath = it.next();
-			String hint = this.writeMediaOmittedHints
+			String hint = this.config.isWriteMediaOmittedHints()
 					? String.format("%s;%s;%d", msg.getTimepoint(), relPath, msg.getCnt())
 					: null;
 
-			appendImage(doc, this.imagePoolDir.resolve(relPath), hint);
+			appendImage( this.config.getImagePoolDir().resolve(relPath), hint);
 		}
 	}
 
-	private void appendMediaMessage(TextDocument doc, MediaMessage msg) {
+	@Override
+	public void appendMediaMessage(MediaMessage msg) throws WriterException {
 		String uuid = UUID.randomUUID().toString();
 		String strDummy = String.format("@@@@%s@@@@", uuid);
-		Paragraph paragraph = appendSenderAndDate(doc, msg, strDummy);
+		Paragraph paragraph = appendSenderAndDate(msg, strDummy);
 
 		String str = msg.getFilename();
 		if (!Misc.isNullOrWhiteSpace(msg.getSubscription())) {
@@ -183,11 +132,10 @@ public class OdfCreator {
 		span.setTextContent(str);
 		DefaultStyleHandler styleHandler = span.getStyleHandler();
 		styleHandler.getTextPropertiesForWrite().setFont(font);
-
 	}
 
-	private Paragraph appendImage(TextDocument doc, Path path, String subscription) {
-		Paragraph paragraph = doc.addParagraph("");
+	private Paragraph appendImage(Path path, String subscription) {
+		Paragraph paragraph = this.doc.addParagraph("");
 		paragraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
 		Image image = Image.newImage(paragraph, path.toUri());
 		FrameRectangle rectangle = image.getRectangle();
@@ -211,24 +159,9 @@ public class OdfCreator {
 		return paragraph;
 	}
 
-	private Paragraph appendDateHeader(TextDocument doc, String dateStr) {
-		Paragraph paragraph;
-		if (this.firstDateHeader) {
-			paragraph = doc.getParagraphByIndex(0, false);
-		} else {
-			paragraph = doc.addParagraph("\n");
-		}
-
-		paragraph.appendTextContent(dateStr + "\n");
-		paragraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
-		this.firstDateHeader = false;
-
-		return paragraph;
-	}
-
-	private Paragraph appendSenderAndDate(TextDocument doc, IMessage msg, String extraText) {
+	private Paragraph appendSenderAndDate(IMessage msg, String extraText) {
 		String sender = msg.getSender();
-		String time = this.dateUtils.formatTimeString(msg.getTimepoint());
+		String time = this.config.getDateUtils().formatTimeString(msg.getTimepoint());
 
 		String uuid = UUID.randomUUID().toString();
 		String senderDummy = String.format("@@@@%s@@@@", uuid);
@@ -252,10 +185,6 @@ public class OdfCreator {
 		styleHandler.getTextPropertiesForWrite().setFont(font);
 
 		return paragraph;
-	}
-
-	public void setImagePoolDir(Path imagePoolDir) {
-		this.imagePoolDir = imagePoolDir;
 	}
 
 	/*
@@ -291,9 +220,9 @@ public class OdfCreator {
 		Image image = Image.newImage(paragraph4, new URI("/tmp/imagepool/IMG-20181024-WA0008.jpg"));
 		// image.setHorizontalPosition(FrameHorizontalPosition.CENTER);
 		FrameRectangle rectangle = image.getRectangle();
-		double scaleFactor = IMAGE_HEIGHT_CM / rectangle.getHeight();
+		double scaleFactor = 2.0 / rectangle.getHeight();
 		rectangle.setWidth(rectangle.getWidth() * scaleFactor);
-		rectangle.setHeight(IMAGE_HEIGHT_CM);
+		rectangle.setHeight(2.0);
 		image.setRectangle(rectangle);
 
 		FrameStyleHandler styleHandler2 = image.getStyleHandler();
@@ -333,4 +262,5 @@ public class OdfCreator {
 		textDoc.save(Paths.get("/tmp/odf/bla.odt").toFile());
 		System.out.println("Moin");
 	}
+
 }
