@@ -35,6 +35,8 @@ public class ImageMatcher {
 
 	private List<MatchEntry> matchList;
 	private List<FileEntry> fileList;
+	
+	private Path matchOutputPath;
 
 	private boolean searchMode;
 
@@ -83,7 +85,12 @@ public class ImageMatcher {
 	}
 
 	public void toXmlFile(Path path) throws IOException {
+		logger.info("Writing match file to '{}'", path);
 		Misc.writeAllText(path, toXmlString());
+	}
+	
+	public void toXmlFile() throws IOException {
+		toXmlFile(this.matchOutputPath);
 	}
 
 	public MatchEntry pick(LocalDateTime timepoint, int cnt) {
@@ -172,6 +179,13 @@ public class ImageMatcher {
 			}
 		}
 	}
+	
+	private List<MatchEntry> find(LocalDateTime timepoint, int cnt) {
+		Stream<MatchEntry> stream = this.matchList.stream()
+				.filter(x -> (x.getTimePoint().equals(timepoint) && x.getCnt() == cnt));
+		List<MatchEntry> list = stream.collect(Collectors.toList());
+		return list;
+	}
 
 	public List<MatchEntry> getMatchList() {
 		return matchList;
@@ -196,11 +210,14 @@ public class ImageMatcher {
 	public void setFileList(List<FileEntry> fileList) {
 		this.fileList = fileList;
 	}
-
-	private List<MatchEntry> find(LocalDateTime timepoint, int cnt) {
-		Stream<MatchEntry> stream = this.matchList.stream()
-				.filter(x -> (x.getTimePoint().equals(timepoint) && x.getCnt() == cnt));
-		List<MatchEntry> list = stream.collect(Collectors.toList());
-		return list;
+	
+	public Path getMatchOutputPath() {
+		return matchOutputPath;
 	}
+
+	public void setMatchOutputPath(Path matchOutputPath) {
+		this.matchOutputPath = matchOutputPath;
+	}
+
+	
 }

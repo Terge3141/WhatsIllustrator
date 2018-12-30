@@ -12,15 +12,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.xml.sax.SAXException;
 
+import creator.IWriterPlugin;
+import creator.TexWriterPlugin;
+import creator.WriterException;
 import imagematcher.FileEntry;
 import imagematcher.ImageMatcher;
 import imagematcher.MatchEntry;
@@ -31,11 +29,10 @@ public class BookCreatorTest {
 	public TemporaryFolder folder = new TemporaryFolder();
 
 	@Test
-	public void testWriteTextTex_DE() throws IOException, ParserConfigurationException, SAXException, ParseException,
-			TransformerFactoryConfigurationError, TransformerException {
-		BookCreator bk = createTextTexFile("de");
+	public void testWriteTextTex_DE() throws WriterException, ParseException, IOException {
+		CreatorAndPlugin cap = createTextTexFile("de");
 
-		List<String> texLines = Files.readAllLines(bk.getTexOutputPath());
+		List<String> texLines = Files.readAllLines(cap.twp.getTexOutputPath());
 		assertEquals(5, texLines.size());
 		assertEquals("header", texLines.get(0));
 		assertEquals("\\begin{center}Freitag, der 16. M\\\"arz 2018\\end{center}", texLines.get(1));
@@ -45,11 +42,10 @@ public class BookCreatorTest {
 	}
 
 	@Test
-	public void testWriteTextTex_EN() throws IOException, ParserConfigurationException, SAXException, ParseException,
-			TransformerFactoryConfigurationError, TransformerException {
-		BookCreator bk = createTextTexFile("en");
+	public void testWriteTextTex_EN() throws WriterException, ParseException, IOException {
+		CreatorAndPlugin cap = createTextTexFile("en");
 
-		List<String> texLines = Files.readAllLines(bk.getTexOutputPath());
+		List<String> texLines = Files.readAllLines(cap.twp.getTexOutputPath());
 		assertEquals(5, texLines.size());
 		assertEquals("header", texLines.get(0));
 		assertEquals("\\begin{center}16 March 2018\\end{center}", texLines.get(1));
@@ -59,11 +55,10 @@ public class BookCreatorTest {
 	}
 
 	@Test
-	public void testWriteTextTex_Default() throws IOException, ParserConfigurationException, SAXException,
-			ParseException, TransformerFactoryConfigurationError, TransformerException {
-		BookCreator bk = createTextTexFile(null);
+	public void testWriteTextTex_Default() throws WriterException, ParseException, IOException {
+		CreatorAndPlugin cap = createTextTexFile(null);
 
-		List<String> texLines = Files.readAllLines(bk.getTexOutputPath());
+		List<String> texLines = Files.readAllLines(cap.twp.getTexOutputPath());
 		assertEquals(5, texLines.size());
 		assertEquals("header", texLines.get(0));
 		assertEquals("\\begin{center}16 March 2018\\end{center}", texLines.get(1));
@@ -73,11 +68,11 @@ public class BookCreatorTest {
 	}
 
 	@Test
-	public void testWriteMediaOmittedTex_NoHints() throws IOException, ParseException {
-		BookCreator bc = createMediaOmittedTexFile(false);
+	public void testWriteMediaOmittedTex_NoHints() throws WriterException, ParseException, IOException {
+		CreatorAndPlugin cap = createMediaOmittedTexFile(false);
 
-		Path imgPath = bc.getImagePoolDir().resolve("relpath/IMG-20180316-WA0001.jpg");
-		List<String> texLines = Files.readAllLines(bc.getTexOutputPath());
+		Path imgPath = cap.bc.getWriterConfig().getImagePoolDir().resolve("relpath/IMG-20180316-WA0001.jpg");
+		List<String> texLines = Files.readAllLines(cap.twp.getTexOutputPath());
 
 		assertEquals(7, texLines.size());
 		assertEquals("header", texLines.get(0));
@@ -91,11 +86,11 @@ public class BookCreatorTest {
 	}
 
 	@Test
-	public void testWriteMediaOmittedTex_WithHints() throws IOException, ParseException {
-		BookCreator bc = createMediaOmittedTexFile(true);
+	public void testWriteMediaOmittedTex_WithHints() throws WriterException, ParseException, IOException {
+		CreatorAndPlugin cap = createMediaOmittedTexFile(true);
 
-		Path imgPath = bc.getImagePoolDir().resolve("relpath/IMG-20180316-WA0001.jpg");
-		List<String> texLines = Files.readAllLines(bc.getTexOutputPath());
+		Path imgPath = cap.bc.getWriterConfig().getImagePoolDir().resolve("relpath/IMG-20180316-WA0001.jpg");
+		List<String> texLines = Files.readAllLines(cap.twp.getTexOutputPath());
 
 		assertEquals(7, texLines.size());
 		assertEquals("header", texLines.get(0));
@@ -108,8 +103,8 @@ public class BookCreatorTest {
 		assertEquals("footer", texLines.get(6));
 	}
 
-	private BookCreator createTexFile(List<String> chatLines, List<String> propLines)
-			throws IOException, ParseException {
+	private CreatorAndPlugin createTexFile(List<String> chatLines, List<String> propLines)
+			throws ParseException, IOException, WriterException {
 		String dir = this.folder.newFolder("test").toString();
 
 		Path inputDir = Paths.get(dir, "input");
@@ -138,19 +133,23 @@ public class BookCreatorTest {
 		imageMatcher.toXmlFile(configDir.resolve("WhatsApp Chat with Firstname Surname.match.xml"));
 		Files.write(configDir.resolve("bookcreator.properties"), propLines);
 
-		BookCreator bk = new BookCreator(inputDir, outputDir, emojiDir);
-		bk.setImagePoolDir(imagePoolDir);
-		bk.setHeader("header");
-		bk.setFooter("footer");
-		bk.writeTex();
+		TexWriterPlugin plugin = new TexWriterPlugin();
+		plugin.setHeader("header");
+		plugin.setFooter("footer");
+
+		List<IWriterPlugin> plugins = Arrays.asList(plugin);
+		BookCreator bk = new BookCreator(inputDir, outputDir, emojiDir, plugins);
+		bk.getWriterConfig().setImagePoolDir(imagePoolDir);
+
+		bk.write();
 
 		Path texFile = outputDir.resolve("WhatsApp Chat with Firstname Surname.tex");
 		assertTrue(Files.exists(texFile));
 
-		return bk;
+		return new CreatorAndPlugin(bk, plugin);
 	}
 
-	private BookCreator createTextTexFile(String locale) throws IOException, ParseException {
+	private CreatorAndPlugin createTextTexFile(String locale) throws WriterException, ParseException, IOException {
 		List<String> chatLines = new ArrayList<String>();
 		chatLines.add("16/03/2018, 08:46 - Firstname Surname: This is my message");
 		chatLines.add("16/03/2018, 21:47 - Firstname Surname: This is my message2");
@@ -163,7 +162,8 @@ public class BookCreatorTest {
 		return createTexFile(chatLines, propLines);
 	}
 
-	private BookCreator createMediaOmittedTexFile(boolean hints) throws IOException, ParseException {
+	private CreatorAndPlugin createMediaOmittedTexFile(boolean hints)
+			throws WriterException, ParseException, IOException {
 		List<String> chatLines = new ArrayList<String>();
 		chatLines.add("16/03/2018, 08:46 - Firstname Surname: <Media omitted>");
 
@@ -172,5 +172,15 @@ public class BookCreatorTest {
 		propLines.add("mediaomittedhints=" + Boolean.toString(hints));
 
 		return createTexFile(chatLines, propLines);
+	}
+
+	private class CreatorAndPlugin {
+		public BookCreator bc;
+		public TexWriterPlugin twp;
+
+		public CreatorAndPlugin(BookCreator bc, TexWriterPlugin twp) {
+			this.bc = bc;
+			this.twp = twp;
+		}
 	}
 }

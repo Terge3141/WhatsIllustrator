@@ -3,6 +3,9 @@ package program;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -13,7 +16,9 @@ import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import creator.IWriterPlugin;
 import creator.OdfCreator;
+import creator.TexWriterPlugin;
 import helper.Misc;
 
 // Parses the old Soft Bank unicode characters to new unicode characters
@@ -57,12 +62,14 @@ public class Program {
 			return;
 		}
 
-		/*BookCreator creator = new BookCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir());
+		List<IWriterPlugin> plugins = new ArrayList<IWriterPlugin>();
+		plugins.add(new TexWriterPlugin());
+		BookCreator creator = new BookCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir(),plugins);
+		creator.getWriterConfig().setImagePoolDir(config.getImagePoolDir());
+		creator.write();
+		/*OdfCreator creator=new OdfCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir());
 		creator.setImagePoolDir(config.getImagePoolDir());
-		creator.writeTex();*/
-		OdfCreator creator=new OdfCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir());
-		creator.setImagePoolDir(config.getImagePoolDir());
-		creator.writeOdf();
+		creator.writeOdf();*/
 
 		logger.info("Done");
 	}

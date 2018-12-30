@@ -8,5 +8,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/Helper"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ImageMatcher"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/MessageParser"/>
+	<classpathentry kind="lib" path="../libraries/commons-text-1.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
