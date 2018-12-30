@@ -49,6 +49,7 @@ public class BookCreator {
 
 		String namePrefix = txtInputPath.toFile().getName();
 		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
+		config.setNamePrefix(namePrefix);
 
 		readProperties();
 		ImageMatcher im = getImageMatcher(namePrefix);

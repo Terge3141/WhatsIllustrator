@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -53,13 +54,14 @@ public class TexWriterPlugin implements IWriterPlugin {
 
 		this.emojis = new EmojiParser(config.getEmojiList(), x -> getEmojiPath(x));
 		this.emojiOutputDir = this.config.getOutputDir().resolve("emojis");
+		this.copyList = new ArrayList<CopyItem>();
 		this.texOutputPath = this.config.getOutputDir().resolve(config.getNamePrefix() + ".tex");
 
 		try {
 			if (this.header == null) {
 				this.header = getRessourceAsString("header.tex.tmpl");
 			}
-			
+
 			if (this.footer == null) {
 				this.footer = getRessourceAsString("footer.tex.tmpl");
 			}
@@ -210,9 +212,8 @@ public class TexWriterPlugin implements IWriterPlugin {
 	public void setFooter(String footer) {
 		this.footer = footer;
 	}
-	
-	public Path getTexOutputPath()
-	{
+
+	public Path getTexOutputPath() {
 		return this.texOutputPath;
 	}
 
