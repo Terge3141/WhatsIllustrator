@@ -20,6 +20,7 @@ import org.odftoolkit.simple.style.DefaultStyleHandler;
 import org.odftoolkit.simple.style.Font;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.AnchorType;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.FontStyle;
+import org.odftoolkit.simple.style.StyleTypeDefinitions.FrameVerticalPosition;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.HorizontalAlignmentType;
 import org.odftoolkit.simple.style.StyleTypeDefinitions.TextLinePosition;
 import org.odftoolkit.simple.text.Paragraph;
@@ -199,7 +200,7 @@ public class OdfWriterPlugin implements IWriterPlugin {
 	 * System.out.println("Done"); }
 	 */
 
-	public static void main2(String args[]) throws Exception {
+	public static void main(String args[]) throws Exception {
 		TextDocument textDoc = TextDocument.newTextDocument();
 		// Paragraph paragraph1 =textDoc.getParagraphByIndex(0, false);
 		// paragraph1.appendTextContent("First Paragraph");
@@ -258,6 +259,17 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		 */
 
 		// paragraph.appendTextContent("This is some text content");
+		
+		Paragraph paragraph6 = textDoc.addParagraph("And it even more weitre");
+		Image image2 = Image.newImage(paragraph6, new URI("/tmp/imagepool/IMG-20181024-WA0008.jpg"));
+		FrameRectangle rectangle2 = image2.getRectangle();
+		rectangle2.setWidth(0.5);
+		rectangle2.setHeight(0.5);
+		image2.setRectangle(rectangle2);
+		FrameStyleHandler styleHandler3 = image2.getStyleHandler();
+		styleHandler3.setAchorType(AnchorType.AS_CHARACTER);
+		styleHandler3.setVerticalPosition(FrameVerticalPosition.BELOW);
+		paragraph6.appendTextContent("End something after the image");
 
 		textDoc.save(Paths.get("/tmp/odf/bla.odt").toFile());
 		System.out.println("Moin");

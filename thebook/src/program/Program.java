@@ -60,15 +60,20 @@ public class Program {
 			return;
 		}
 
+		long start = System.currentTimeMillis();
 		List<IWriterPlugin> plugins = new ArrayList<IWriterPlugin>();
 		plugins.add(new TexWriterPlugin());
 		plugins.add(new OdfWriterPlugin());
-		
-		BookCreator creator = new BookCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir(),plugins);
+
+		BookCreator creator = new BookCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir(),
+				plugins);
 		creator.getWriterConfig().setImagePoolDir(config.getImagePoolDir());
 		creator.write();
 
-		logger.info("Done");
+		long stop = System.currentTimeMillis();
+		double seconds = 0.001 * (stop - start);
+
+		logger.info("Done {}", seconds);
 	}
 
 	// TODO Some Softbank icons don't have a mapping
