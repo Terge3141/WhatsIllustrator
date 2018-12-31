@@ -52,7 +52,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 		this.config = config;
 		this.tsb = new TextStringBuilder();
 
-		this.emojis = new EmojiParser(config.getEmojiList(), x -> getEmojiPath(x));
+		this.emojis = new EmojiParser(config.getEmojiList());
 		this.emojiOutputDir = this.config.getOutputDir().resolve("emojis");
 		this.copyList = new ArrayList<CopyItem>();
 		this.texOutputPath = this.config.getOutputDir().resolve(config.getNamePrefix() + ".tex");
@@ -177,7 +177,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 	private String encode(String str) {
 		str = Latex.encodeLatex(str);
 		str = Latex.replaceURL(str);
-		str = this.emojis.replaceEmojis(str);
+		str = this.emojis.replaceEmojis(str, x -> getEmojiPath(x));
 		return str;
 	}
 

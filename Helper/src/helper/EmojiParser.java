@@ -1,5 +1,6 @@
 package helper;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
@@ -20,7 +21,6 @@ public class EmojiParser {
 	private static Logger logger = LogManager.getLogger();
 
 	private List<String> emojiList;
-	private Function<String, String> emojiFormatFunction;
 
 	private int tokenMax;
 
@@ -37,9 +37,8 @@ public class EmojiParser {
 	 *                            found. The unicode(s) are passed to the function
 	 *                            and the formatted code is returned.
 	 */
-	public EmojiParser(List<String> emojiList, Function<String, String> emojiFormatFunction) {
+	public EmojiParser(List<String> emojiList) {
 		this.emojiList = emojiList;
-		this.emojiFormatFunction = emojiFormatFunction;
 
 		Iterator<String> it = this.emojiList.iterator();
 
@@ -58,18 +57,33 @@ public class EmojiParser {
 	 * @param str The string to replaced
 	 * @return The replaced string
 	 */
-	public String replaceEmojis(String str) {
+	public String replaceEmojis(String str, Function<String, String> emojiFormatFunction) {
+		List<Token> tokens = getTokens(str);
+
 		TextStringBuilder tsb = new TextStringBuilder();
-		int index = 0;
-		while (index < str.length()) {
-			index = parseChars(str, index, tsb);
+		for (Token token : tokens) {
+			if (token.isEmoji()) {
+				tsb.append(emojiFormatFunction.apply(token.getString()));
+			} else {
+				tsb.append(token.getString());
+			}
 		}
 
 		return tsb.toString();
 	}
 
-	private int parseChars(String str, int index, TextStringBuilder tsb) {
-		return parseChars(str, index, tsb, null, 0);
+	public List<Token> getTokens(String str) {
+		List<Token> tokens = new ArrayList<Token>();
+		int index = 0;
+		while (index < str.length()) {
+			index = parseChars(str, index, tokens);
+		}
+
+		return tokens;
+	}
+
+	private int parseChars(String str, int index, List<Token> tokens) {
+		return parseChars(str, index, tokens, null, 0);
 	}
 
 	/**
@@ -83,7 +97,7 @@ public class EmojiParser {
 	 * @return index of the next character to be parsed, -1 if unicode chain was not
 	 *         found or end of string was reached
 	 */
-	private int parseChars(String str, int index, TextStringBuilder tsb, String last, int cnt) {
+	private int parseChars(String str, int index, List<Token> tokens, String last, int cnt) {
 		if (cnt == tokenMax) {
 			return -1;
 		}
@@ -101,24 +115,44 @@ public class EmojiParser {
 			suggestion = last + SEPERATOR + suggestion;
 		}
 
-		int result = parseChars(str, index + charCnt, tsb, suggestion, cnt + 1);
+		int result = parseChars(str, index + charCnt, tokens, suggestion, cnt + 1);
 		if (result == -1) {
 			if (Misc.listContains(emojiList, suggestion)) {
-				tsb.append(emojiFormatFunction.apply(suggestion));
+				tokens.add(new Token(suggestion, true));
 				return index + charCnt;
 			} else {
 				if (cnt == 0) {
 					String replacement = fromUtf32toString(codePoint);
+					boolean emoji = false;
 
 					// See if it is an SoftBank encoded character
 					String alternative = SoftBankConverter.getNewUnicode(suggestion);
 					if (alternative != null) {
 						if (Misc.listContains(emojiList, alternative)) {
-							replacement = emojiFormatFunction.apply(alternative);
+							replacement = alternative;
+							emoji = true;
 						}
 					}
 
-					tsb.append(replacement);
+					if (emoji) {
+						tokens.add(new Token(replacement, true));
+					} else {
+						Token lastToken = null;
+						if (tokens.size() > 0) {
+							lastToken = tokens.get(tokens.size() - 1);
+						}
+
+						if (lastToken == null) {
+							tokens.add(new Token(replacement, false));
+						} else {
+							if (lastToken.isEmoji()) {
+								tokens.add(new Token(replacement, false));
+							} else {
+								lastToken.append(replacement);
+							}
+						}
+					}
+
 					logger.trace("{} {}", codePoint, alternative);
 
 					return index + charCnt;
@@ -133,5 +167,27 @@ public class EmojiParser {
 
 	private static String fromUtf32toString(int codePoint) {
 		return new String(Character.toChars(codePoint));
+	}
+
+	public class Token {
+		private TextStringBuilder tsb;
+		private boolean emoji;
+
+		public Token(String str, boolean emoji) {
+			tsb = new TextStringBuilder(str);
+			this.emoji = emoji;
+		}
+
+		public String getString() {
+			return tsb.toString();
+		}
+
+		public void append(String str) {
+			tsb.append(str);
+		}
+
+		public boolean isEmoji() {
+			return this.emoji;
+		}
 	}
 }
