@@ -1,15 +1,22 @@
 package messageparser.test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
-import org.junit.jupiter.api.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
+import helper.Misc;
 import messageparser.NameLookup;
 
-class NameLookupTest {
+public class NameLookupTest {
+	
+	@BeforeClass
+	public static void setLogger()  {
+		Misc.setStdoutLogger();
+	}
 
 	@Test
-	void testTryLookup()  {
+	public void testTryLookup()  {
 		String xml = "<NameReplacer>"
 				+ "<ReplaceItem>"
 				+ "<oldName>Doc Brown</oldName>"

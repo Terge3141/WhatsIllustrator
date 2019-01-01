@@ -1,8 +1,6 @@
 package imagematcher.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -11,13 +9,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
+import helper.Misc;
 import imagematcher.FileEntry;
 import imagematcher.ImageMatcher;
 import imagematcher.MatchEntry;
 
-class ImageMatcherTest {
+public class ImageMatcherTest {
+	
+	@BeforeClass
+	public static void setLogger()  {
+		Misc.setStdoutLogger();
+	}
+	
 	@Test
 	public void testPick_Load_SingleMatch() throws IOException  {
 		List<FileEntry> fileList = new ArrayList<FileEntry>();

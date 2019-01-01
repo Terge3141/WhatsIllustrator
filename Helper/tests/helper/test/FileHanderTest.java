@@ -9,13 +9,21 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import helper.Misc;
+
 public class FileHanderTest {
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
+	
+	@BeforeClass
+	public static void setLogger()  {
+		Misc.setStdoutLogger();
+	}
 
 	@Test
 	public void testListDir() throws IOException {

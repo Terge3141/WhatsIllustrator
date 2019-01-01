@@ -1,11 +1,20 @@
 package helper.test;
 
 import static org.junit.Assert.*;
+
+import org.junit.BeforeClass;
+
 import helper.Latex;
+import helper.Misc;
 
 import org.junit.Test;
 
 public class LatexTest {
+	
+	@BeforeClass
+	public static void setLogger()  {
+		Misc.setStdoutLogger();
+	}
 
 	@Test
 	public void testReplaceURL_Http_Only() {

@@ -3,8 +3,6 @@ package creator.test;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,14 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
-import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
-import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
-import org.apache.logging.log4j.core.config.builder.api.LayoutComponentBuilder;
-import org.apache.logging.log4j.core.config.builder.api.RootLoggerComponentBuilder;
-import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,6 +21,7 @@ import creator.BookCreator;
 import creator.IWriterPlugin;
 import creator.TexWriterPlugin;
 import creator.WriterException;
+import helper.Misc;
 import imagematcher.FileEntry;
 import imagematcher.ImageMatcher;
 import imagematcher.MatchEntry;
@@ -40,22 +31,8 @@ public class BookCreatorTest {
 	public TemporaryFolder folder = new TemporaryFolder();
 
 	@BeforeClass
-	public static void setLogger() throws MalformedURLException, URISyntaxException {
-		ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
-		AppenderComponentBuilder console = builder.newAppender("stdout", "Console");
-
-		LayoutComponentBuilder standard = builder.newLayout("PatternLayout");
-		standard.addAttribute("pattern", "%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n");
-		console.add(standard);
-		
-		builder.add(console);
-
-		RootLoggerComponentBuilder rootLogger = builder.newRootLogger(Level.DEBUG);
-		rootLogger.add(builder.newAppenderRef("stdout"));
-
-		builder.add(rootLogger);
-		
-		Configurator.initialize(builder.build());
+	public static void setLogger()  {
+		Misc.setStdoutLogger();
 	}
 
 	@Test

@@ -7,9 +7,15 @@ import java.util.List;
 
 import helper.Misc;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class MiscTest {
+	
+	@BeforeClass
+	public static void setLogger()  {
+		Misc.setStdoutLogger();
+	}
 
 	@Test
 	public void testIsNullOrEmpty() {

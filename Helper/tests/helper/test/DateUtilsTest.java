@@ -3,6 +3,7 @@ package helper.test;
 import static org.junit.Assert.*;
 
 import helper.DateUtils;
+import helper.Misc;
 
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -10,9 +11,15 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class DateUtilsTest {
+	
+	@BeforeClass
+	public static void setLogger()  {
+		Misc.setStdoutLogger();
+	}
 
 	@Test
 	public void testDateDifferEqual() throws ParseException {

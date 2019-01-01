@@ -1,14 +1,16 @@
 package messageparser.test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
+import helper.Misc;
 import imagematcher.FileEntry;
 import imagematcher.ImageMatcher;
 import imagematcher.MatchEntry;
@@ -20,10 +22,14 @@ import messageparser.NameLookup;
 import messageparser.TextMessage;
 import messageparser.WhatsappParser;
 
-class WhatsappParserTest {
+public class WhatsappParserTest {
+	@BeforeClass
+	public static void setLogger()  {
+		Misc.setStdoutLogger();
+	}
 
 	@Test
-	void testNextMessage_InvalidHeader() {
+	public void testNextMessage_InvalidHeader() {
 		List<String> lines = Arrays.asList("Something different");
 		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
 		try {
@@ -34,7 +40,7 @@ class WhatsappParserTest {
 	}
 
 	@Test
-	void testNextMessage_SeveralMessages() {
+	public void testNextMessage_SeveralMessages() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: Hmm", "21/10/2015, 16:30 - biffer: Oh",
 				"21/10/2015, 16:30 - biff: Delorean?");
 		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
@@ -71,7 +77,7 @@ class WhatsappParserTest {
 	}
 
 	@Test
-	void testNextMessage_TextMessage_LookUpSender() {
+	public void testNextMessage_TextMessage_LookUpSender() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: Hmm", "21/10/2015, 16:29 - buff: Hmm");
 
 		NameLookup nl = new NameLookup();
@@ -98,7 +104,7 @@ class WhatsappParserTest {
 	}
 
 	@Test
-	void testNextMessage_TextMessage() {
+	public void testNextMessage_TextMessage() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: Hmm");
 		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
 
@@ -114,7 +120,7 @@ class WhatsappParserTest {
 	}
 
 	@Test
-	void testNextMessage_TextMessage_SeveralLines() {
+	public void testNextMessage_TextMessage_SeveralLines() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: Hmm", "a flying delorean", "Can't be true");
 		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
 
@@ -130,7 +136,7 @@ class WhatsappParserTest {
 	}
 
 	@Test
-	void testNextMessage_ImageMessage_Nosubscription() {
+	public void testNextMessage_ImageMessage_Nosubscription() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: delorean.jpg (file attached)");
 		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
 
@@ -147,7 +153,7 @@ class WhatsappParserTest {
 	}
 
 	@Test
-	void testNextMessage_ImageMessage_Subscription() {
+	public void testNextMessage_ImageMessage_Subscription() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: delorean.jpg (file attached)", "Flying delorean");
 		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
 
@@ -164,7 +170,7 @@ class WhatsappParserTest {
 	}
 
 	@Test
-	void testNextMessage_MediaMessage() {
+	public void testNextMessage_MediaMessage() {
 		List<String> lines = Arrays.asList("21/10/2015, 16:29 - biff: mcfly.vcf (file attached)");
 		WhatsappParser wp = new WhatsappParser(lines, new ImageMatcher(), new NameLookup());
 
@@ -181,7 +187,7 @@ class WhatsappParserTest {
 	}
 
 	@Test
-	void testNextMessage_MediaOmittedMessage() {
+	public void testNextMessage_MediaOmittedMessage() {
 		ImageMatcher im = new ImageMatcher();
 
 		FileEntry f1 = getFileEntry("delorean1.jpg", 2015, 10, 21);

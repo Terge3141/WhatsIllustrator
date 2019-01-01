@@ -3,6 +3,7 @@ package helper.test;
 import static org.junit.Assert.*;
 
 import helper.EmojiParser;
+import helper.Misc;
 import helper.EmojiParser.Token;
 
 import java.io.IOException;
@@ -10,9 +11,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class EmojiParserTest {
+	
+	@BeforeClass
+	public static void setLogger()  {
+		Misc.setStdoutLogger();
+	}
 
 	@Test
 	public void testReplaceEmojis_Single_NotInList() throws IOException {
