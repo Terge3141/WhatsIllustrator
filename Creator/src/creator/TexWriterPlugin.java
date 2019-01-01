@@ -144,6 +144,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 	}
 
 	private String getEmojiPath(String str) {
+		// TODO use resolve
 		String src = String.format("%s/%s%s.png", this.config.getEmojiInputDir(), EMOJIPREFIX, str);
 		String dst = String.format("%s/%s.png", emojiOutputDir, str);
 
