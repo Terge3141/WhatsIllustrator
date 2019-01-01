@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,9 +26,6 @@ import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
 
 public class TexWriterPlugin implements IWriterPlugin {
-	// TODO check if it should be moved to EmojiParser
-	private final String EMOJIPREFIX = "emoji_u";
-
 	private static Logger logger = LogManager.getLogger(TexWriterPlugin.class);
 
 	private WriterConfig config;
@@ -144,9 +140,8 @@ public class TexWriterPlugin implements IWriterPlugin {
 	}
 
 	private String getEmojiPath(String str) {
-		// TODO use resolve
-		String src = String.format("%s/%s%s.png", this.config.getEmojiInputDir(), EMOJIPREFIX, str);
-		String dst = String.format("%s/%s.png", emojiOutputDir, str);
+		Path src = this.config.getEmojiInputDir().resolve(String.format("%s%s.png", this.emojis.getEmojiPrefix(), str));
+		Path dst = this.emojiOutputDir.resolve(String.format("%s.png", str));
 
 		copyList.add(new CopyItem(src, dst));
 
@@ -220,20 +215,20 @@ public class TexWriterPlugin implements IWriterPlugin {
 
 	private class CopyItem {
 
-		private String src;
-		private String dst;
+		private Path src;
+		private Path dst;
 
-		public CopyItem(String src, String dst) {
+		public CopyItem(Path src, Path dst) {
 			this.src = src;
 			this.dst = dst;
 		}
 
 		public Path getSrcPath() {
-			return Paths.get(src);
+			return src;
 		}
 
 		public Path getDstPath() {
-			return Paths.get(dst);
+			return dst;
 		}
 	}
 

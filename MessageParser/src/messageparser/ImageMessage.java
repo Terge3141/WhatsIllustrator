@@ -4,11 +4,10 @@ import java.time.LocalDateTime;
 
 public class ImageMessage implements IMessage {
 
-	// TODO change to private
-	public LocalDateTime timepoint;
-	public String sender;
-	public String filename;
-	public String subscription;
+	private LocalDateTime timepoint;
+	private String sender;
+	private String filename;
+	private String subscription;
 
 	public ImageMessage(LocalDateTime timepoint, String sender, String filename, String subscription) {
 		this.timepoint = timepoint;

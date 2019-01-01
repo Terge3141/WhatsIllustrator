@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 
 import helper.DateUtils;
 
-// TODO check if all fields are necessary
 public class WriterConfig {
 
 	private final String EMOJIPREFIX = "emoji_u";

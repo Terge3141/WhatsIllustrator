@@ -18,13 +18,14 @@ import org.apache.logging.log4j.Logger;
  */
 public class EmojiParser {
 
+	private static final String SEPERATOR = "_";
+	private final String EMOJIPREFIX = "emoji_u";
+	
 	private static Logger logger = LogManager.getLogger();
 
 	private List<String> emojiList;
 
 	private int tokenMax;
-
-	private static final String SEPERATOR = "_";
 
 	/**
 	 * Constructor
@@ -167,6 +168,10 @@ public class EmojiParser {
 
 	private static String fromUtf32toString(int codePoint) {
 		return new String(Character.toChars(codePoint));
+	}
+	
+	public String getEmojiPrefix() {
+		return this.EMOJIPREFIX;
 	}
 
 	public class Token {

@@ -36,8 +36,7 @@ import messageparser.TextMessage;
 public class OdfWriterPlugin implements IWriterPlugin {
 
 	private final double IMAGE_HEIGHT_CM = 2.0;
-	// TODO check if it should be moved to EmojiParser
-	private final String EMOJIPREFIX = "emoji_u";
+
 	private final double EMOJI_HEIGHT_CM = 0.5;
 
 	private static Logger logger = LogManager.getLogger(OdfWriterPlugin.class);
@@ -182,7 +181,8 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		List<Token> tokens = this.emojis.getTokens(text);
 		for (Token token : tokens) {
 			if (token.isEmoji()) {
-				URI uri = this.config.getEmojiInputDir().resolve(EMOJIPREFIX + token.getString() + ".png").toUri();
+				URI uri = this.config.getEmojiInputDir()
+						.resolve(this.emojis.getEmojiPrefix() + token.getString() + ".png").toUri();
 				Image image = Image.newImage(paragraph, uri);
 
 				FrameRectangle rectangle = image.getRectangle();
