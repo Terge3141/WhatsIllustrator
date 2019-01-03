@@ -1,4 +1,4 @@
-package creator;
+package creator.plugins.odf;
 
 import java.net.URI;
 import java.nio.file.Path;
@@ -24,6 +24,9 @@ import org.odftoolkit.simple.style.StyleTypeDefinitions.HorizontalAlignmentType;
 import org.odftoolkit.simple.text.Paragraph;
 import org.odftoolkit.simple.text.Span;
 
+import creator.plugins.IWriterPlugin;
+import creator.plugins.WriterConfig;
+import creator.plugins.WriterException;
 import helper.EmojiParser;
 import helper.EmojiParser.Token;
 import helper.Misc;
@@ -92,7 +95,7 @@ public class OdfWriterPlugin implements IWriterPlugin {
 
 	@Override
 	public void appendTextMessage(TextMessage msg) throws WriterException {
-		appendSenderAndDate(msg, msg.content);
+		appendSenderAndDate(msg, msg.getContent());
 	}
 
 	@Override

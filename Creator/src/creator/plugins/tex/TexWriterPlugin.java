@@ -1,4 +1,4 @@
-package creator;
+package creator.plugins.tex;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,6 +16,9 @@ import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import creator.plugins.IWriterPlugin;
+import creator.plugins.WriterConfig;
+import creator.plugins.WriterException;
 import helper.EmojiParser;
 import helper.Latex;
 import helper.Misc;
@@ -96,7 +99,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 	@Override
 	public void appendTextMessage(TextMessage msg) throws WriterException {
 		String senderAndTime = formatSenderAndTime(msg);
-		String content = encode(msg.content);
+		String content = encode(msg.getContent());
 		tsb.appendln("%s %s\\\\", senderAndTime, content);
 	}
 

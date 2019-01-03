@@ -14,9 +14,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import creator.BookCreator;
-import creator.IWriterPlugin;
-import creator.OdfWriterPlugin;
-import creator.TexWriterPlugin;
+import creator.plugins.IWriterPlugin;
+import creator.plugins.odf.OdfWriterPlugin;
+import creator.plugins.tex.TexWriterPlugin;
 import helper.Misc;
 
 // Parses the old Soft Bank unicode characters to new unicode characters

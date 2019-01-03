@@ -1,4 +1,4 @@
-package creator;
+package creator.plugins;
 
 import java.io.File;
 import java.nio.file.Path;

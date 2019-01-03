@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!-- This file just serves as an example -->
+
+<messages>
+	<date>Dienstag, der 1. Januar 2019</date>
+	<textmessage>
+		<sender>Firstname Lastname</sender>
+		<time>11:00</time>
+		<text>Moin</text>
+	</textmessage>
+
+	<date>Mittwoch, der 2. Januar 2019</date>
+	<textmessage>
+		<sender>Firstname2 Lastname2</sender>
+		<time>11:01</time>
+		<text>Moin moin</text>
+	</textmessage>
+
+	<textmessage>
+		<sender>Firstname Lastname</sender>
+		<time>11:03</time>
+		<text>How are you?</text>
+	</textmessage>
+</messages>

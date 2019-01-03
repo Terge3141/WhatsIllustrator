@@ -19,9 +19,9 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import creator.IWriterPlugin;
-import creator.WriterConfig;
-import creator.WriterException;
+import creator.plugins.IWriterPlugin;
+import creator.plugins.WriterConfig;
+import creator.plugins.WriterException;
 
 public class BookCreator {
 

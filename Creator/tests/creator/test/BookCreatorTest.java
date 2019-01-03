@@ -18,9 +18,9 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import creator.BookCreator;
-import creator.IWriterPlugin;
-import creator.TexWriterPlugin;
-import creator.WriterException;
+import creator.plugins.IWriterPlugin;
+import creator.plugins.WriterException;
+import creator.plugins.tex.TexWriterPlugin;
 import helper.Misc;
 import imagematcher.FileEntry;
 import imagematcher.ImageMatcher;
