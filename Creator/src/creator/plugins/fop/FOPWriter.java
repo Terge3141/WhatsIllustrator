@@ -87,6 +87,11 @@ public class FOPWriter implements IWriterPlugin {
 		writer.writeStartElement("messages");
 
 		marshaller.marshal(fopTextMessage1, writer);
+		
+		writer.writeStartElement("date");
+		writer.writeCharacters(dateUtils.formatDateString(LocalDateTime.now()));
+		writer.writeEndElement();
+		
 		marshaller.marshal(fopTextMessage2, writer);
 
 		writer.writeEndElement();
