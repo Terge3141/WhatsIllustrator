@@ -125,7 +125,7 @@ public class FOPWriterPlugin implements IWriterPlugin {
 	@Override
 	public void appendImageMessage(ImageMessage imageMessage) throws WriterException {
 		FOPImageMessage fopImageMessage = FOPImageMessage.of(imageMessage, config.getDateUtils(),
-				this.config.getImageDir());
+				this.config.getImageDir(), this.emojis);
 		appendObject(fopImageMessage, this.writer);
 	}
 

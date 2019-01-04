@@ -8,12 +8,14 @@
 
 	<xsl:template match="emoji">
 		<xsl:variable name="emojifilename" select="." />
-<!-- 		<xsl:value-of -->
-<!-- 			select="concat($emojisprefix, '/', $emojifilename)" /> -->
+		<!-- For debugging -->
+		<!-- <xsl:value-of -->
+		<!-- select="concat($emojisprefix, '/', $emojifilename)" /> -->
 		<fo:external-graphic height="10pt"
 			content-height="10pt">
 			<xsl:attribute name="src">
-					<xsl:value-of select="concat($emojisprefix, '/', $emojifilename)" />
+					<xsl:value-of
+				select="concat($emojisprefix, '/', $emojifilename)" />
 			</xsl:attribute>
 		</fo:external-graphic>
 	</xsl:template>
@@ -77,7 +79,8 @@
 
 		<fo:block text-align="center">
 			<fo:inline font-style="italic">
-				<xsl:value-of select="subscription" />
+				<xsl:apply-templates select="subscription" />
+<!-- 				<xsl:value-of select="subscription" /> -->
 			</fo:inline>
 		</fo:block>
 	</xsl:template>

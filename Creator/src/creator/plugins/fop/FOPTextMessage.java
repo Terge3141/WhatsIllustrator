@@ -37,14 +37,8 @@ public class FOPTextMessage implements Serializable {
 		fopMessage.timepoint = dateUtils.formatTimeString(message.getTimepoint());
 		fopMessage.sender = message.getSender();
 
-		fopMessage.tokens = new ArrayList<FOPToken>();
 		List<Token> emojiParserTokens = emojiParser.getTokens(message.content);
-		for (Token emojiParserToken : emojiParserTokens) {
-			String str = emojiParserToken.isEmoji()
-					? String.format("%s%s.png", emojiParser.getEmojiPrefix(), emojiParserToken.getString())
-					: emojiParserToken.getString();
-			fopMessage.tokens.add(FOPToken.ofEmoji(str, emojiParserToken.isEmoji()));
-		}
+		fopMessage.tokens = FOPToken.ofEmojiParser(emojiParserTokens, emojiParser.getEmojiPrefix());
 
 		return fopMessage;
 	}
