@@ -1,15 +1,13 @@
 package creator.plugins.fop;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
+import java.io.OutputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -18,14 +16,24 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.sax.SAXResult;
+import javax.xml.transform.stream.StreamSource;
 
+import org.apache.fop.apps.FOPException;
+import org.apache.fop.apps.FOUserAgent;
+import org.apache.fop.apps.Fop;
+import org.apache.fop.apps.FopFactory;
+import org.apache.fop.apps.MimeConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import creator.plugins.IWriterPlugin;
 import creator.plugins.WriterConfig;
 import creator.plugins.WriterException;
-import helper.DateUtils;
 import messageparser.ImageMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
@@ -33,10 +41,14 @@ import messageparser.TextMessage;
 
 public class FOPWriterPlugin implements IWriterPlugin {
 
+	private static Logger logger = LogManager.getLogger(FOPWriterPlugin.class);
+
 	private WriterConfig config;
 	private XMLStreamWriter writer;
 
-	private static Logger logger = LogManager.getLogger(FOPWriterPlugin.class);
+	private Path xmlOutputPath;
+	private Path xslOutputPath;
+	private Path pdfOutputPath;
 
 	@Override
 	public void preAppend(WriterConfig config) throws WriterException {
@@ -45,8 +57,9 @@ public class FOPWriterPlugin implements IWriterPlugin {
 		try {
 			Path outputDir = this.config.getOutputDir().resolve("fo");
 			outputDir.toFile().mkdir();
-			Path xmlOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".xml");
-			Path xslOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".xsl");
+			this.xmlOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".xml");
+			this.xslOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".xsl");
+			this.pdfOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".pdf");
 
 			logger.info("Writing output to '{}'", xmlOutputPath);
 			FileOutputStream out = new FileOutputStream(xmlOutputPath.toFile());
@@ -75,6 +88,12 @@ public class FOPWriterPlugin implements IWriterPlugin {
 			this.writer.flush();
 		} catch (XMLStreamException xse) {
 			throw new WriterException(xse);
+		}
+
+		try {
+			toPDF();
+		} catch (FOPException | TransformerException | IOException e) {
+			throw new WriterException(e);
 		}
 	}
 
@@ -146,43 +165,44 @@ public class FOPWriterPlugin implements IWriterPlugin {
 		}
 	}
 
-	public static void main2(String args[])
-			throws JAXBException, IOException, XMLStreamException, FactoryConfigurationError {
-		TextMessage message1 = new TextMessage(LocalDateTime.now(), "Firstname surname", "Blabla");
-		TextMessage message2 = new TextMessage(LocalDateTime.now(), "Firstname surname2", "Blabla2");
-		DateUtils dateUtils = new DateUtils(Locale.GERMAN);
+	private void toPDF() throws FOPException, TransformerException, IOException {
+		FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
+		FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
 
-		FOPTextMessage fopTextMessage1 = FOPTextMessage.of(message1, dateUtils);
-		FOPTextMessage fopTextMessage2 = FOPTextMessage.of(message2, dateUtils);
+		logger.info("Writing file to {}", this.pdfOutputPath);
 
-		JAXBContext context = JAXBContext.newInstance(FOPTextMessage.class);
-		Marshaller marshaller = context.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		StreamSource xmlSource = new StreamSource(this.xmlOutputPath.toFile());
+		OutputStream out = new FileOutputStream(this.pdfOutputPath.toFile());
 
-		XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(out, "UTF-8");
-		writer.writeStartDocument();
-		writer.writeStartElement("messages");
+		Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, out);
 
-		marshaller.marshal(fopTextMessage1, writer);
+		TransformerFactory factory = TransformerFactory.newInstance();
+		Transformer transformer = factory.newTransformer(new StreamSource(this.xslOutputPath.toFile()));
 
-		writer.writeStartElement("date");
-		writer.writeCharacters(dateUtils.formatDateString(LocalDateTime.now()));
-		writer.writeEndElement();
+		Result res = new SAXResult(fop.getDefaultHandler());
+		transformer.transform(xmlSource, res);
 
-		marshaller.marshal(fopTextMessage2, writer);
+		out.close();
+	}
 
-		writer.writeEndElement();
-		writer.writeEndDocument();
+	public static void main2(String args[]) throws FOPException, IOException, TransformerException {
+		File xslFile = new File("/tmp/fopsample.xsl");
+		StreamSource xmlSource = new StreamSource(new File("/tmp/fopsample.xml"));
+		File pdfFile = new File("/tmp/fopsample.pdf");
 
-		writer.flush();
+		FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
+		FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+		OutputStream out = new FileOutputStream(pdfFile);
 
-		// File file = new File("/tmp/bla.xml");
-		// marshaller.mas
-		// marshaller.marshal(fopTextMessage1, out);
-		// marshaller.marshal(fopTextMessage2, out);
-		Files.write(Paths.get("/tmp/bla.xml"), out.toByteArray());
-		System.out.println("Moin");
+		Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, out);
+
+		TransformerFactory factory = TransformerFactory.newInstance();
+		Transformer transformer = factory.newTransformer(new StreamSource(xslFile));
+
+		Result res = new SAXResult(fop.getDefaultHandler());
+		transformer.transform(xmlSource, res);
+
+		out.close();
 	}
 
 	private void writeRessourceFile(String ressourceName, Path destPath) throws IOException {
@@ -194,7 +214,7 @@ public class FOPWriterPlugin implements IWriterPlugin {
 		while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
 			fileOutputStream.write(data, 0, nRead);
 		}
-		
+
 		fileOutputStream.close();
 	}
 }
