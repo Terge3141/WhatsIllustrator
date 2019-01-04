@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Locale;
 
 import javax.xml.bind.JAXBContext;
@@ -71,7 +72,7 @@ public class FOPWriter implements IWriterPlugin {
 	public void appendDateHeader(LocalDateTime timepoint) throws WriterException {
 		try {
 			this.writer.writeStartElement("date");
-			this.writer.writeCharacters(config.getDateUtils().formatDateString(LocalDateTime.now()));
+			this.writer.writeCharacters(config.getDateUtils().formatDateString(timepoint));
 			this.writer.writeEndElement();
 		} catch (XMLStreamException xse) {
 			throw new WriterException(xse);
@@ -81,12 +82,11 @@ public class FOPWriter implements IWriterPlugin {
 
 	@Override
 	public void appendTextMessage(TextMessage textMessage) throws WriterException {
-		JAXBContext context;
 		try {
-			context = JAXBContext.newInstance(FOPTextMessage.class);
+			JAXBContext context = JAXBContext.newInstance(FOPTextMessage.class);
 			Marshaller marshaller = context.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-			FOPTextMessage fopTextMessage = new FOPTextMessage(textMessage, config.getDateUtils());
+			FOPTextMessage fopTextMessage = FOPTextMessage.of(textMessage, config.getDateUtils());
 			marshaller.marshal(fopTextMessage, writer);
 		} catch (JAXBException je) {
 			throw new WriterException(je);
@@ -95,17 +95,45 @@ public class FOPWriter implements IWriterPlugin {
 
 	@Override
 	public void appendImageMessage(ImageMessage imageMessage) throws WriterException {
-		logger.warn("Not implemented yet");
+		try {
+			JAXBContext context = JAXBContext.newInstance(FOPImageMessage.class);
+			Marshaller marshaller = context.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+			FOPImageMessage fopImageMessage = FOPImageMessage.of(imageMessage, config.getDateUtils(),
+					this.config.getImageDir());
+			marshaller.marshal(fopImageMessage, writer);
+		} catch (JAXBException je) {
+			throw new WriterException(je);
+		}
 	}
 
 	@Override
 	public void appendMediaOmittedMessage(MediaOmittedMessage mediaOmittedMessage) throws WriterException {
-		logger.warn("Not implemented yet");
+		try {
+			JAXBContext context = JAXBContext.newInstance(FOPImageMessage.class);
+			Marshaller marshaller = context.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+			List<FOPImageMessage> fopImageMessages = FOPImageMessage.of(mediaOmittedMessage, config.getDateUtils(),
+					this.config.getImagePoolDir());
+			for (FOPImageMessage fopImageMessage : fopImageMessages) {
+				marshaller.marshal(fopImageMessage, writer);
+			}
+		} catch (JAXBException je) {
+			throw new WriterException(je);
+		}
 	}
 
 	@Override
 	public void appendMediaMessage(MediaMessage mediaMessage) throws WriterException {
-		logger.warn("Not implemented yet");
+		try {
+			JAXBContext context = JAXBContext.newInstance(FOPMediaMessage.class);
+			Marshaller marshaller = context.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+			FOPMediaMessage fopMediaMessage = FOPMediaMessage.of(mediaMessage, config.getDateUtils());
+			marshaller.marshal(fopMediaMessage, writer);
+		} catch (JAXBException je) {
+			throw new WriterException(je);
+		}
 	}
 
 	public static void main2(String args[])
@@ -114,8 +142,8 @@ public class FOPWriter implements IWriterPlugin {
 		TextMessage message2 = new TextMessage(LocalDateTime.now(), "Firstname surname2", "Blabla2");
 		DateUtils dateUtils = new DateUtils(Locale.GERMAN);
 
-		FOPTextMessage fopTextMessage1 = new FOPTextMessage(message1, dateUtils);
-		FOPTextMessage fopTextMessage2 = new FOPTextMessage(message2, dateUtils);
+		FOPTextMessage fopTextMessage1 = FOPTextMessage.of(message1, dateUtils);
+		FOPTextMessage fopTextMessage2 = FOPTextMessage.of(message2, dateUtils);
 
 		JAXBContext context = JAXBContext.newInstance(FOPTextMessage.class);
 		Marshaller marshaller = context.createMarshaller();

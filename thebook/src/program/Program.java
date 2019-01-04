@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import creator.BookCreator;
 import creator.plugins.IWriterPlugin;
+import creator.plugins.fop.FOPWriter;
 import creator.plugins.odf.OdfWriterPlugin;
 import creator.plugins.tex.TexWriterPlugin;
 import helper.Misc;
@@ -64,6 +65,7 @@ public class Program {
 		List<IWriterPlugin> plugins = new ArrayList<IWriterPlugin>();
 		plugins.add(new TexWriterPlugin());
 		plugins.add(new OdfWriterPlugin());
+		plugins.add(new FOPWriter());
 
 		BookCreator creator = new BookCreator(config.getInputDir(), config.getOutputDir(), config.getEmojiDir(),
 				plugins);

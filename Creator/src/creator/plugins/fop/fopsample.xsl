@@ -22,47 +22,66 @@
 		</fo:root>
 	</xsl:template>
 	<xsl:template match="date">
-		<fo:block font-weight="italic"
-			margin-top="5mm" margin-bottom="1mm" text-align="center">
+		<fo:block font-weight="italic" margin-top="5mm"
+			margin-bottom="1mm" text-align="center">
 			<xsl:value-of select="." />
 		</fo:block>
-		<!-- <fo:block text-align="right">
-			<fo:external-graphic width="150pt" height="150pt" content-width="150pt" content-height="150pt" src="url(/tmp/imagepool/IMG-20130101-WA0000.jpg)">
-				<xsl:attribute name="src">
-					<xsl:value-of select="."/>
-				</xsl:attribute>
-			</fo:external-graphic>
-		</fo:block>-->
 	</xsl:template>
 
 	<xsl:template match="textmessage">
 		<fo:block>
-		<fo:inline font-weight="bold"><xsl:value-of select="sender"/></fo:inline>	
-			(<xsl:value-of select="time" />):
+			<fo:inline font-weight="bold">
+				<xsl:value-of select="sender" />
+			</fo:inline>
+			(
+			<xsl:value-of select="time" />
+			):
 			<xsl:value-of select="text" />
 		</fo:block>
 	</xsl:template>
-	
+
 	<xsl:template match="imagemessage">
 		<fo:block>
-		<fo:inline font-weight="bold"><xsl:value-of select="sender"/></fo:inline>	
-			(<xsl:value-of select="time" />):
+			<fo:inline font-weight="bold">
+				<xsl:value-of select="sender" />
+			</fo:inline>
+			(
+			<xsl:value-of select="time" />
+			):
 		</fo:block>
-		
-		<fo:block>
-			<fo:external-graphic width="150pt" height="150pt" content-width="150pt" content-height="150pt">
+
+		<fo:block text-align="center">
+			<fo:external-graphic height="50pt"
+				content-height="50pt">
 				<xsl:attribute name="src">
 					<xsl:value-of select="src" />
 				</xsl:attribute>
 			</fo:external-graphic>
 		</fo:block>
-		
-		<fo:block text-align="right">
-			<xsl:value-of select="src" />
+
+		<fo:block text-align="center">
+			<fo:inline font-style="italic">
+				<xsl:value-of select="subscription" />
+			</fo:inline>
 		</fo:block>
-		<!-- <fo:block text-align="right">
-			<fo:external-graphic width="150pt" height="150pt" content-width="150pt" content-height="150pt" src="url({src})/>				
-		</fo:block>-->
 	</xsl:template>
-	
+	<xsl:template match="mediamessage">
+		<fo:block>
+			<fo:inline font-weight="bold">
+				<xsl:value-of select="sender" />
+			</fo:inline>
+
+			(
+			<xsl:value-of select="time" />
+			):
+
+			<fo:inline font-style="italic">
+				<xsl:value-of select="filename" />
+				<xsl:if test="subscription">
+					- <xsl:value-of select="subscription" />
+				</xsl:if>
+			</fo:inline>
+
+		</fo:block>
+	</xsl:template>
 </xsl:stylesheet>

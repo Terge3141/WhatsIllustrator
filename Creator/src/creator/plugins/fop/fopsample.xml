@@ -27,4 +27,23 @@
 		<time>11:03</time>
 		<src>/tmp/imagepool/IMG-20130101-WA0000.jpg</src>
 	</imagemessage>
+	<imagemessage>
+		<sender>Firstname Lastname</sender>
+		<time>11:03</time>
+		<src>/tmp/imagepool/IMG-20130101-WA0000.jpg</src>
+		<subscription>And now with subscription</subscription>
+	</imagemessage>
+
+	<mediamessage>
+		<sender>Another sender</sender>
+		<time>11:04</time>
+		<filename>bla.vcf</filename>
+	</mediamessage>
+	
+	<mediamessage>
+		<sender>Another sender2</sender>
+		<time>11:05</time>
+		<filename>bla2.vcf</filename>
+		<subscription>Another subscription</subscription>
+	</mediamessage>
 </messages>
