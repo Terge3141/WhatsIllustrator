@@ -34,6 +34,7 @@ import org.apache.logging.log4j.Logger;
 import creator.plugins.IWriterPlugin;
 import creator.plugins.WriterConfig;
 import creator.plugins.WriterException;
+import helper.EmojiParser;
 import messageparser.ImageMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
@@ -44,21 +45,26 @@ public class FOPWriterPlugin implements IWriterPlugin {
 	private static Logger logger = LogManager.getLogger(FOPWriterPlugin.class);
 
 	private WriterConfig config;
+	private EmojiParser emojis;
 	private XMLStreamWriter writer;
 
 	private Path xmlOutputPath;
 	private Path xslOutputPath;
+	private Path incOutputPath;
 	private Path pdfOutputPath;
 
 	@Override
 	public void preAppend(WriterConfig config) throws WriterException {
 		this.config = config;
 
+		this.emojis = new EmojiParser(config.getEmojiList());
+
 		try {
 			Path outputDir = this.config.getOutputDir().resolve("fo");
 			outputDir.toFile().mkdir();
 			this.xmlOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".xml");
 			this.xslOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".xsl");
+			this.incOutputPath = outputDir.resolve("fopincludes.xsl");
 			this.pdfOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".pdf");
 
 			logger.info("Writing output to '{}'", xmlOutputPath);
@@ -66,6 +72,7 @@ public class FOPWriterPlugin implements IWriterPlugin {
 
 			// write xsl file
 			writeRessourceFile("fopsample.xsl", xslOutputPath);
+			writeRessourceFile("fopincludes.xsl", incOutputPath);
 
 			this.writer = XMLOutputFactory.newInstance().createXMLStreamWriter(out, "UTF-16");
 			this.writer.writeStartDocument();
@@ -111,55 +118,39 @@ public class FOPWriterPlugin implements IWriterPlugin {
 
 	@Override
 	public void appendTextMessage(TextMessage textMessage) throws WriterException {
-		try {
-			JAXBContext context = JAXBContext.newInstance(FOPTextMessage.class);
-			Marshaller marshaller = context.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-			FOPTextMessage fopTextMessage = FOPTextMessage.of(textMessage, config.getDateUtils());
-			marshaller.marshal(fopTextMessage, writer);
-		} catch (JAXBException je) {
-			throw new WriterException(je);
-		}
+		FOPTextMessage fopTextMessage = FOPTextMessage.of(textMessage, config.getDateUtils(), this.emojis);
+		appendObject(fopTextMessage, this.writer);
 	}
 
 	@Override
 	public void appendImageMessage(ImageMessage imageMessage) throws WriterException {
-		try {
-			JAXBContext context = JAXBContext.newInstance(FOPImageMessage.class);
-			Marshaller marshaller = context.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-			FOPImageMessage fopImageMessage = FOPImageMessage.of(imageMessage, config.getDateUtils(),
-					this.config.getImageDir());
-			marshaller.marshal(fopImageMessage, writer);
-		} catch (JAXBException je) {
-			throw new WriterException(je);
-		}
+		FOPImageMessage fopImageMessage = FOPImageMessage.of(imageMessage, config.getDateUtils(),
+				this.config.getImageDir());
+		appendObject(fopImageMessage, this.writer);
 	}
 
 	@Override
 	public void appendMediaOmittedMessage(MediaOmittedMessage mediaOmittedMessage) throws WriterException {
-		try {
-			JAXBContext context = JAXBContext.newInstance(FOPImageMessage.class);
-			Marshaller marshaller = context.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-			List<FOPImageMessage> fopImageMessages = FOPImageMessage.of(mediaOmittedMessage, config.getDateUtils(),
-					this.config.getImagePoolDir());
-			for (FOPImageMessage fopImageMessage : fopImageMessages) {
-				marshaller.marshal(fopImageMessage, writer);
-			}
-		} catch (JAXBException je) {
-			throw new WriterException(je);
+		List<FOPImageMessage> fopImageMessages = FOPImageMessage.of(mediaOmittedMessage, config.getDateUtils(),
+				this.config.getImagePoolDir());
+		for (FOPImageMessage fopImageMessage : fopImageMessages) {
+			appendObject(fopImageMessage, this.writer);
 		}
 	}
 
 	@Override
 	public void appendMediaMessage(MediaMessage mediaMessage) throws WriterException {
+		FOPMediaMessage fopMediaMessage = FOPMediaMessage.of(mediaMessage, config.getDateUtils());
+		appendObject(fopMediaMessage, this.writer);
+	}
+
+	private <T> void appendObject(T obj, XMLStreamWriter writer) throws WriterException {
 		try {
-			JAXBContext context = JAXBContext.newInstance(FOPMediaMessage.class);
+			JAXBContext context = JAXBContext.newInstance(obj.getClass());
 			Marshaller marshaller = context.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-			FOPMediaMessage fopMediaMessage = FOPMediaMessage.of(mediaMessage, config.getDateUtils());
-			marshaller.marshal(fopMediaMessage, writer);
+			marshaller.setProperty("jaxb.encoding", "Unicode");
+			marshaller.marshal(obj, writer);
 		} catch (JAXBException je) {
 			throw new WriterException(je);
 		}

@@ -46,4 +46,10 @@
 		<filename>bla2.vcf</filename>
 		<subscription>Another subscription</subscription>
 	</mediamessage>
+	
+	<textmessage>
+		<sender>Firstname Lastname</sender>
+		<time>11:33</time>
+		<text><normal>Davor</normal><emoji>emoji_u2755.png</emoji><normal>danach</normal></text>
+	</textmessage>
 </messages>

@@ -3,6 +3,21 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:fo="http://www.w3.org/1999/XSL/Format"
 	exclude-result-prefixes="fo">
+
+	<xsl:include href="fopincludes.xsl" />
+
+	<xsl:template match="emoji">
+		<xsl:variable name="emojifilename" select="." />
+<!-- 		<xsl:value-of -->
+<!-- 			select="concat($emojisprefix, '/', $emojifilename)" /> -->
+		<fo:external-graphic height="10pt"
+			content-height="10pt">
+			<xsl:attribute name="src">
+					<xsl:value-of select="concat($emojisprefix, '/', $emojifilename)" />
+			</xsl:attribute>
+		</fo:external-graphic>
+	</xsl:template>
+
 	<xsl:template match="messages">
 		<fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format">
 			<fo:layout-master-set>
@@ -36,7 +51,8 @@
 			(
 			<xsl:value-of select="time" />
 			):
-			<xsl:value-of select="text" />
+			<xsl:apply-templates select="text" />
+			<!-- <xsl:value-of select="text" /> -->
 		</fo:block>
 	</xsl:template>
 
@@ -78,10 +94,21 @@
 			<fo:inline font-style="italic">
 				<xsl:value-of select="filename" />
 				<xsl:if test="subscription">
-					- <xsl:value-of select="subscription" />
+					-
+					<xsl:value-of select="subscription" />
 				</xsl:if>
 			</fo:inline>
 
 		</fo:block>
 	</xsl:template>
+
+	<!-- <xsl:template match="text"> <xsl:template match="emoji"> <xsl:variable 
+		name="emojifilename" select="." /> <xsl:value-of select="concat($emojisprefix, 
+		$emojifilename)" /> </xsl:template> </xsl:template> -->
+
+
+
+
+
+
 </xsl:stylesheet>

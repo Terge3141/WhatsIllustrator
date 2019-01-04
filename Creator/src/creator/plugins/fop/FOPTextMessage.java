@@ -1,11 +1,15 @@
 package creator.plugins.fop;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import helper.DateUtils;
+import helper.EmojiParser;
+import helper.EmojiParser.Token;
 import messageparser.TextMessage;
 
 @XmlRootElement(name = "textmessage")
@@ -23,16 +27,24 @@ public class FOPTextMessage implements Serializable {
 	private String sender;
 
 	@XmlElement(name = "text")
-	private String content;
+	private List<FOPToken> tokens;
 
 	public FOPTextMessage() {
 	}
 
-	public static FOPTextMessage of(TextMessage message, DateUtils dateUtils) {
+	public static FOPTextMessage of(TextMessage message, DateUtils dateUtils, EmojiParser emojiParser) {
 		FOPTextMessage fopMessage = new FOPTextMessage();
 		fopMessage.timepoint = dateUtils.formatTimeString(message.getTimepoint());
 		fopMessage.sender = message.getSender();
-		fopMessage.content = message.getContent();
+
+		fopMessage.tokens = new ArrayList<FOPToken>();
+		List<Token> emojiParserTokens = emojiParser.getTokens(message.content);
+		for (Token emojiParserToken : emojiParserTokens) {
+			String str = emojiParserToken.isEmoji()
+					? String.format("%s%s.png", emojiParser.getEmojiPrefix(), emojiParserToken.getString())
+					: emojiParserToken.getString();
+			fopMessage.tokens.add(FOPToken.ofEmoji(str, emojiParserToken.isEmoji()));
+		}
 
 		return fopMessage;
 	}
