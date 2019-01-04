@@ -29,12 +29,12 @@ import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
 
-public class FOPWriter implements IWriterPlugin {
+public class FOPWriterPlugin implements IWriterPlugin {
 
 	private WriterConfig config;
 	private XMLStreamWriter writer;
 
-	private static Logger logger = LogManager.getLogger(FOPWriter.class);
+	private static Logger logger = LogManager.getLogger(FOPWriterPlugin.class);
 
 	@Override
 	public void preAppend(WriterConfig config) throws WriterException {
