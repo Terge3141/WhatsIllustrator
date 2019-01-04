@@ -29,6 +29,7 @@ public class Config {
 	}
 
 	public void setOutputDir(Path outputDir) throws FileNotFoundException {
+		outputDir.toFile().mkdir();
 		check(outputDir);
 		this.outputDir = outputDir;
 	}
@@ -42,6 +43,7 @@ public class Config {
 	}
 
 	public void setEmojiDir(Path emojiDir) throws FileNotFoundException {
+		emojiDir.toFile().mkdir();
 		check(emojiDir);
 		this.emojiDir = emojiDir;
 	}

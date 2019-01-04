@@ -44,6 +44,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 	private Path emojiOutputDir;
 	private List<CopyItem> copyList;
 
+	private Path outputDir;
 	private Path texOutputPath;
 
 	@Override
@@ -51,10 +52,14 @@ public class TexWriterPlugin implements IWriterPlugin {
 		this.config = config;
 		this.tsb = new TextStringBuilder();
 
+		this.outputDir = this.config.getOutputDir().resolve("tex");
+		this.outputDir.toFile().mkdir();
+
 		this.emojis = new EmojiParser(config.getEmojiList());
-		this.emojiOutputDir = this.config.getOutputDir().resolve("emojis");
+		this.emojiOutputDir = this.outputDir.resolve("emojis");
+		this.emojiOutputDir.toFile().mkdir();
 		this.copyList = new ArrayList<CopyItem>();
-		this.texOutputPath = this.config.getOutputDir().resolve(config.getNamePrefix() + ".tex");
+		this.texOutputPath = this.outputDir.resolve(config.getNamePrefix() + ".tex");
 
 		try {
 			if (this.header == null) {
@@ -106,7 +111,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 	@Override
 	public void appendImageMessage(ImageMessage msg) throws WriterException {
 		Path absoluteImgPath = this.config.getImageDir().resolve(msg.getFilename());
-		Path relativeImgPath = this.config.getOutputDir().relativize(absoluteImgPath);
+		Path relativeImgPath = this.outputDir.relativize(absoluteImgPath);
 
 		tsb.appendln("%s\\\\", formatSenderAndTime(msg));
 		tsb.append("\\begin{center}");

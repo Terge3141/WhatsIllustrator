@@ -3,7 +3,9 @@ package creator.plugins.fop;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,8 +43,16 @@ public class FOPWriterPlugin implements IWriterPlugin {
 		this.config = config;
 
 		try {
-			// TODO change
-			FileOutputStream out = new FileOutputStream("/tmp/bla.xml");
+			Path outputDir = this.config.getOutputDir().resolve("fo");
+			outputDir.toFile().mkdir();
+			Path xmlOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".xml");
+			Path xslOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".xsl");
+
+			logger.info("Writing output to '{}'", xmlOutputPath);
+			FileOutputStream out = new FileOutputStream(xmlOutputPath.toFile());
+
+			// write xsl file
+			writeRessourceFile("fopsample.xsl", xslOutputPath);
 
 			this.writer = XMLOutputFactory.newInstance().createXMLStreamWriter(out, "UTF-16");
 			this.writer.writeStartDocument();
@@ -175,4 +185,16 @@ public class FOPWriterPlugin implements IWriterPlugin {
 		System.out.println("Moin");
 	}
 
+	private void writeRessourceFile(String ressourceName, Path destPath) throws IOException {
+		InputStream inputStream = this.getClass().getResourceAsStream(ressourceName);
+		FileOutputStream fileOutputStream = new FileOutputStream(destPath.toFile());
+
+		int nRead;
+		byte[] data = new byte[1024];
+		while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+			fileOutputStream.write(data, 0, nRead);
+		}
+		
+		fileOutputStream.close();
+	}
 }

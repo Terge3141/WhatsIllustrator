@@ -53,7 +53,7 @@ public class Program {
 			config.setDebugDir(line.getOptionValue("debugdir"));
 
 			String outputDirStr = line.getOptionValue("outputdir");
-			config.setOutputDir(Misc.isNullOrWhiteSpace(outputDirStr) ? config.getInputDir() : Paths.get(outputDirStr));
+			config.setOutputDir(Misc.isNullOrWhiteSpace(outputDirStr) ? config.getInputDir().resolve("output") : Paths.get(outputDirStr));
 
 		} catch (MissingOptionException moe) {
 			HelpFormatter formatter = new HelpFormatter();

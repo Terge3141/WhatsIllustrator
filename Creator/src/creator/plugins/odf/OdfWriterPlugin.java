@@ -60,7 +60,11 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		this.emojis = new EmojiParser(config.getEmojiList());
 
 		this.firstDateHeader = true;
-		this.odfOutputPath = this.config.getOutputDir().resolve(this.config.getNamePrefix() + ".odt");
+
+		Path outputDir = this.config.getOutputDir().resolve("odf");
+		outputDir.toFile().mkdir();
+
+		this.odfOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".odt");
 
 		try {
 			this.doc = TextDocument.newTextDocument();
