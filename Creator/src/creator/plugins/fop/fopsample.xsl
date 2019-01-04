@@ -26,6 +26,13 @@
 			margin-top="5mm" margin-bottom="1mm" text-align="center">
 			<xsl:value-of select="." />
 		</fo:block>
+		<!-- <fo:block text-align="right">
+			<fo:external-graphic width="150pt" height="150pt" content-width="150pt" content-height="150pt" src="url(/tmp/imagepool/IMG-20130101-WA0000.jpg)">
+				<xsl:attribute name="src">
+					<xsl:value-of select="."/>
+				</xsl:attribute>
+			</fo:external-graphic>
+		</fo:block>-->
 	</xsl:template>
 
 	<xsl:template match="textmessage">
@@ -35,4 +42,27 @@
 			<xsl:value-of select="text" />
 		</fo:block>
 	</xsl:template>
+	
+	<xsl:template match="imagemessage">
+		<fo:block>
+		<fo:inline font-weight="bold"><xsl:value-of select="sender"/></fo:inline>	
+			(<xsl:value-of select="time" />):
+		</fo:block>
+		
+		<fo:block>
+			<fo:external-graphic width="150pt" height="150pt" content-width="150pt" content-height="150pt">
+				<xsl:attribute name="src">
+					<xsl:value-of select="src" />
+				</xsl:attribute>
+			</fo:external-graphic>
+		</fo:block>
+		
+		<fo:block text-align="right">
+			<xsl:value-of select="src" />
+		</fo:block>
+		<!-- <fo:block text-align="right">
+			<fo:external-graphic width="150pt" height="150pt" content-width="150pt" content-height="150pt" src="url({src})/>				
+		</fo:block>-->
+	</xsl:template>
+	
 </xsl:stylesheet>

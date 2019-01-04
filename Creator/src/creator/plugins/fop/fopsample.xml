@@ -21,4 +21,10 @@
 		<time>11:03</time>
 		<text>How are you?</text>
 	</textmessage>
+
+	<imagemessage>
+		<sender>Firstname Lastname</sender>
+		<time>11:03</time>
+		<src>/tmp/imagepool/IMG-20130101-WA0000.jpg</src>
+	</imagemessage>
 </messages>

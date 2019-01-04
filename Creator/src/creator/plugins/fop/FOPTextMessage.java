@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import helper.DateUtils;
 import messageparser.TextMessage;
 
-@XmlRootElement
+@XmlRootElement(name="textmessage")
 public class FOPTextMessage implements Serializable {
 
 	/**
@@ -16,13 +16,13 @@ public class FOPTextMessage implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	@XmlElement
+	@XmlElement(name="time")
 	private String timepoint;
 
-	@XmlElement
+	@XmlElement(name="sender")
 	private String sender;
 
-	@XmlElement
+	@XmlElement(name="text")
 	private String content;
 
 	public FOPTextMessage() {
