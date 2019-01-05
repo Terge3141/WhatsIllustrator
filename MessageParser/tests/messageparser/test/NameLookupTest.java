@@ -17,7 +17,7 @@ public class NameLookupTest {
 
 	@Test
 	public void testTryLookup()  {
-		String xml = "<NameReplacer>"
+		String xml = "<NameLookup>"
 				+ "<ReplaceItem>"
 				+ "<oldName>Doc Brown</oldName>"
 				+ "<newName>Doc</newName>"
@@ -26,7 +26,7 @@ public class NameLookupTest {
 				+ "<oldName>Martin McFly</oldName>"
 				+ "<newName>Marti</newName>"
 				+ "</ReplaceItem>"
-				+ "</NameReplacer>";
+				+ "</NameLookup>";
 		
 		NameLookup nl=NameLookup.fromXmlString(xml);
 		assertEquals("Doc", nl.tryLookup("Doc Brown"));

@@ -1,0 +1,7 @@
+<!-- Copy this file to the config directory -->
+<NameLookup>
+	<ReplaceItem>
+		<oldName>Martin McFly</oldName>
+		<newName>Marti</newName>
+	</ReplaceItem>
+</NameLookup>

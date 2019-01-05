@@ -30,7 +30,7 @@ public class NameLookup {
 			SAXReader reader = new SAXReader();
 			InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
 			Document document = reader.read(stream);
-			List<Node> elements = document.selectNodes("//NameReplacer/ReplaceItem");
+			List<Node> elements = document.selectNodes("//NameLookup/ReplaceItem");
 			for (Node element : elements) {
 				String oldName = element.selectSingleNode("oldName").getText();
 				String newName = element.selectSingleNode("newName").getText();
