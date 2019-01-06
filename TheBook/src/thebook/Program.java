@@ -20,11 +20,9 @@ import creator.plugins.odf.OdfWriterPlugin;
 import creator.plugins.tex.TexWriterPlugin;
 import helper.Misc;
 
-// Parses the old Soft Bank unicode characters to new unicode characters
-// Table from https://github.com/iamcal/emoji-data
 public class Program {
 
-	private static Logger logger = LogManager.getLogger(Program.class);
+	private static Logger logger;
 
 	public static Options getOptions() {
 		Options options = new Options();
@@ -42,6 +40,10 @@ public class Program {
 	public static void main(String[] args) throws Exception {
 		// -i "/tmp/mychat" -e "/tmp/emojis" -imagepooldir "/tmp/imagepool"
 
+		Misc.setStdoutLogger();
+
+		logger = LogManager.getLogger(Program.class);
+
 		Config config = new Config();
 		Options options = getOptions();
 		CommandLineParser parser = new DefaultParser();
@@ -53,7 +55,8 @@ public class Program {
 			config.setDebugDir(line.getOptionValue("debugdir"));
 
 			String outputDirStr = line.getOptionValue("outputdir");
-			config.setOutputDir(Misc.isNullOrWhiteSpace(outputDirStr) ? config.getInputDir().resolve("output") : Paths.get(outputDirStr));
+			config.setOutputDir(Misc.isNullOrWhiteSpace(outputDirStr) ? config.getInputDir().resolve("output")
+					: Paths.get(outputDirStr));
 
 		} catch (MissingOptionException moe) {
 			HelpFormatter formatter = new HelpFormatter();
