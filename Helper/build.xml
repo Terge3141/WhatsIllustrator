@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. --><project basedir="." default="build" name="Helper">
+    <property environment="env"/>
+    <property name="Creator.location" value="../Creator"/>
+    <property name="ImageMatcher.location" value="../ImageMatcher"/>
+    <property name="MessageParser.location" value="../MessageParser"/>
+    <property name="Tests.location" value="../Tests"/>
+    <property name="TheBook.location" value="../TheBook"/>
+    <property name="junit.output.dir" value="junit"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.8"/>
+    <property name="source" value="1.8"/>
+    <path id="Helper.classpath">
+        <pathelement location="bin"/>
+        <pathelement location="../libraries/commons-text-1.6.jar"/>
+        <pathelement location="../libraries/log4j-api-2.11.1.jar"/>
+        <pathelement location="../libraries/log4j-core-2.11.1.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="Helper.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">
+        <ant antfile="build.xml" dir="${Creator.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${Creator.location}" inheritAll="false" target="build"/>
+        <ant antfile="build.xml" dir="${ImageMatcher.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${ImageMatcher.location}" inheritAll="false" target="build"/>
+        <ant antfile="build.xml" dir="${MessageParser.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${MessageParser.location}" inheritAll="false" target="build"/>
+        <ant antfile="build.xml" dir="${Tests.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${Tests.location}" inheritAll="false" target="build"/>
+        <ant antfile="build.xml" dir="${TheBook.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${TheBook.location}" inheritAll="false" target="build"/>
+    </target>
+    <target name="DateUtilsTest.testDateDifferYearDiffer">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="helpertest.DateUtilsTest" todir="${junit.output.dir}"/>
+            <classpath refid="Helper.classpath"/>
+        </junit>
+    </target>
+    <target name="EmojiParserTest">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="helpertest.EmojiParserTest" todir="${junit.output.dir}"/>
+            <classpath refid="Helper.classpath"/>
+        </junit>
+    </target>
+    <target name="MiscTest">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="helpertest.MiscTest" todir="${junit.output.dir}"/>
+            <classpath refid="Helper.classpath"/>
+        </junit>
+    </target>
+    <target name="EmojiParserTest.TestReplaceEmojis_List1">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="helpertest.EmojiParserTest" todir="${junit.output.dir}"/>
+            <classpath refid="Helper.classpath"/>
+        </junit>
+    </target>
+    <target name="EmojiParserTest.TestReplaceEmojis_Single_InList1">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="helpertest.EmojiParserTest" todir="${junit.output.dir}"/>
+            <classpath refid="Helper.classpath"/>
+        </junit>
+    </target>
+    <target name="helper.test">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <jvmarg line="-ea"/>
+            <classpath refid="Helper.classpath"/>
+        </junit>
+    </target>
+    <target name="DateUtilsTest">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="helpertest.DateUtilsTest" todir="${junit.output.dir}"/>
+            <classpath refid="Helper.classpath"/>
+        </junit>
+    </target>
+    <target name="FileHanderTest">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="helpertest.FileHanderTest" todir="${junit.output.dir}"/>
+            <classpath refid="Helper.classpath"/>
+        </junit>
+    </target>
+    <target name="EmojiParserTest.TestReplaceEmojis_List2">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="helpertest.EmojiParserTest" todir="${junit.output.dir}"/>
+            <classpath refid="Helper.classpath"/>
+        </junit>
+    </target>
+    <target name="tests">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <jvmarg line="-ea"/>
+            <classpath refid="Helper.classpath"/>
+        </junit>
+    </target>
+    <target name="LatexTest">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="helpertest.LatexTest" todir="${junit.output.dir}"/>
+            <classpath refid="Helper.classpath"/>
+        </junit>
+    </target>
+    <target name="XmlUtilsTest">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="helpertest.XmlUtilsTest" todir="${junit.output.dir}"/>
+            <classpath refid="Helper.classpath"/>
+        </junit>
+    </target>
+    <target name="junitreport">
+        <junitreport todir="${junit.output.dir}">
+            <fileset dir="${junit.output.dir}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${junit.output.dir}"/>
+        </junitreport>
+    </target>
+</project>
