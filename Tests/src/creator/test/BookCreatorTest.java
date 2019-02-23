@@ -31,7 +31,7 @@ public class BookCreatorTest {
 	public TemporaryFolder folder = new TemporaryFolder();
 
 	@BeforeClass
-	public static void setLogger()  {
+	public static void setLogger() {
 		Misc.setStdoutLogger();
 	}
 
@@ -150,7 +150,7 @@ public class BookCreatorTest {
 
 		bk.write();
 
-		Path texFile = outputDir.resolve("WhatsApp Chat with Firstname Surname.tex");
+		Path texFile = outputDir.resolve("tex").resolve("WhatsApp Chat with Firstname Surname.tex");
 		assertTrue(Files.exists(texFile));
 
 		return new CreatorAndPlugin(bk, plugin);
