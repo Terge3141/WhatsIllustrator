@@ -40,6 +40,9 @@ This will create the directory "output" in $dir. It has the following subdirecto
 * **odf**: Contains the generated **odt** file. It can be open for example with *libre office*.
 * **tex** Contains the generated **tex** file and some files the tex document references. The file can be processed for example with *pdflatex*
 
+# Contributions
+Contributions (new features, bug fixes, changes) are very welcome. Just send send me the pull requests or patches. Also, if you find any bugs let me know.
+
 ## Image Pools
 For some chats it appears not be possible to export them with media. In this case an `<`Media omitted`>` line occurs in the chat file. In this case WhatsBookSharp automatically searches the image pool directory and lists all possible images for the date of interest.
 
