@@ -110,14 +110,66 @@ public class BookCreatorTest {
 		assertEquals("footer", texLines.get(6));
 	}
 
+	@Test
+	public void testWriteTextTex_Properties() throws IOException, ParseException, WriterException {
+		Path dir = this.folder.newFolder("test").toPath();
+
+		Path inputDir = dir.resolve("input");
+		Path outputDir = dir.resolve("output");
+		Path emojiDir = dir.resolve("emojis");
+		Path imagePoolDir = dir.resolve("imagepool");
+
+		Path chatDir = inputDir.resolve("chat");
+		Path configDir = inputDir.resolve("config");
+
+		Files.createDirectories(inputDir);
+		Files.createDirectories(outputDir);
+		Files.createDirectories(emojiDir);
+		Files.createDirectories(imagePoolDir);
+		Files.createDirectories(chatDir);
+		Files.createDirectories(configDir);
+
+		List<String> chatLines =new ArrayList<String>();
+		chatLines.add("16/03/2018, 08:46 - Firstname Surname: Message1");
+		
+		Arrays.asList();
+
+		Files.write(chatDir.resolve("WhatsApp Chat with Firstname Surname.txt"), chatLines);
+		
+		Path headerTmpl = dir.resolve("header.tex.tmpl");
+		Path footerTmpl = dir.resolve("footer.tex.tmpl");
+		Path messageTmpl = dir.resolve("message.tex.tmpl");
+		
+		Files.write(headerTmpl, Arrays.asList( "headercontent"));
+		Files.write(headerTmpl, Arrays.asList( "footercontent"));
+		Files.write(headerTmpl, Arrays.asList( "before$$message$$after"));
+
+		List<String> propLines = new ArrayList<String>();
+		propLines.add("header=" + headerTmpl);
+		propLines.add("footer=" + footerTmpl);
+		propLines.add("content=" + messageTmpl);
+		Files.write(configDir.resolve("texwriter.properties"), propLines);
+		
+		TexWriterPlugin plugin = new TexWriterPlugin();
+
+		List<IWriterPlugin> plugins = Arrays.asList(plugin);
+		BookCreator bk = new BookCreator(inputDir, outputDir, emojiDir, plugins);
+		bk.getWriterConfig().setImagePoolDir(imagePoolDir);
+		
+		bk.write();
+
+		Path texFile = outputDir.resolve("tex").resolve("WhatsApp Chat with Firstname Surname.tex");
+		assertTrue(Files.exists(texFile));
+	}
+
 	private CreatorAndPlugin createTexFile(List<String> chatLines, List<String> propLines)
 			throws ParseException, IOException, WriterException {
-		String dir = this.folder.newFolder("test").toString();
+		Path dir = this.folder.newFolder("test").toPath();
 
-		Path inputDir = Paths.get(dir, "input");
-		Path outputDir = Paths.get(dir, "output");
-		Path emojiDir = Paths.get(dir, "emojis");
-		Path imagePoolDir = Paths.get(dir, "imagepool");
+		Path inputDir = dir.resolve("input");
+		Path outputDir = dir.resolve("output");
+		Path emojiDir = dir.resolve("emojis");
+		Path imagePoolDir = dir.resolve("imagepool");
 
 		Path chatDir = inputDir.resolve("chat");
 		Path configDir = inputDir.resolve("config");
