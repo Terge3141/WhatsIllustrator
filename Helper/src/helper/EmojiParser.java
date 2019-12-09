@@ -21,7 +21,7 @@ public class EmojiParser {
 	private static final String SEPERATOR = "_";
 	private final String EMOJIPREFIX = "emoji_u";
 	
-	private static Logger logger = LogManager.getLogger();
+	private static Logger logger = LogManager.getLogger(EmojiParser.class);
 
 	private List<String> emojiList;
 

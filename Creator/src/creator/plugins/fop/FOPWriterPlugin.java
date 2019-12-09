@@ -145,7 +145,7 @@ public class FOPWriterPlugin implements IWriterPlugin {
 	}
 
 	private <T> void appendObject(T obj, XMLStreamWriter writer) throws WriterException {
-		try {
+		/*try {
 			JAXBContext context = JAXBContext.newInstance(obj.getClass());
 			Marshaller marshaller = context.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
@@ -153,7 +153,8 @@ public class FOPWriterPlugin implements IWriterPlugin {
 			marshaller.marshal(obj, writer);
 		} catch (JAXBException je) {
 			throw new WriterException(je);
-		}
+		}*/
+		//throw new WriterException("Problem");
 	}
 
 	private void toPDF() throws FOPException, TransformerException, IOException {

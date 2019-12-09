@@ -193,6 +193,8 @@ public class TexWriterPlugin implements IWriterPlugin {
 	private String createLatexImage(String path, String subscription) {
 		TextStringBuilder tsb = new TextStringBuilder();
 		tsb.appendln("\\includegraphics[height=0.1\\textheight]{%s}\\\\", path);
+		
+		subscription = subscription.replace("\n", " ").replace("\r", "");
 		tsb.appendln("\\small{\\textit{%s}}", encode(subscription));
 		return tsb.toString();
 	}
