@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.terge</groupId>
+	<artifactId>whatsillustrator</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>PDF-Converter for Whatsapp Messages</name>
+	<description>Converts whatsapp messages to pdf</description>
+	<modules>
+		<module>helper</module>
+		<module>imagematcher</module>
+		<module>messageparser</module>
+		<module>creator</module>
+		<module>thebook</module>
+	</modules>
+
+	<build>
+		<plugins>
+			<!-- COMPILE -->
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>11</source>
+					<target>11</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

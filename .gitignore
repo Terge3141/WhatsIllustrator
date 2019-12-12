@@ -78,3 +78,5 @@ libraries/Log4j-config.xsd
 libraries/Log4j-events.dtd
 libraries/Log4j-events.xsd
 libraries/Log4j-levels.xsd
+
+.settings
