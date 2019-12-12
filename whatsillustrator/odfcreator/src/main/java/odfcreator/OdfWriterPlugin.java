@@ -1,4 +1,4 @@
-package creator.plugins.odf;
+package odfcreator;
 
 import java.net.URI;
 import java.nio.file.Path;

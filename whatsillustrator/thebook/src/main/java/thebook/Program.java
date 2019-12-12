@@ -15,9 +15,9 @@ import org.apache.logging.log4j.Logger;
 
 import creator.BookCreator;
 import creator.plugins.IWriterPlugin;
-import creator.plugins.fop.FOPWriterPlugin;
-import creator.plugins.odf.OdfWriterPlugin;
-import creator.plugins.tex.TexWriterPlugin;
+import fopcreator.FOPWriterPlugin;
+import odfcreator.OdfWriterPlugin;
+import texcreator.TexWriterPlugin;
 import helper.Misc;
 
 public class Program {

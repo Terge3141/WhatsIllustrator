@@ -1,4 +1,4 @@
-package creator.plugins.fop;
+package fopcreator;
 
 import java.io.Serializable;
 import java.util.ArrayList;

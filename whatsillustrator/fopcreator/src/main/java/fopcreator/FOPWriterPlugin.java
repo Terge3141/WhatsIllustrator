@@ -1,4 +1,4 @@
-package creator.plugins.fop;
+package fopcreator;
 
 import java.io.File;
 import java.io.FileOutputStream;

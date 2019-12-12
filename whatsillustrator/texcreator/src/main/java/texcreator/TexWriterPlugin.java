@@ -1,4 +1,4 @@
-package creator.plugins.tex;
+package texcreator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
