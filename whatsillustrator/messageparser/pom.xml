@@ -27,5 +27,13 @@
 			<artifactId>imagematcher</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/jaxen/jaxen -->
+		<dependency>
+			<groupId>jaxen</groupId>
+			<artifactId>jaxen</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+
 	</dependencies>
 </project>
