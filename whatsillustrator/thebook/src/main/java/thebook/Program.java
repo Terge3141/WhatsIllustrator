@@ -40,8 +40,6 @@ public class Program {
 	public static void main(String[] args) throws Exception {
 		// -i "/tmp/mychat" -e "/tmp/emojis" -imagepooldir "/tmp/imagepool"
 
-		Misc.setStdoutLogger();
-
 		logger = LogManager.getLogger(Program.class);
 
 		Config config = new Config();
