@@ -19,9 +19,10 @@ git clone https://github.com/googlei18n/noto-emoji.git
 
 Make sure that *Java 8* and *ant* is installed
 
-Go to the WhatsIllustrator directory and type
+Go to the WhatsIllustrator directory and build package
 ```bash
-ant
+cd whatsillustrator
+mvn package
 ```
 This will create the file dist.jar in the same directory.
 
