@@ -17,7 +17,7 @@ Get the emojis from noto-emoji using git (recommended)
 git clone https://github.com/googlei18n/noto-emoji.git
 ``` 
 
-Make sure that *Java 8* and *ant* is installed
+Make sure that *Java 11* and *maven* is installed
 
 Go to the WhatsIllustrator directory and build package
 ```bash
