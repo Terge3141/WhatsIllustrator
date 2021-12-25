@@ -37,7 +37,7 @@ public class BookCreator {
 		this.plugins = writerPlugins;
 	}
 
-	public void write() throws IOException, ParseException, WriterException  {
+	public void write_wa() throws IOException, ParseException, WriterException  {
 		List<String> txtFiles = FileHandler.listDir(this.config.getChatDir(), ".*.txt");
 		if (txtFiles.size() != 1) {
 			throw new IllegalArgumentException(
@@ -100,6 +100,74 @@ public class BookCreator {
 		}
 
 		im.toXmlFile();
+	}
+	
+	public void write() throws IOException, ParseException, WriterException  {
+		/*List<String> txtFiles = FileHandler.listDir(this.config.getChatDir(), ".*.txt");
+		if (txtFiles.size() != 1) {
+			throw new IllegalArgumentException(
+					String.format("Invalid number of .txt-files found: %d", txtFiles.size()));
+		}
+
+		Path txtInputPath = Paths.get(txtFiles.get(0));
+		logger.info("Using {} as input", txtInputPath);
+
+		String namePrefix = txtInputPath.toFile().getName();
+		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
+		config.setNamePrefix(namePrefix);*/
+
+		readProperties();
+		/*ImageMatcher im = getImageMatcher(namePrefix);
+		NameLookup nl = getNameLookup();
+
+		WhatsappParser parser = WhatsappParser.of(txtInputPath, im, nl);*/
+		config.setNamePrefix("prefix");
+		Path txtInputPath = Paths.get(config.getInputDir().toString(), "bigfamily.json");
+		TelegramParser parser = TelegramParser.of(txtInputPath);
+
+		// pre append
+		for (IWriterPlugin plugin : this.plugins) {
+			plugin.preAppend(this.config);
+		}
+
+		// write messages
+		logger.info("Start parsing messages");
+		IMessage msg;
+		LocalDateTime last = LocalDateTime.MIN;
+		while ((msg = parser.nextMessage()) != null) {
+			if (DateUtils.dateDiffer(last, msg.getTimepoint())) {
+				for (IWriterPlugin plugin : this.plugins) {
+					plugin.appendDateHeader(msg.getTimepoint());
+				}
+			}
+
+			last = msg.getTimepoint();
+
+			if (msg instanceof TextMessage) {
+				for (IWriterPlugin plugin : this.plugins) {
+					plugin.appendTextMessage((TextMessage) msg);
+				}
+			} else if (msg instanceof ImageMessage) {
+				for (IWriterPlugin plugin : this.plugins) {
+					plugin.appendImageMessage((ImageMessage) msg);
+				}
+			} else if (msg instanceof MediaOmittedMessage) {
+				for (IWriterPlugin plugin : this.plugins) {
+					plugin.appendMediaOmittedMessage((MediaOmittedMessage) msg);
+				}
+			} else if (msg instanceof MediaMessage) {
+				for (IWriterPlugin plugin : this.plugins) {
+					plugin.appendMediaMessage((MediaMessage) msg);
+				}
+			}
+		}
+		
+		// post append
+		for (IWriterPlugin plugin : this.plugins) {
+			plugin.postAppend();
+		}
+
+		//im.toXmlFile();
 	}
 	
 	public WriterConfig getWriterConfig() {
