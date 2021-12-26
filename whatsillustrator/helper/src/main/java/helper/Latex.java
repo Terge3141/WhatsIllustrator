@@ -77,23 +77,10 @@ public class Latex {
 		str = str.replace("Ù", "\\`{U}");
 		str = str.replace("Ú", "\\'{U}");
 		str = str.replace("Û", "\\^{U}");
-
-		/*
-		 * // causes strange character 0xC2 0xA0 --> " " str =
-		 * replaceHelper.replaceString (str, new byte[]{ 0xC2, 0xA0 }, " ");
-		 * 
-		 * // 0xC2 0x84 --> ,, str = replaceHelper.replaceString (str, new byte[]{ 0xC2,
-		 * 0x84 }, "\\glqq ");
-		 * 
-		 * // 0xC2 0x93 --> '' str = replaceHelper.replaceString (str, new byte[]{ 0xC2,
-		 * 0x93 }, "\\grqq ");
-		 * 
-		 * // 0xC2 0x92 --> ' str = replaceHelper.replaceString (str, new byte[]{ 0xC2,
-		 * 0x92 }, "'");
-		 * 
-		 * // 0xC2 0x85 --> nothing str = replaceHelper.replaceString (str, new byte[]{
-		 * 0xC2, 0x85 }, "");
-		 */
+		
+		// feof character (Variation Selectors)	
+		char c = 0xfe0f;
+		str = str.replace(String.valueOf(c), "");
 
 		return str;
 	}
