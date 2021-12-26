@@ -8,9 +8,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.google.gson.*;
 
 public class TelegramParser {
+	
+	private static Logger logger = LogManager.getLogger(TelegramParser.class);
 	
 	private int index = 0;
 	private TelegramChat telegramChat;
@@ -35,6 +40,11 @@ public class TelegramParser {
 		if(this.index >= this.telegramChat.messages.length) {
 			return null;
 		}		
+		
+		if(this.index%100==0) {
+			logger.info("{}/{} messages parsed", this.index, this.telegramChat.messages.length);
+		}
+		
 		TelegramMessage message = this.telegramChat.messages[this.index];
 		this.index++;
 		
