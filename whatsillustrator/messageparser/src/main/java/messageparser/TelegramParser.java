@@ -74,7 +74,12 @@ public class TelegramParser {
 				return new TextMessage(date, from, message.sticker_emoji);
 			}
 			else if("video_file".equals(message.media_type)) {
-				return new ImageMessage(date, from, message.thumbnail, text);
+				if(message.thumbnail!=null) {
+					return new ImageMessage(date, from, message.thumbnail, text);
+				}
+				else {
+					return new TextMessage(date, from, "video - no thumbnail available");
+				}
 			}
 			else {
 				if("".equals(text)) {
