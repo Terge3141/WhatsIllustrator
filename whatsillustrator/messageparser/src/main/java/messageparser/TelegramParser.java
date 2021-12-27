@@ -60,8 +60,28 @@ public class TelegramParser {
 			throw new IllegalArgumentException(message.date);
 		}
 		
+		String from = message.from;
+		from = from + ": " + message.id;
+		String text = message.text.text;
+		
 		if(message.type.equals(JSON_MESSAGE)) {
-			return new TextMessage(date, message.from, message.text.text);
+			if(message.photo!=null) {
+				return new ImageMessage(date, from, message.photo, text);
+			}
+			else if("sticker".equals(message.media_type)) {
+				// This will be replaced by the actual sticker once https://github.com/haraldk/TwelveMonkeys
+				// supports alpha for webp images
+				return new TextMessage(date, from, message.sticker_emoji);
+			}
+			else if("video_file".equals(message.media_type)) {
+				return new ImageMessage(date, from, message.thumbnail, text);
+			}
+			else {
+				if("".equals(text)) {
+					logger.info("Text message has empty text, id {}", message.id);
+				}
+				return new TextMessage(date, from, text);
+			}
 		}
 		else {
 			return nextMessage();

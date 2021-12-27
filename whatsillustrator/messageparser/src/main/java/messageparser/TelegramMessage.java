@@ -18,8 +18,8 @@ public class TelegramMessage {
 	public String mime_type;
 	public String photo;
 	// TODO
-	/*public String reply_to_message_id;
-	public String sticker_emoji;*/
+	/*public String reply_to_message_id;*/
+	public String sticker_emoji;
 	public TelegramText text;
 	public String thumbnail;
 	public String width;
