@@ -13,7 +13,7 @@ public class TelegramMessage {
 	public String from_id;
 	public String height;
 	public String live_location_period_seconds;
-	//public String location_information; // TODO
+	public TelegramLocationInformation location_information;
 	public String media_type;
 	public String mime_type;
 	public String photo;

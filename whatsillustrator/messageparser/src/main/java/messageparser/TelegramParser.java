@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -86,6 +87,12 @@ public class TelegramParser {
 			}
 			else if("audio_file".equals(message.media_type)) {
 				return new TextMessage(date, from, "audio file of " + message.duration_seconds + "s");
+			}
+			else if(message.location_information!=null) {
+				TextStringBuilder sb = new TextStringBuilder();
+				sb.appendln("Latitude: %s", message.location_information.latitude);
+				sb.appendln("Longitude: %s", message.location_information.longitude);
+				return new TextMessage(date, from, sb.toString());
 			}
 			else {
 				if("".equals(text)) {
