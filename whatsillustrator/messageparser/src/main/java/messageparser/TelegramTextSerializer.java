@@ -10,6 +10,20 @@ public class TelegramTextSerializer implements JsonDeserializer<TelegramText>{
 		String text = null;
 		if(json.isJsonArray()) {
 			JsonArray arr = json.getAsJsonArray();
+			// check if it is a link
+			if(arr.get(0).isJsonObject()) {
+				JsonObject jsonObject = arr.get(0).getAsJsonObject();
+				JsonElement typeEl = jsonObject.get("type");
+				if(typeEl!=null && "link".equals(typeEl.getAsString())) {			
+					JsonElement textEl = jsonObject.get("text");
+					if(textEl==null) {
+						return new TelegramText("Bad link", false);
+					}
+					else {
+						return new TelegramText(textEl.getAsString(), true);
+					}
+				}
+			}
 			text = "";
 			for(int i=0; i<arr.size(); i++) {
 				JsonElement element = arr.get(i);

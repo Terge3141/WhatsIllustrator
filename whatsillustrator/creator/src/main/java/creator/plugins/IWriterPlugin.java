@@ -6,6 +6,7 @@ import messageparser.ImageMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
+import messageparser.LinkMessage;
 
 public interface IWriterPlugin {
 	/**
@@ -54,4 +55,11 @@ public interface IWriterPlugin {
 	 * @throws WriterException
 	 */
 	void appendMediaMessage(MediaMessage mediaMessage)throws WriterException;
+	
+	/**
+	 * Appends a link message to the document
+	 * @param linkMessage Message to be appended
+	 * @throws WriterException
+	 */
+	void appendLinkMessage(LinkMessage linkMessage)throws WriterException;
 }

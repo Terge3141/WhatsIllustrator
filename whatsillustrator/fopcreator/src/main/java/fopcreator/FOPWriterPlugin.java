@@ -39,6 +39,7 @@ import messageparser.ImageMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
+import messageparser.LinkMessage;
 
 public class FOPWriterPlugin implements IWriterPlugin {
 	
@@ -66,6 +67,10 @@ public class FOPWriterPlugin implements IWriterPlugin {
 
 	@Override
 	public void appendMediaMessage(MediaMessage mediaMessage) throws WriterException {
+	}
+	
+	@Override
+	public void appendLinkMessage(LinkMessage linkMessage) throws WriterException {
 	}
 	
 	@Override

@@ -24,6 +24,7 @@ import helper.Latex;
 import helper.Misc;
 import messageparser.IMessage;
 import messageparser.ImageMessage;
+import messageparser.LinkMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
@@ -113,10 +114,14 @@ public class TexWriterPlugin implements IWriterPlugin {
 		Path absoluteImgPath = this.config.getImageDir().resolve(msg.getFilename());
 		Path relativeImgPath = this.outputDir.relativize(absoluteImgPath);
 
-		tsb.appendln("%s\\\\", formatSenderAndTime(msg));
-		tsb.append("\\begin{center}");
-		tsb.append(createLatexImage(relativeImgPath, msg.getSubscription()));
-		tsb.appendln("\\end{center}");
+		if(Files.exists(absoluteImgPath)) {
+			tsb.appendln("%s\\\\", formatSenderAndTime(msg));
+			tsb.append("\\begin{center}");
+			tsb.append(createLatexImage(relativeImgPath, msg.getSubscription()));
+			tsb.appendln("\\end{center}");
+		} else {
+			logger.warn("File '{}' does not exist, skipping message", absoluteImgPath);
+		}
 	}
 
 	@Override
@@ -143,6 +148,14 @@ public class TexWriterPlugin implements IWriterPlugin {
 			str = str + " - " + encode(msg.getSubscription());
 		}
 
+		tsb.appendln(str);
+		tsb.appendln("\\\\");
+	}
+	
+	@Override
+	public void appendLinkMessage(LinkMessage msg) throws WriterException {
+		String str = String.format("\\textit{%s}", Latex.encodeLatex(msg.getUrl()));
+		
 		tsb.appendln(str);
 		tsb.appendln("\\\\");
 	}

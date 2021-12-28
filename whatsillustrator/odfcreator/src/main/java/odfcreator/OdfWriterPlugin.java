@@ -1,6 +1,7 @@
 package odfcreator;
 
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Iterator;
@@ -35,6 +36,7 @@ import messageparser.ImageMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
+import messageparser.LinkMessage;
 
 public class OdfWriterPlugin implements IWriterPlugin {
 
@@ -146,9 +148,20 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		DefaultStyleHandler styleHandler = span.getStyleHandler();
 		styleHandler.getTextPropertiesForWrite().setFont(font);
 	}
+	
+	@Override
+	public void appendLinkMessage(LinkMessage msg) throws WriterException {
+		appendSenderAndDate(msg, msg.getUrl());
+	}
 
 	private Paragraph appendImage(Path path, String subscription) {
 		Paragraph paragraph = this.doc.addParagraph("");
+		
+		if(!Files.exists(path)) {
+			logger.warn("File '{}' does not exist, skipping.", path);
+			return paragraph;
+		}
+		
 		paragraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
 		Image image = Image.newImage(paragraph, path.toUri());
 		FrameRectangle rectangle = image.getRectangle();

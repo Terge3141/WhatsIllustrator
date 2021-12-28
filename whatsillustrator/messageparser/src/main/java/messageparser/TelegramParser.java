@@ -73,13 +73,19 @@ public class TelegramParser {
 				// supports alpha for webp images
 				return new TextMessage(date, from, message.sticker_emoji);
 			}
-			else if("video_file".equals(message.media_type)) {
+			else if("video_file".equals(message.media_type) || "animation".equals(message.media_type)) {
 				if(message.thumbnail!=null) {
 					return new ImageMessage(date, from, message.thumbnail, text);
 				}
 				else {
 					return new TextMessage(date, from, "video - no thumbnail available");
 				}
+			}
+			else if("voice_message".equals(message.media_type)) {
+				return new TextMessage(date, from, "voice message of " + message.duration_seconds + "s");
+			}
+			else if("audio_file".equals(message.media_type)) {
+				return new TextMessage(date, from, "audio file of " + message.duration_seconds + "s");
 			}
 			else {
 				if("".equals(text)) {

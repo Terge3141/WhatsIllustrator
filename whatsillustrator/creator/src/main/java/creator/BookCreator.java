@@ -159,6 +159,10 @@ public class BookCreator {
 				for (IWriterPlugin plugin : this.plugins) {
 					plugin.appendMediaMessage((MediaMessage) msg);
 				}
+			} else if (msg instanceof LinkMessage) {
+				for (IWriterPlugin plugin : this.plugins) {
+					plugin.appendLinkMessage((LinkMessage) msg);
+				}
 			}
 		}
 		
