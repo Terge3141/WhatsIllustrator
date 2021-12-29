@@ -19,25 +19,29 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import configurator.Global;
 import creator.plugins.IWriterPlugin;
 import creator.plugins.WriterConfig;
 import creator.plugins.WriterException;
 
 public class BookCreator {
 
-	private final String DEFAULT_LOCALE = "en";
+	//private final String DEFAULT_LOCALE = "en";
 
 	private static Logger logger = LogManager.getLogger(BookCreator.class);
 
-	private WriterConfig config;
+	//private WriterConfig config;
+	private Global globalConfig;
+	private IParser parser;
 	private List<IWriterPlugin> plugins;
 
-	public BookCreator(Path inputDir, Path outputDir, Path emojiInputDir, List<IWriterPlugin> writerPlugins) {
-		this.config = new WriterConfig(inputDir, outputDir, emojiInputDir);
+	public BookCreator(Global globalConfig, IParser parser, List<IWriterPlugin> writerPlugins) {
+		this.globalConfig = globalConfig;
+		this.parser = parser;
 		this.plugins = writerPlugins;
 	}
 
-	public void write_wa() throws IOException, ParseException, WriterException  {
+	/*public void write_wa() throws IOException, ParseException, WriterException  {
 		List<String> txtFiles = FileHandler.listDir(this.config.getChatDir(), ".*.txt");
 		if (txtFiles.size() != 1) {
 			throw new IllegalArgumentException(
@@ -49,7 +53,7 @@ public class BookCreator {
 
 		String namePrefix = txtInputPath.toFile().getName();
 		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
-		config.setNamePrefix(namePrefix);
+		//config.setNamePrefix(namePrefix);
 
 		readProperties();
 		ImageMatcher im = getImageMatcher(namePrefix);
@@ -100,7 +104,7 @@ public class BookCreator {
 		}
 
 		im.toXmlFile();
-	}
+	}*/
 	
 	public void write() throws IOException, ParseException, WriterException  {
 		/*List<String> txtFiles = FileHandler.listDir(this.config.getChatDir(), ".*.txt");
@@ -116,19 +120,19 @@ public class BookCreator {
 		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
 		config.setNamePrefix(namePrefix);*/
 
-		readProperties();
+		//readProperties();
 		/*ImageMatcher im = getImageMatcher(namePrefix);
 		NameLookup nl = getNameLookup();
 
 		WhatsappParser parser = WhatsappParser.of(txtInputPath, im, nl);*/
-		config.setNamePrefix("prefix");
-		Path txtInputPath = Paths.get(config.getInputDir().toString(), "bigfamily.json");
-		TelegramParser parser = TelegramParser.of(txtInputPath);
+		//config.setNamePrefix("prefix");
+		//Path txtInputPath = Paths.get(config.getInputDir().toString(), "bigfamily.json");
+		//TelegramParser parser = TelegramParser.of(txtInputPath);
 
 		// pre append
-		for (IWriterPlugin plugin : this.plugins) {
+		/*for (IWriterPlugin plugin : this.plugins) {
 			plugin.preAppend(this.config);
-		}
+		}*/
 
 		// write messages
 		logger.info("Start parsing messages");
@@ -174,13 +178,13 @@ public class BookCreator {
 		//im.toXmlFile();
 	}
 	
-	public WriterConfig getWriterConfig() {
+	/*public WriterConfig getWriterConfig() {
 		return this.config;
-	}
+	}*/
 
 	private ImageMatcher getImageMatcher(String namePrefix) throws IOException, ParseException {
-		Path matchInputPath = this.config.getConfigDir().resolve(namePrefix + ".match.xml");
-		Path matchOutputPath = this.config.getOutputDir().resolve(namePrefix + ".match.xml");
+		Path matchInputPath = this.globalConfig.getConfigDir().resolve(namePrefix + ".match.xml");
+		Path matchOutputPath = this.globalConfig.getOutputDir().resolve(namePrefix + ".match.xml");
 		ImageMatcher im = null;
 
 		if (matchInputPath.toFile().isFile()) {
@@ -188,7 +192,7 @@ public class BookCreator {
 			im = ImageMatcher.fromXmlFile(matchInputPath);
 			im.setSearchMode(false);
 		} else {
-			Path imagePoolDir = config.getImagePoolDir();
+			Path imagePoolDir = globalConfig.getImagePoolDir();
 			im = new ImageMatcher();
 			if (imagePoolDir == null) {
 				im.setSearchMode(false);
@@ -206,7 +210,7 @@ public class BookCreator {
 	}
 
 	private NameLookup getNameLookup() throws IOException {
-		Path lookupInputPath = this.config.getConfigDir().resolve("namelookup.xml");
+		Path lookupInputPath = this.globalConfig.getConfigDir().resolve("namelookup.xml");
 		NameLookup nl;
 		if (lookupInputPath.toFile().isFile()) {
 			logger.info("Loading name lookup '{}'", lookupInputPath);
@@ -218,23 +222,23 @@ public class BookCreator {
 		return nl;
 	}
 
-	private void readProperties() throws FileNotFoundException, IOException {
-		Path propertiesInputPath = this.config.getConfigDir().resolve("bookcreator.properties");
+	/*private void readProperties() throws FileNotFoundException, IOException {
+		Path propertiesInputPath = this.globalConfig.getConfigDir().resolve("bookcreator.properties");
 		
 		// file should contain
 		// locale=language
-		String locale = this.DEFAULT_LOCALE;
+		//String locale = this.DEFAULT_LOCALE;
 		boolean writeMediaOmittedHints = false;
 		if (propertiesInputPath.toFile().isFile()) {
 			logger.info("Using properties file '{}'", propertiesInputPath);
 			Properties properties = new Properties();
 			properties.load(new FileInputStream(propertiesInputPath.toFile()));
 
-			locale = properties.getProperty("locale", locale);
+			//locale = properties.getProperty("locale", locale);
 			writeMediaOmittedHints = Boolean.parseBoolean(
 					properties.getProperty("mediaomittedhints", Boolean.toString(writeMediaOmittedHints)));
 		}
-		this.config.setDateUtils(new DateUtils(locale));
+		//this.config.setDateUtils(new DateUtils(locale));
 		this.config.setWriteMediaOmittedHints(writeMediaOmittedHints);
-	}
+	}*/
 }

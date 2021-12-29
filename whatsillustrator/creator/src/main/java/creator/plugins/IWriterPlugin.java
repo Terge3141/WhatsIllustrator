@@ -2,6 +2,7 @@ package creator.plugins;
 
 import java.time.LocalDateTime;
 
+import configurator.Global;
 import messageparser.ImageMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
@@ -10,10 +11,10 @@ import messageparser.LinkMessage;
 
 public interface IWriterPlugin {
 	/**
-	 * Method is invoked before the actual message are appended. This method should
+	 * Method is invoked before the actual messages are appended. This method should
 	 * initialize all necessary global variables.
 	 */
-	void preAppend(WriterConfig config) throws WriterException;
+	void preAppend(String xmlConfig, Global globalConfig) throws WriterException;
 
 	/**
 	 * Method is invoked after all messages are appended. This method should save

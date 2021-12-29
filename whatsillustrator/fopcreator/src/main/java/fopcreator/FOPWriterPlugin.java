@@ -31,6 +31,7 @@ import org.apache.fop.apps.MimeConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import configurator.Global;
 import creator.plugins.IWriterPlugin;
 import creator.plugins.WriterConfig;
 import creator.plugins.WriterException;
@@ -43,11 +44,11 @@ import messageparser.LinkMessage;
 
 public class FOPWriterPlugin implements IWriterPlugin {
 	
-	// TODO delete
 	@Override
-	public void preAppend(WriterConfig config) throws WriterException {
-		
+	public void preAppend(String xmlConfig, Global globalConfig) throws WriterException {
+	
 	}
+	
 	@Override
 	public void postAppend() throws WriterException {
 		

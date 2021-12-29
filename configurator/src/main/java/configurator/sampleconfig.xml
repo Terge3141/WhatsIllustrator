@@ -1,0 +1,30 @@
+<configuration>
+	<global>
+		<inputdir>inputdirectory</inputdir>
+		<outputdir>outputdirectory</outputdir>
+		<emojidir>emojidirectory</emojidir>
+		<imagepooldir>imagepooldirectory</imagepooldir>
+		<debugdir>debugdirectory</debugdir>
+		<nameprefix>nameprefix</nameprefix>
+	</global>
+	<parser>
+		<name>messageparser.TelegramParser</name>
+		<parserconfiguration>
+			<messagepath>messagepath</messagepath>
+		</parserconfiguration>
+	</parser>
+	<writers>
+		<writer>
+			<name>namea</name>
+			<writerconfiguration>configa</writerconfiguration>
+		</writer>
+		<writer>
+			<name>nameb</name>
+			<writerconfiguration>configb</writerconfiguration>
+		</writer>
+		<writer>
+			<name>nameb</name>
+			<writerconfiguration>configb</writerconfiguration>
+		</writer>
+	</writers>
+</configuration>

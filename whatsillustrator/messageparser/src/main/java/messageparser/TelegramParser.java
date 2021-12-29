@@ -1,8 +1,12 @@
 package messageparser;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -11,10 +15,13 @@ import java.time.format.DateTimeParseException;
 import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.io.SAXReader;
 
 import com.google.gson.*;
 
-public class TelegramParser {
+public class TelegramParser implements IParser {
 	
 	private static Logger logger = LogManager.getLogger(TelegramParser.class);
 	
@@ -22,6 +29,9 @@ public class TelegramParser {
 	private TelegramChat telegramChat;
 	
 	private static final String JSON_MESSAGE = "message";
+	
+	public TelegramParser() {
+	}
 	
 	public static TelegramParser of(Path messagePath)
 			throws IOException {
@@ -35,6 +45,21 @@ public class TelegramParser {
 		
 		Gson gson = gsonBuilder.create(); 
 		telegramChat = gson.fromJson(json, TelegramChat.class);
+	}
+	
+	public void init(String xmlConfig) throws IOException, DocumentException {
+		SAXReader reader = new SAXReader();
+		InputStream stream = new ByteArrayInputStream(xmlConfig.getBytes(StandardCharsets.UTF_16));
+		Document document = reader.read(stream);
+		
+		String messagePath = document.selectSingleNode("//messagepath").getStringValue();
+		String json = Files.readString(Paths.get(messagePath));
+		
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.registerTypeAdapter(TelegramText.class, new TelegramTextSerializer());
+		
+		Gson gson = gsonBuilder.create(); 
+		this.telegramChat = gson.fromJson(json, TelegramChat.class);
 	}
 	
 	public IMessage nextMessage() {

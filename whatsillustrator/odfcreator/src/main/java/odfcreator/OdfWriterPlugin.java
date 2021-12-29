@@ -25,6 +25,7 @@ import org.odftoolkit.simple.style.StyleTypeDefinitions.HorizontalAlignmentType;
 import org.odftoolkit.simple.text.Paragraph;
 import org.odftoolkit.simple.text.Span;
 
+import configurator.Global;
 import creator.plugins.IWriterPlugin;
 import creator.plugins.WriterConfig;
 import creator.plugins.WriterException;
@@ -51,22 +52,22 @@ public class OdfWriterPlugin implements IWriterPlugin {
 	private boolean firstDateHeader = true;
 	private TextDocument doc;
 
-	private WriterConfig config;
+	private Global globalConfig;
 
 	private EmojiParser emojis;
 
 	@Override
-	public void preAppend(WriterConfig config) throws WriterException {
-		this.config = config;
+	public void preAppend(String xmlConfig, Global globalConfig) throws WriterException {
+		this.globalConfig = globalConfig;
 
-		this.emojis = new EmojiParser(config.getEmojiList());
+		this.emojis = new EmojiParser(globalConfig.getEmojiList());
 
 		this.firstDateHeader = true;
 
-		Path outputDir = this.config.getOutputDir().resolve("odf");
+		Path outputDir = this.globalConfig.getOutputDir().resolve("odf");
 		outputDir.toFile().mkdir();
 
-		this.odfOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".odt");
+		this.odfOutputPath = outputDir.resolve(this.globalConfig.getNamePrefix() + ".odt");
 
 		try {
 			this.doc = TextDocument.newTextDocument();
@@ -94,7 +95,7 @@ public class OdfWriterPlugin implements IWriterPlugin {
 			paragraph = doc.addParagraph("\n");
 		}
 
-		paragraph.appendTextContent(this.config.getDateUtils().formatDateString(timepoint) + "\n");
+		paragraph.appendTextContent(this.globalConfig.getDateUtils().formatDateString(timepoint) + "\n");
 		paragraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
 		this.firstDateHeader = false;
 	}
@@ -108,7 +109,7 @@ public class OdfWriterPlugin implements IWriterPlugin {
 	public void appendImageMessage(ImageMessage msg) throws WriterException {
 		appendSenderAndDate(msg, null);
 
-		Path absoluteImgPath = this.config.getImageDir().resolve(msg.getFilename());
+		Path absoluteImgPath = this.globalConfig.getImageDir().resolve(msg.getFilename());
 
 		appendImage(absoluteImgPath, msg.getSubscription());
 	}
@@ -119,11 +120,11 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		Iterator<String> it = msg.getRelpaths().iterator();
 		while (it.hasNext()) {
 			String relPath = it.next();
-			String hint = this.config.isWriteMediaOmittedHints()
+			String hint = this.globalConfig.isWriteMediaOmittedHints()
 					? String.format("%s;%s;%d", msg.getTimepoint(), relPath, msg.getCnt())
 					: null;
 
-			appendImage(this.config.getImagePoolDir().resolve(relPath), hint);
+			appendImage(this.globalConfig.getImagePoolDir().resolve(relPath), hint);
 		}
 	}
 
@@ -184,7 +185,7 @@ public class OdfWriterPlugin implements IWriterPlugin {
 
 	private Paragraph appendSenderAndDate(IMessage msg, String extraText) {
 		String sender = msg.getSender();
-		String time = this.config.getDateUtils().formatTimeString(msg.getTimepoint());
+		String time = this.globalConfig.getDateUtils().formatTimeString(msg.getTimepoint());
 
 		Paragraph paragraph = doc.addParagraph("");
 		paragraph.setHorizontalAlignment(HorizontalAlignmentType.LEFT);
@@ -201,7 +202,7 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		List<Token> tokens = this.emojis.getTokens(text);
 		for (Token token : tokens) {
 			if (token.isEmoji()) {
-				URI uri = this.config.getEmojiInputDir()
+				URI uri = this.globalConfig.getEmojiDir()
 						.resolve(this.emojis.getEmojiPrefix() + token.getString() + ".png").toUri();
 				Image image = Image.newImage(paragraph, uri);
 

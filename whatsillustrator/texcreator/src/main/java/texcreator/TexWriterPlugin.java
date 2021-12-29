@@ -16,6 +16,7 @@ import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import configurator.Global;
 import creator.plugins.IWriterPlugin;
 import creator.plugins.WriterConfig;
 import creator.plugins.WriterException;
@@ -32,7 +33,7 @@ import messageparser.TextMessage;
 public class TexWriterPlugin implements IWriterPlugin {
 	private static Logger logger = LogManager.getLogger(TexWriterPlugin.class);
 
-	private WriterConfig config;
+	private Global globalConfig;
 	private TextStringBuilder tsb;
 
 	private String header;
@@ -49,18 +50,18 @@ public class TexWriterPlugin implements IWriterPlugin {
 	private Path texOutputPath;
 
 	@Override
-	public void preAppend(WriterConfig config) throws WriterException {
-		this.config = config;
+	public void preAppend(String xmlConfig, Global globalConfig) throws WriterException {
+		this.globalConfig = globalConfig;
 		this.tsb = new TextStringBuilder();
 
-		this.outputDir = this.config.getOutputDir().resolve("tex");
+		this.outputDir = this.globalConfig.getOutputDir().resolve("tex");
 		this.outputDir.toFile().mkdir();
 
-		this.emojis = new EmojiParser(config.getEmojiList());
+		this.emojis = new EmojiParser(globalConfig.getEmojiList());
 		this.emojiOutputDir = this.outputDir.resolve("emojis");
 		this.emojiOutputDir.toFile().mkdir();
 		this.copyList = new ArrayList<CopyItem>();
-		this.texOutputPath = this.outputDir.resolve(config.getNamePrefix() + ".tex");
+		this.texOutputPath = this.outputDir.resolve(globalConfig.getNamePrefix() + ".tex");
 
 		try {
 			if (this.header == null) {
@@ -99,7 +100,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 	@Override
 	public void appendDateHeader(LocalDateTime timepoint) throws WriterException {
 		this.tsb.appendln("\\begin{center}%s\\end{center}",
-				Latex.encodeLatex(this.config.getDateUtils().formatDateString(timepoint)));
+				Latex.encodeLatex(this.globalConfig.getDateUtils().formatDateString(timepoint)));
 	}
 
 	@Override
@@ -111,7 +112,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 
 	@Override
 	public void appendImageMessage(ImageMessage msg) throws WriterException {
-		Path absoluteImgPath = this.config.getImageDir().resolve(msg.getFilename());
+		Path absoluteImgPath = this.globalConfig.getImageDir().resolve(msg.getFilename());
 		Path relativeImgPath = this.outputDir.relativize(absoluteImgPath);
 
 		if(Files.exists(absoluteImgPath)) {
@@ -132,11 +133,11 @@ public class TexWriterPlugin implements IWriterPlugin {
 			tsb.append("\\begin{center}");
 			String relPath = it.next();
 			String str = "";
-			if (this.config.isWriteMediaOmittedHints()) {
+			if (this.globalConfig.isWriteMediaOmittedHints()) {
 				str = String.format("%s;%s;%d", msg.getTimepoint(), relPath, msg.getCnt());
 			}
 
-			tsb.append(createLatexImage(this.config.getImagePoolDir().resolve(relPath), str));
+			tsb.append(createLatexImage(this.globalConfig.getImagePoolDir().resolve(relPath), str));
 			tsb.appendln("\\end{center}");
 		}
 	}
@@ -161,7 +162,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 	}
 
 	private String getEmojiPath(String str) {
-		Path src = this.config.getEmojiInputDir().resolve(String.format("%s%s.png", this.emojis.getEmojiPrefix(), str));
+		Path src = this.globalConfig.getEmojiDir().resolve(String.format("%s%s.png", this.emojis.getEmojiPrefix(), str));
 		Path dst = this.emojiOutputDir.resolve(String.format("%s.png", str));
 
 		copyList.add(new CopyItem(src, dst));
@@ -200,7 +201,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 
 	private String formatSenderAndTime(IMessage msg) {
 		String sender = String.format("\\textbf{%s}", Latex.encodeLatex(msg.getSender()));
-		return String.format("%s (%s):", sender, this.config.getDateUtils().formatTimeString(msg.getTimepoint()));
+		return String.format("%s (%s):", sender, this.globalConfig.getDateUtils().formatTimeString(msg.getTimepoint()));
 	}
 
 	private String createLatexImage(String path, String subscription) {
