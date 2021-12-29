@@ -28,6 +28,7 @@ public class TelegramParser implements IParser {
 	
 	private int index = 0;
 	private TelegramChat telegramChat;
+	private Path messageDir;
 	
 	private static final String JSON_MESSAGE = "message";
 	
@@ -55,6 +56,7 @@ public class TelegramParser implements IParser {
 		
 		String messagePath = document.selectSingleNode("//messagepath").getStringValue();
 		String json = Files.readString(Paths.get(messagePath));
+		this.messageDir = Paths.get(messagePath).getParent();
 		
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.registerTypeAdapter(TelegramText.class, new TelegramTextSerializer());
@@ -91,7 +93,7 @@ public class TelegramParser implements IParser {
 		
 		if(message.type.equals(JSON_MESSAGE)) {
 			if(message.photo!=null) {
-				return new ImageMessage(date, from, message.photo, text);
+				return new ImageMessage(date, from, fullPath(message.photo), text);
 			}
 			else if("sticker".equals(message.media_type)) {
 				// This will be replaced by the actual sticker once https://github.com/haraldk/TwelveMonkeys
@@ -99,11 +101,11 @@ public class TelegramParser implements IParser {
 				return new TextMessage(date, from, message.sticker_emoji);
 			}
 			else if("image/jpeg".equals(message.mime_type)) {
-				return new ImageMessage(date, from, message.file, text);
+				return new ImageMessage(date, from, fullPath(message.file), text);
 			}
 			else if("video_file".equals(message.media_type) || "animation".equals(message.media_type)) {
 				if(message.thumbnail!=null) {
-					return new ImageMessage(date, from, message.thumbnail, text);
+					return new ImageMessage(date, from, fullPath(message.thumbnail), text);
 				}
 				else {
 					return new TextMessage(date, from, "video - no thumbnail available");
@@ -116,10 +118,10 @@ public class TelegramParser implements IParser {
 				return new TextMessage(date, from, "audio file of " + message.duration_seconds + "s");
 			}
 			else if("video_message".equals(message.media_type)) {
-				return new ImageMessage(date, from, message.thumbnail, text);
+				return new ImageMessage(date, from, fullPath(message.thumbnail), text);
 			}
 			else if("application/pdf".equals(message.mime_type)) {
-				return new ImageMessage(date, from, message.thumbnail, text);
+				return new ImageMessage(date, from, fullPath(message.thumbnail), text);
 			}
 			else if(message.location_information!=null) {
 				TextStringBuilder sb = new TextStringBuilder();
@@ -137,5 +139,9 @@ public class TelegramParser implements IParser {
 		else {
 			return nextMessage();
 		}
+	}
+	
+	private Path fullPath(String relativePath) {
+		return this.messageDir.resolve(relativePath);
 	}
 }

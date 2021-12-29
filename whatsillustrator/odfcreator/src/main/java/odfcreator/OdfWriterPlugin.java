@@ -3,6 +3,7 @@ package odfcreator;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
@@ -108,7 +109,7 @@ public class OdfWriterPlugin implements IWriterPlugin {
 	public void appendImageMessage(ImageMessage msg) throws WriterException {
 		appendSenderAndDate(msg, null);
 
-		Path absoluteImgPath = this.globalConfig.getImageDir().resolve(msg.getFilename());
+		Path absoluteImgPath = msg.getFilepath().toAbsolutePath();
 
 		appendImage(absoluteImgPath, msg.getSubscription());
 	}

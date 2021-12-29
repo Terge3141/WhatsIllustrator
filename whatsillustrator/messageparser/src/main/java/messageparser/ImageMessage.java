@@ -1,18 +1,19 @@
 package messageparser;
 
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 
 public class ImageMessage implements IMessage {
 
 	private LocalDateTime timepoint;
 	private String sender;
-	private String filename;
+	private Path filepath;
 	private String subscription;
 
-	public ImageMessage(LocalDateTime timepoint, String sender, String filename, String subscription) {
+	public ImageMessage(LocalDateTime timepoint, String sender, Path filepath, String subscription) {
 		this.timepoint = timepoint;
 		this.sender = sender;
-		this.filename = filename;
+		this.filepath = filepath;
 		this.subscription = subscription;
 	}
 
@@ -24,8 +25,8 @@ public class ImageMessage implements IMessage {
 		return this.sender;
 	}
 
-	public String getFilename() {
-		return this.filename;
+	public Path getFilepath() {
+		return this.filepath;
 	}
 
 	public String getSubscription() {

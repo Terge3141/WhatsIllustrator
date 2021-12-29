@@ -42,7 +42,7 @@ public class FOPImageMessage implements Serializable {
 		FOPImageMessage fopMessage = new FOPImageMessage();
 		fopMessage.timepoint = dateUtils.formatTimeString(message.getTimepoint());
 		fopMessage.sender = message.getSender();
-		fopMessage.src = imagedir.resolve(message.getFilename()).toString();
+		fopMessage.src = message.getFilepath().toString();
 
 		List<Token> emojiParserTokens = emojiParser.getTokens(message.getSubscription());
 		fopMessage.tokens = FOPToken.ofEmojiParser(emojiParserTokens, emojiParser.getEmojiPrefix());

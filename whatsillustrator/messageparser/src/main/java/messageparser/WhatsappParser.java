@@ -33,6 +33,7 @@ public class WhatsappParser implements IParser {
 	private Global globalConfig;
 	private Path messageDir;
 	private Path configDir;
+	private Path chatDir;
 
 	private List<String> lines;
 	private ImageMatcher imageMatcher;
@@ -59,8 +60,9 @@ public class WhatsappParser implements IParser {
 		this.globalConfig = globalConfig;
 		this.messageDir = Paths.get(document.selectSingleNode("//messagedir").getStringValue());
 		this.configDir = this.messageDir.resolve("config");
+		this.chatDir = this.messageDir.resolve("chat");
 		
-		List<String> txtFiles = FileHandler.listDir(messageDir.resolve("chat"), ".*.txt");
+		List<String> txtFiles = FileHandler.listDir(chatDir, ".*.txt");
 		if (txtFiles.size() != 1) {
 			throw new IllegalArgumentException(
 					String.format("Invalid number of .txt-files found: %d", txtFiles.size()));
@@ -126,7 +128,7 @@ public class WhatsappParser implements IParser {
 			switch (extension) {
 			case "jpg":
 				String subscription = parseNextLines().trim();
-				return new ImageMessage(date, sender, fileName, subscription);
+				return new ImageMessage(date, sender, fullPath(fileName), subscription);
 			default:
 				subscription = parseNextLines().trim();
 				return new MediaMessage(date, sender, fileName, subscription);
@@ -174,6 +176,10 @@ public class WhatsappParser implements IParser {
 		}
 
 		return this.lastCnt.cnt;
+	}
+	
+	private Path fullPath(String relativePath) {
+		return this.chatDir.resolve(relativePath);
 	}
 	
 	private ImageMatcher getImageMatcher(String namePrefix) throws IOException, ParseException {

@@ -85,9 +85,9 @@ public class Global {
 		return str;
 	}
 	
-	public Path getInputDir() {
+	/*public Path getInputDir() {
 		return inputDir;
-	}
+	}*/
 
 	public Path getOutputDir() {
 		return outputDir;
@@ -117,9 +117,9 @@ public class Global {
 		return configDir;
 	}
 
-	public Path getImageDir() {
+	/*public Path getImageDir() {
 		return imageDir;
-	}
+	}*/
 	
 	// TODO update for WhatsApp
 	public boolean isWriteMediaOmittedHints() {
