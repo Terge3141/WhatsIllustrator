@@ -55,7 +55,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 		this.tsb = new TextStringBuilder();
 
 		this.outputDir = this.globalConfig.getOutputDir().resolve("tex");
-		this.outputDir.toFile().mkdir();
+		this.outputDir.toFile().mkdirs();
 
 		this.emojis = new EmojiParser(globalConfig.getEmojiList());
 		this.emojiOutputDir = this.outputDir.resolve("emojis");

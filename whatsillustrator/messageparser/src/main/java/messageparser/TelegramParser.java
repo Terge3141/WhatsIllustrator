@@ -21,6 +21,8 @@ import org.dom4j.io.SAXReader;
 
 import com.google.gson.*;
 
+import configurator.Global;
+
 public class TelegramParser implements IParser {
 	
 	private static Logger logger = LogManager.getLogger(TelegramParser.class);
@@ -47,7 +49,7 @@ public class TelegramParser implements IParser {
 		telegramChat = gson.fromJson(json, TelegramChat.class);
 	}
 	
-	public void init(String xmlConfig) throws IOException, DocumentException {
+	public void init(String xmlConfig, Global globalConfig) throws IOException, DocumentException {
 		SAXReader reader = new SAXReader();
 		InputStream stream = new ByteArrayInputStream(xmlConfig.getBytes(StandardCharsets.UTF_16));
 		Document document = reader.read(stream);

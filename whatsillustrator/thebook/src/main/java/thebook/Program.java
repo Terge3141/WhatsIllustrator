@@ -107,7 +107,7 @@ public class Program {
 		Class<?> myClass = Class.forName(parserNodeName.getStringValue());
 		Constructor<?> cons = myClass.getConstructor();
 		IParser parser = (IParser)cons.newInstance();
-		parser.init(document.selectSingleNode("//configuration/parser/parserconfiguration").asXML());
+		parser.init(document.selectSingleNode("//configuration/parser/parserconfiguration").asXML(), global);
 		
 		List<IWriterPlugin> plugins = new ArrayList<IWriterPlugin>();
 		List<Node> writerNodes = document.selectNodes("//configuration/writers/writer");

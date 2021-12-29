@@ -182,7 +182,7 @@ public class BookCreator {
 		return this.config;
 	}*/
 
-	private ImageMatcher getImageMatcher(String namePrefix) throws IOException, ParseException {
+	/*private ImageMatcher getImageMatcher(String namePrefix) throws IOException, ParseException {
 		Path matchInputPath = this.globalConfig.getConfigDir().resolve(namePrefix + ".match.xml");
 		Path matchOutputPath = this.globalConfig.getOutputDir().resolve(namePrefix + ".match.xml");
 		ImageMatcher im = null;
@@ -207,9 +207,9 @@ public class BookCreator {
 		im.setMatchOutputPath(matchOutputPath);
 
 		return im;
-	}
+	}*/
 
-	private NameLookup getNameLookup() throws IOException {
+	/*private NameLookup getNameLookup() throws IOException {
 		Path lookupInputPath = this.globalConfig.getConfigDir().resolve("namelookup.xml");
 		NameLookup nl;
 		if (lookupInputPath.toFile().isFile()) {
@@ -220,7 +220,7 @@ public class BookCreator {
 		}
 
 		return nl;
-	}
+	}*/
 
 	/*private void readProperties() throws FileNotFoundException, IOException {
 		Path propertiesInputPath = this.globalConfig.getConfigDir().resolve("bookcreator.properties");

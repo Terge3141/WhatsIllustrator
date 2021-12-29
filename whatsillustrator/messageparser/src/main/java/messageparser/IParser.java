@@ -1,8 +1,8 @@
 package messageparser;
 
-import org.dom4j.Node;
+import configurator.Global;
 
 public interface IParser {
 	IMessage nextMessage();
-	void init(String xmlConfig) throws Exception;
+	void init(String xmlConfig, Global globalConfig) throws Exception;
 }

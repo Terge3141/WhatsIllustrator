@@ -1,8 +1,13 @@
 package messageparser;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -14,12 +19,20 @@ import java.util.stream.Collectors;
 import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.io.SAXReader;
 
+import configurator.Global;
+import helper.FileHandler;
 import imagematcher.*;
 
-public class WhatsappParser {
+public class WhatsappParser implements IParser {
 	
 	private static Logger logger = LogManager.getLogger(WhatsappParser.class);
+	
+	private Global globalConfig;
+	private Path messageDir;
+	private Path configDir;
 
 	private List<String> lines;
 	private ImageMatcher imageMatcher;
@@ -33,7 +46,7 @@ public class WhatsappParser {
 	private static final String FILE_ATTACHED = "(file attached)";
 	private static final String MEDIA_OMITTED = "<Media omitted>";
 
-	public WhatsappParser(List<String> lines, ImageMatcher imageMatcher, NameLookup nameLookup) {
+	/*public WhatsappParser(List<String> lines, ImageMatcher imageMatcher, NameLookup nameLookup) {
 		this.lines = lines;
 		this.index = 0;
 
@@ -46,6 +59,36 @@ public class WhatsappParser {
 			throws IOException {
 		List<String> lines = Files.readAllLines(messagePath);
 		return new WhatsappParser(lines, imageMatcher, nameLookup);
+	}*/
+	public WhatsappParser() {
+
+	}
+	
+	@Override
+	public void init(String xmlConfig, Global globalConfig) throws Exception {
+		// TODO Auto-generated method stub
+		SAXReader reader = new SAXReader();
+		InputStream stream = new ByteArrayInputStream(xmlConfig.getBytes(StandardCharsets.UTF_16));
+		Document document = reader.read(stream);
+		
+		this.globalConfig = globalConfig;
+		this.messageDir = Paths.get(document.selectSingleNode("//messagedir").getStringValue());
+		this.configDir = this.messageDir.resolve("config");
+		
+		List<String> txtFiles = FileHandler.listDir(messageDir.resolve("chat"), ".*.txt");
+		if (txtFiles.size() != 1) {
+			throw new IllegalArgumentException(
+					String.format("Invalid number of .txt-files found: %d", txtFiles.size()));
+		}		
+		Path txtInputPath = Paths.get(txtFiles.get(0));
+		logger.info("Using {} as input", txtInputPath);
+		
+		this.lines = Files.readAllLines(txtInputPath);
+		
+		String namePrefix = txtInputPath.toFile().getName();
+		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
+		this.imageMatcher = getImageMatcher(namePrefix);
+		this.nameLookup = getNameLookup();
 	}
 
 	public IMessage nextMessage() {
@@ -146,6 +189,46 @@ public class WhatsappParser {
 		}
 
 		return this.lastCnt.cnt;
+	}
+	
+	private ImageMatcher getImageMatcher(String namePrefix) throws IOException, ParseException {
+		Path matchInputPath = this.configDir.resolve(namePrefix + ".match.xml");
+		Path matchOutputPath = this.messageDir.resolve("output").resolve(namePrefix + ".match.xml");
+		ImageMatcher im = null;
+
+		if (matchInputPath.toFile().isFile()) {
+			logger.info("Loading matches '{}'", matchInputPath);
+			im = ImageMatcher.fromXmlFile(matchInputPath);
+			im.setSearchMode(false);
+		} else {
+			Path imagePoolDir = globalConfig.getImagePoolDir();
+			im = new ImageMatcher();
+			if (imagePoolDir == null) {
+				im.setSearchMode(false);
+			} else {
+				logger.info("Loading pool images from '{}'", imagePoolDir);
+				im.loadFiles(imagePoolDir);
+				im.setSearchMode(true);
+				logger.info("{} images found", im.getFileList().size());
+			}
+		}
+
+		im.setMatchOutputPath(matchOutputPath);
+
+		return im;
+	}
+	
+	private NameLookup getNameLookup() throws IOException {
+		Path lookupInputPath = this.globalConfig.getConfigDir().resolve("namelookup.xml");
+		NameLookup nl;
+		if (lookupInputPath.toFile().isFile()) {
+			logger.info("Loading name lookup '{}'", lookupInputPath);
+			nl = NameLookup.fromXmlFile(lookupInputPath);
+		} else {
+			nl = new NameLookup();
+		}
+
+		return nl;
 	}
 
 	public class LastCnt {
