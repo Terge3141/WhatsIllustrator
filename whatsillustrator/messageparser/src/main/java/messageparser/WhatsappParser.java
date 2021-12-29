@@ -46,27 +46,12 @@ public class WhatsappParser implements IParser {
 	private static final String FILE_ATTACHED = "(file attached)";
 	private static final String MEDIA_OMITTED = "<Media omitted>";
 
-	/*public WhatsappParser(List<String> lines, ImageMatcher imageMatcher, NameLookup nameLookup) {
-		this.lines = lines;
-		this.index = 0;
-
-		this.imageMatcher = imageMatcher;
-		this.nameLookup = nameLookup;
-		this.lastCnt = new LastCnt();
-	}
-
-	public static WhatsappParser of(Path messagePath, ImageMatcher imageMatcher, NameLookup nameLookup)
-			throws IOException {
-		List<String> lines = Files.readAllLines(messagePath);
-		return new WhatsappParser(lines, imageMatcher, nameLookup);
-	}*/
 	public WhatsappParser() {
 
 	}
 	
 	@Override
 	public void init(String xmlConfig, Global globalConfig) throws Exception {
-		// TODO Auto-generated method stub
 		SAXReader reader = new SAXReader();
 		InputStream stream = new ByteArrayInputStream(xmlConfig.getBytes(StandardCharsets.UTF_16));
 		Document document = reader.read(stream);
