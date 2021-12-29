@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -80,10 +79,8 @@ public class TelegramParser implements IParser {
 		try {
 			// TODO: Replace dirty hack
 			String datestr = message.date.replace('T', ' ');
-			//System.out.println(datestr);
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 			date = LocalDateTime.parse(datestr, formatter);
-			//System.out.println(date);
 		} catch (DateTimeParseException dtpe) {
 			throw new IllegalArgumentException(message.date);
 		}
