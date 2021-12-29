@@ -33,7 +33,6 @@ import org.apache.logging.log4j.Logger;
 
 import configurator.Global;
 import creator.plugins.IWriterPlugin;
-import creator.plugins.WriterConfig;
 import creator.plugins.WriterException;
 import helper.EmojiParser;
 import messageparser.ImageMessage;

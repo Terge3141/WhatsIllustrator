@@ -27,7 +27,6 @@ import org.odftoolkit.simple.text.Span;
 
 import configurator.Global;
 import creator.plugins.IWriterPlugin;
-import creator.plugins.WriterConfig;
 import creator.plugins.WriterException;
 import helper.EmojiParser;
 import helper.EmojiParser.Token;
