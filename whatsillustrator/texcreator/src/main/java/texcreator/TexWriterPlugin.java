@@ -18,7 +18,6 @@ import org.apache.logging.log4j.Logger;
 
 import configurator.Global;
 import creator.plugins.IWriterPlugin;
-import creator.plugins.WriterConfig;
 import creator.plugins.WriterException;
 import helper.EmojiParser;
 import helper.Latex;
@@ -255,5 +254,4 @@ public class TexWriterPlugin implements IWriterPlugin {
 			return dst;
 		}
 	}
-
 }
