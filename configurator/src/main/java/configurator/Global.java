@@ -2,7 +2,6 @@ package configurator;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -18,7 +17,6 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
 import helper.DateUtils;
-import helper.Misc;
 
 public class Global {
 	private final String DEFAULT_LOCALE = "en";

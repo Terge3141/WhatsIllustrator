@@ -24,9 +24,6 @@ import org.dom4j.Node;
 import configurator.Global;
 import creator.BookCreator;
 import creator.plugins.IWriterPlugin;
-import fopcreator.FOPWriterPlugin;
-import odfcreator.OdfWriterPlugin;
-import texcreator.TexWriterPlugin;
 import helper.Misc;
 import messageparser.IParser;
 
