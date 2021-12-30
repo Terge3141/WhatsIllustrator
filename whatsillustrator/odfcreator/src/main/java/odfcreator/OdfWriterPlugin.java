@@ -117,14 +117,14 @@ public class OdfWriterPlugin implements IWriterPlugin {
 	@Override
 	public void appendMediaOmittedMessage(MediaOmittedMessage msg) throws WriterException {
 		appendSenderAndDate(msg, null);
-		Iterator<String> it = msg.getRelpaths().iterator();
+		Iterator<Path> it = msg.getAbspaths().iterator();
 		while (it.hasNext()) {
-			String relPath = it.next();
+			Path absPath = it.next();
 			String hint = this.globalConfig.isWriteMediaOmittedHints()
-					? String.format("%s;%s;%d", msg.getTimepoint(), relPath, msg.getCnt())
+					? String.format("%s;%s;%d", msg.getTimepoint(), absPath, msg.getCnt())
 					: null;
 
-			appendImage(this.globalConfig.getImagePoolDir().resolve(relPath), hint);
+			appendImage(absPath, hint);
 		}
 	}
 

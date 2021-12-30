@@ -1,5 +1,6 @@
 package messageparser;
 
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -7,13 +8,13 @@ public class MediaOmittedMessage implements IMessage {
 
 	private LocalDateTime timepoint;
 	private String sender;
-	private List<String> relpaths;
+	private List<Path> abspaths;
 	private int cnt;
 
-	public MediaOmittedMessage(LocalDateTime timepoint, String sender, List<String> relpaths, int cnt) {
+	public MediaOmittedMessage(LocalDateTime timepoint, String sender, List<Path> abspaths, int cnt) {
 		this.timepoint = timepoint;
 		this.sender = sender;
-		this.relpaths = relpaths;
+		this.abspaths = abspaths;
 		this.cnt = cnt;
 	}
 
@@ -25,8 +26,8 @@ public class MediaOmittedMessage implements IMessage {
 		return this.sender;
 	}
 
-	public List<String> getRelpaths() {
-		return this.relpaths;
+	public List<Path> getAbspaths() {
+		return this.abspaths;
 	}
 
 	public int getCnt() {

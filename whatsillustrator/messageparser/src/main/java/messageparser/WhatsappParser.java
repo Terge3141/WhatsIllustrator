@@ -32,6 +32,7 @@ public class WhatsappParser implements IParser {
 	
 	private Global globalConfig;
 	private Path messageDir;
+	private Path imagePoolDir;
 	private Path configDir;
 	private Path chatDir;
 	
@@ -61,6 +62,7 @@ public class WhatsappParser implements IParser {
 		
 		this.globalConfig = globalConfig;
 		this.messageDir = Paths.get(document.selectSingleNode("//messagedir").getStringValue());
+		this.imagePoolDir = Paths.get(document.selectSingleNode("//imagepooldir").getStringValue());
 		this.configDir = this.messageDir.resolve("config");
 		this.chatDir = this.messageDir.resolve("chat");
 		
@@ -138,9 +140,11 @@ public class WhatsappParser implements IParser {
 		} else if (contentStr.equals(MEDIA_OMITTED)) {
 			MatchEntry entry = this.imageMatcher.pick(date, getCnt(date));
 			if (entry.isImageType() && entry.getFileMatches().size() > 0) {
-				List<String> relpaths = entry.getFileMatches().stream().map(x -> x.getRelPath()).distinct()
+				List<Path> abspaths = entry.getFileMatches().stream()
+						.map(x -> this.imagePoolDir.resolve(x.getRelPath()))
+						.distinct()
 						.collect(Collectors.toList());
-				return new MediaOmittedMessage(entry.getTimePoint(), sender, relpaths, entry.getCnt());
+				return new MediaOmittedMessage(entry.getTimePoint(), sender, abspaths, entry.getCnt());
 			} else {
 				return nextMessage();
 			}
@@ -198,7 +202,6 @@ public class WhatsappParser implements IParser {
 			im = ImageMatcher.fromXmlFile(matchInputPath);
 			im.setSearchMode(false);
 		} else {
-			Path imagePoolDir = globalConfig.getImagePoolDir();
 			im = new ImageMatcher();
 			if (imagePoolDir == null) {
 				im.setSearchMode(false);

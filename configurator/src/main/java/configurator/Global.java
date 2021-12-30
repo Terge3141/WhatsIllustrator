@@ -26,7 +26,6 @@ public class Global {
 	
 	private Path outputDir;
 	private Path emojiDir;
-	private Path imagePoolDir;
 	private Path debugDir;
 	
 	private String nameSuggestion;
@@ -42,7 +41,6 @@ public class Global {
 		Global global = new Global();
 		global.outputDir = readPath(document, "//global/outputdir");
 		global.emojiDir = readPath(document, "//global/emojidir");
-		global.imagePoolDir = readPath(document, "//global/imagepooldir");
 		global.debugDir = readPath(document, "//global/debugdir");
 		
 		global.dateUtils = new DateUtils(global.DEFAULT_LOCALE);
@@ -68,7 +66,6 @@ public class Global {
 		String str = "";
 		str = str + ", outputdir: " + outputDir;
 		str = str + ", emojidir: " + emojiDir;
-		str = str + ", imagepooldir: " + imagePoolDir;
 		str = str + ", debugdir: " + debugDir;
 		str = str + ", nameSuggestion: " + nameSuggestion;
 		return str;
@@ -80,10 +77,6 @@ public class Global {
 
 	public Path getEmojiDir() {
 		return emojiDir;
-	}
-
-	public Path getImagePoolDir() {
-		return imagePoolDir;
 	}
 
 	public Path getDebugDir() {

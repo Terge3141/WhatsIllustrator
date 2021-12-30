@@ -134,16 +134,16 @@ public class TexWriterPlugin implements IWriterPlugin {
 	@Override
 	public void appendMediaOmittedMessage(MediaOmittedMessage msg) throws WriterException {
 		tsb.appendln("%s\\\\", formatSenderAndTime(msg));
-		Iterator<String> it = msg.getRelpaths().iterator();
+		Iterator<Path> it = msg.getAbspaths().iterator();
 		while (it.hasNext()) {
 			tsb.append("\\begin{center}");
-			String relPath = it.next();
+			Path absPath = it.next();
 			String str = "";
 			if (this.globalConfig.isWriteMediaOmittedHints()) {
-				str = String.format("%s;%s;%d", msg.getTimepoint(), relPath, msg.getCnt());
+				str = String.format("%s;%s;%d", msg.getTimepoint(), absPath, msg.getCnt());
 			}
 
-			tsb.append(createLatexImage(this.globalConfig.getImagePoolDir().resolve(relPath), str));
+			tsb.append(createLatexImage(absPath, str));
 			tsb.appendln("\\end{center}");
 		}
 	}

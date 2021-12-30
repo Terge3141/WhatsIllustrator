@@ -52,11 +52,11 @@ public class FOPImageMessage implements Serializable {
 
 	public static List<FOPImageMessage> of(MediaOmittedMessage message, DateUtils dateUtils, Path imagedir) {
 		List<FOPImageMessage> list = new ArrayList<FOPImageMessage>();
-		for (String relPath : message.getRelpaths()) {
+		for (Path absPath : message.getAbspaths()) {
 			FOPImageMessage fopMessage = new FOPImageMessage();
 			fopMessage.timepoint = dateUtils.formatTimeString(message.getTimepoint());
 			fopMessage.sender = message.getSender();
-			fopMessage.src = imagedir.resolve(relPath).toString();
+			fopMessage.src = absPath.toString();
 			fopMessage.tokens = null;
 
 			list.add(fopMessage);
