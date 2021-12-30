@@ -45,6 +45,8 @@ public class TexWriterPlugin implements IWriterPlugin {
 	// Default is OutputDir/emojis
 	private Path emojiOutputDir;
 	private List<CopyItem> copyList;
+	
+	private Path imageOutputDir;
 
 	private Path outputDir;
 	private Path texOutputPath;
@@ -59,7 +61,11 @@ public class TexWriterPlugin implements IWriterPlugin {
 
 		this.emojis = new EmojiParser(globalConfig.getEmojiList());
 		this.emojiOutputDir = this.outputDir.resolve("emojis");
-		this.emojiOutputDir.toFile().mkdir();
+		this.emojiOutputDir.toFile().mkdirs();
+		
+		this.imageOutputDir = this.outputDir.resolve("images");
+		this.imageOutputDir.toFile().mkdirs();
+		
 		this.copyList = new ArrayList<CopyItem>();
 		this.texOutputPath = this.outputDir.resolve(globalConfig.getNameSuggestion() + ".tex");
 
@@ -113,12 +119,12 @@ public class TexWriterPlugin implements IWriterPlugin {
 	@Override
 	public void appendImageMessage(ImageMessage msg) throws WriterException {
 		Path absoluteImgPath = msg.getFilepath();
-		Path relativeImgPath = this.outputDir.relativize(absoluteImgPath);
+		/*Path relativeImgPath = this.outputDir.relativize(absoluteImgPath);*/
 
 		if(Files.exists(absoluteImgPath)) {
 			tsb.appendln("%s\\\\", formatSenderAndTime(msg));
 			tsb.append("\\begin{center}");
-			tsb.append(createLatexImage(relativeImgPath, msg.getSubscription()));
+			tsb.append(createLatexImage(absoluteImgPath, msg.getSubscription()));
 			tsb.appendln("\\end{center}");
 		} else {
 			logger.warn("File '{}' does not exist, skipping message", absoluteImgPath);
@@ -204,16 +210,28 @@ public class TexWriterPlugin implements IWriterPlugin {
 		return String.format("%s (%s):", sender, this.globalConfig.getDateUtils().formatTimeString(msg.getTimepoint()));
 	}
 
-	private String createLatexImage(String path, String subscription) {
+	private String createLatexImage(String path, String subscription) throws WriterException {
+		Path src = Paths.get(path);
+		Path fileName = src.getFileName();
+		Path dst = this.imageOutputDir.resolve(fileName);
+		Path relDst = this.outputDir.relativize(dst);
+		try {
+			Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+		}
+		catch(IOException ioe) {
+			throw new WriterException("Cannot copy file from '" + src.toString() + "' to '" + dst.toString() + "'",
+					ioe);
+		}
+		
 		TextStringBuilder tsb = new TextStringBuilder();
-		tsb.appendln("\\includegraphics[height=0.1\\textheight]{%s}\\\\", path);
+		tsb.appendln("\\includegraphics[height=0.1\\textheight]{%s}\\\\", relDst);
 		
 		subscription = subscription.replace("\n", " ").replace("\r", "");
 		tsb.appendln("\\small{\\textit{%s}}", encode(subscription));
 		return tsb.toString();
 	}
 
-	private String createLatexImage(Path path, String subscription) {
+	private String createLatexImage(Path path, String subscription) throws WriterException {
 		return createLatexImage(path.toString(), subscription);
 	}
 
