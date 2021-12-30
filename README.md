@@ -1,7 +1,7 @@
 # WhatsIllustrator
 
 ## What is WhatsIllustrator?
-WhatsIllustrator is a program and framework which converts a WhatsApp chat into a pdf, odt and tex. It is written in Java and can be easily extended for other output formats or layouts.
+WhatsIllustrator is a program and framework which converts WhatsApp and Telegram Messenger chats into a pdf, odt and tex. It is written in Java and can be easily extended for other output formats, layouts and messengers.
 
 ## Getting started
 ### Compile
