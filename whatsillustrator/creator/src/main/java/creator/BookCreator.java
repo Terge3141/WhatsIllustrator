@@ -20,6 +20,7 @@ public class BookCreator {
 
 	private static Logger logger = LogManager.getLogger(BookCreator.class);
 
+	@SuppressWarnings("unused")
 	private Global globalConfig;
 	private IParser parser;
 	private List<IWriterPlugin> plugins;

@@ -30,6 +30,7 @@ public class WhatsappParser implements IParser {
 	
 	private static Logger logger = LogManager.getLogger(WhatsappParser.class);
 	
+	@SuppressWarnings("unused")
 	private Global globalConfig;
 	private Path messageDir;
 	private Path imagePoolDir;
