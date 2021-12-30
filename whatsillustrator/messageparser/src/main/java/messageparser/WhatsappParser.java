@@ -156,7 +156,12 @@ public class WhatsappParser implements IParser {
 	}
 	
 	public String getNameSuggestion() {
-		return "Whatsapp_" + this.namePrefix;
+		String needle = "Whatsapp";
+		String buf = this.namePrefix;
+		if(!this.namePrefix.toLowerCase().startsWith(needle.toLowerCase())) {
+			buf = needle + "_" + buf;
+		}
+		return buf;
 	}
 
 	private boolean isHeader(String str) {
