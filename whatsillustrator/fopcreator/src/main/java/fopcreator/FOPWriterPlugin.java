@@ -12,7 +12,7 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-/*import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -21,7 +21,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.stream.StreamSource;*/
+import javax.xml.transform.stream.StreamSource;
 
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FOUserAgent;
@@ -42,44 +42,9 @@ import messageparser.TextMessage;
 import messageparser.LinkMessage;
 
 public class FOPWriterPlugin implements IWriterPlugin {
-	
-	@Override
-	public void preAppend(String xmlConfig, Global globalConfig) throws WriterException {
-	
-	}
-	
-	@Override
-	public void postAppend() throws WriterException {
-		
-	}
-	
-	@Override
-	public void appendTextMessage(TextMessage textMessage) throws WriterException {
-	}
+	private static Logger logger = LogManager.getLogger(FOPWriterPlugin.class);
 
-	@Override
-	public void appendImageMessage(ImageMessage imageMessage) throws WriterException {
-	}
-
-	@Override
-	public void appendMediaOmittedMessage(MediaOmittedMessage mediaOmittedMessage) throws WriterException {
-	}
-
-	@Override
-	public void appendMediaMessage(MediaMessage mediaMessage) throws WriterException {
-	}
-	
-	@Override
-	public void appendLinkMessage(LinkMessage linkMessage) throws WriterException {
-	}
-	
-	@Override
-	public void appendDateHeader(LocalDateTime timepoint) throws WriterException {
-	
-	}
-	/*private static Logger logger = LogManager.getLogger(FOPWriterPlugin.class);
-
-	private WriterConfig config;
+	private Global globalConfig;
 	private EmojiParser emojis;
 	private XMLStreamWriter writer;
 
@@ -89,25 +54,26 @@ public class FOPWriterPlugin implements IWriterPlugin {
 	private Path pdfOutputPath;
 
 	@Override
-	public void preAppend(WriterConfig config) throws WriterException {
-		this.config = config;
+	public void preAppend(String xmlConfig, Global globalConfig) throws WriterException {
+		this.globalConfig = globalConfig;
 
-		this.emojis = new EmojiParser(config.getEmojiList());
+		this.emojis = new EmojiParser(this.globalConfig.getEmojiList());
 
 		try {
-			Path outputDir = this.config.getOutputDir().resolve("fo");
-			outputDir.toFile().mkdir();
-			this.xmlOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".xml");
-			this.xslOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".xsl");
+			Path outputDir = this.globalConfig.getOutputDir().resolve(this.globalConfig.getNameSuggestion())
+					.resolve("fop");
+			outputDir.toFile().mkdirs();
+			this.xmlOutputPath = outputDir.resolve(this.globalConfig.getNameSuggestion() + ".xml");
+			this.xslOutputPath = outputDir.resolve(this.globalConfig.getNameSuggestion() + ".xsl");
 			this.incOutputPath = outputDir.resolve("fopincludes.xsl");
-			this.pdfOutputPath = outputDir.resolve(this.config.getNamePrefix() + ".pdf");
+			this.pdfOutputPath = outputDir.resolve(this.globalConfig.getNameSuggestion() + ".pdf");
 
 			logger.info("Writing output to '{}'", xmlOutputPath);
 			FileOutputStream out = new FileOutputStream(xmlOutputPath.toFile());
 
 			// write xsl file
-			writeRessourceFile("fopsample.xsl", xslOutputPath);
-			writeRessourceFile("fopincludes.xsl", incOutputPath);
+			writeRessourceFile("/fopsample.xsl", xslOutputPath);
+			writeRessourceFile("/fopincludes.xsl", incOutputPath);
 
 			this.writer = XMLOutputFactory.newInstance().createXMLStreamWriter(out, "UTF-16");
 			this.writer.writeStartDocument();
@@ -143,7 +109,7 @@ public class FOPWriterPlugin implements IWriterPlugin {
 	public void appendDateHeader(LocalDateTime timepoint) throws WriterException {
 		try {
 			this.writer.writeStartElement("date");
-			this.writer.writeCharacters(config.getDateUtils().formatDateString(timepoint));
+			this.writer.writeCharacters(globalConfig.getDateUtils().formatDateString(timepoint));
 			this.writer.writeEndElement();
 		} catch (XMLStreamException xse) {
 			throw new WriterException(xse);
@@ -153,21 +119,20 @@ public class FOPWriterPlugin implements IWriterPlugin {
 
 	@Override
 	public void appendTextMessage(TextMessage textMessage) throws WriterException {
-		FOPTextMessage fopTextMessage = FOPTextMessage.of(textMessage, config.getDateUtils(), this.emojis);
+		FOPTextMessage fopTextMessage = FOPTextMessage.of(textMessage, globalConfig.getDateUtils(), this.emojis);
 		appendObject(fopTextMessage, this.writer);
 	}
 
 	@Override
 	public void appendImageMessage(ImageMessage imageMessage) throws WriterException {
-		FOPImageMessage fopImageMessage = FOPImageMessage.of(imageMessage, config.getDateUtils(),
-				this.config.getImageDir(), this.emojis);
+		FOPImageMessage fopImageMessage = FOPImageMessage.of(imageMessage, globalConfig.getDateUtils()
+				, this.emojis);
 		appendObject(fopImageMessage, this.writer);
 	}
 
 	@Override
 	public void appendMediaOmittedMessage(MediaOmittedMessage mediaOmittedMessage) throws WriterException {
-		List<FOPImageMessage> fopImageMessages = FOPImageMessage.of(mediaOmittedMessage, config.getDateUtils(),
-				this.config.getImagePoolDir());
+		List<FOPImageMessage> fopImageMessages = FOPImageMessage.of(mediaOmittedMessage, globalConfig.getDateUtils());
 		for (FOPImageMessage fopImageMessage : fopImageMessages) {
 			appendObject(fopImageMessage, this.writer);
 		}
@@ -175,8 +140,12 @@ public class FOPWriterPlugin implements IWriterPlugin {
 
 	@Override
 	public void appendMediaMessage(MediaMessage mediaMessage) throws WriterException {
-		FOPMediaMessage fopMediaMessage = FOPMediaMessage.of(mediaMessage, config.getDateUtils());
+		FOPMediaMessage fopMediaMessage = FOPMediaMessage.of(mediaMessage, globalConfig.getDateUtils());
 		appendObject(fopMediaMessage, this.writer);
+	}
+	
+	@Override
+	public void appendLinkMessage(LinkMessage linkMessage) throws WriterException {
 	}
 
 	private <T> void appendObject(T obj, XMLStreamWriter writer) throws WriterException {
@@ -192,7 +161,7 @@ public class FOPWriterPlugin implements IWriterPlugin {
 		//throw new WriterException("Problem");
 	}
 
-	private void toPDF() throws FOPException, TransformerException, IOException {
+	private void toPDF() throws FOPException, IOException, TransformerException {
 		FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
 		FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
 
@@ -243,5 +212,5 @@ public class FOPWriterPlugin implements IWriterPlugin {
 		}
 
 		fileOutputStream.close();
-	}*/
+	}
 }

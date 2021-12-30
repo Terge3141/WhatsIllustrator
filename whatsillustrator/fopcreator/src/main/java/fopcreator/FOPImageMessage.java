@@ -37,8 +37,7 @@ public class FOPImageMessage implements Serializable {
 	public FOPImageMessage() {
 	}
 
-	public static FOPImageMessage of(ImageMessage message, DateUtils dateUtils, Path imagedir,
-			EmojiParser emojiParser) {
+	public static FOPImageMessage of(ImageMessage message, DateUtils dateUtils, EmojiParser emojiParser) {
 		FOPImageMessage fopMessage = new FOPImageMessage();
 		fopMessage.timepoint = dateUtils.formatTimeString(message.getTimepoint());
 		fopMessage.sender = message.getSender();
@@ -50,7 +49,7 @@ public class FOPImageMessage implements Serializable {
 		return fopMessage;
 	}
 
-	public static List<FOPImageMessage> of(MediaOmittedMessage message, DateUtils dateUtils, Path imagedir) {
+	public static List<FOPImageMessage> of(MediaOmittedMessage message, DateUtils dateUtils) {
 		List<FOPImageMessage> list = new ArrayList<FOPImageMessage>();
 		for (Path absPath : message.getAbspaths()) {
 			FOPImageMessage fopMessage = new FOPImageMessage();

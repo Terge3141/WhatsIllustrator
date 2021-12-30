@@ -27,5 +27,9 @@
 			<name>odfcreator.OdfWriterPlugin</name>
 			<writerconfiguration></writerconfiguration>
 		</writer>
+		<writer>
+			<name>fopcreator.FOPWriterPlugin</name>
+			<writerconfiguration></writerconfiguration>
+		</writer>
 	</writers>
 </configuration>
