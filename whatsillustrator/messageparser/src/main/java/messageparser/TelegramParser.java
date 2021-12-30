@@ -28,6 +28,7 @@ public class TelegramParser implements IParser {
 	
 	private int index = 0;
 	private TelegramChat telegramChat;
+	private Path messagePath;
 	private Path messageDir;
 	
 	private static final String JSON_MESSAGE = "message";
@@ -54,9 +55,9 @@ public class TelegramParser implements IParser {
 		InputStream stream = new ByteArrayInputStream(xmlConfig.getBytes(StandardCharsets.UTF_16));
 		Document document = reader.read(stream);
 		
-		String messagePath = document.selectSingleNode("//messagepath").getStringValue();
-		String json = Files.readString(Paths.get(messagePath));
-		this.messageDir = Paths.get(messagePath).getParent();
+		this.messagePath = Paths.get(document.selectSingleNode("//messagepath").getStringValue());
+		String json = Files.readString(this.messagePath);
+		this.messageDir = messagePath.getParent();
 		
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.registerTypeAdapter(TelegramText.class, new TelegramTextSerializer());
@@ -139,6 +140,12 @@ public class TelegramParser implements IParser {
 		else {
 			return nextMessage();
 		}
+	}
+	
+	public String getNameSuggestion() {
+		String fileName = this.messagePath.getFileName().toString();
+		int index = fileName.lastIndexOf('.');
+		return "Telegram_" + fileName.substring(0, index);
 	}
 	
 	private Path fullPath(String relativePath) {

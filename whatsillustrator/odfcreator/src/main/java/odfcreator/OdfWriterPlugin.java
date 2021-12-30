@@ -67,7 +67,7 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		Path outputDir = this.globalConfig.getOutputDir().resolve("odf");
 		outputDir.toFile().mkdir();
 
-		this.odfOutputPath = outputDir.resolve(this.globalConfig.getNamePrefix() + ".odt");
+		this.odfOutputPath = outputDir.resolve(this.globalConfig.getNameSuggestion() + ".odt");
 
 		try {
 			this.doc = TextDocument.newTextDocument();

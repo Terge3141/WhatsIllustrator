@@ -24,16 +24,12 @@ public class Global {
 	
 	private static Logger logger = LogManager.getLogger(Global.class);
 	
-	private Path inputDir;
 	private Path outputDir;
 	private Path emojiDir;
 	private Path imagePoolDir;
 	private Path debugDir;
-	private Path namePrefix;
 	
-	private Path chatDir;
-	private Path configDir;
-	private Path imageDir;
+	private String nameSuggestion;
 	
 	private DateUtils dateUtils;
 	private List<String> emojiList;
@@ -44,16 +40,10 @@ public class Global {
 		Document document = reader.read(stream);
 		
 		Global global = new Global();
-		global.inputDir = readPath(document, "//global/inputdir");
-		global.outputDir = readPath(document, "//global/outputdir", global.inputDir.resolve("output").toString());
+		global.outputDir = readPath(document, "//global/outputdir");
 		global.emojiDir = readPath(document, "//global/emojidir");
 		global.imagePoolDir = readPath(document, "//global/imagepooldir");
 		global.debugDir = readPath(document, "//global/debugdir");
-		global.namePrefix = readPath(document, "//global/nameprefix");
-		
-		global.chatDir = global.inputDir.resolve("chat");
-		global.configDir = global.inputDir.resolve("config");
-		global.imageDir = global.chatDir;
 		
 		global.dateUtils = new DateUtils(global.DEFAULT_LOCALE);
 		
@@ -76,18 +66,13 @@ public class Global {
 	@Override
 	public String toString() {
 		String str = "";
-		str = str + "inputdir: " + inputDir;
 		str = str + ", outputdir: " + outputDir;
 		str = str + ", emojidir: " + emojiDir;
 		str = str + ", imagepooldir: " + imagePoolDir;
 		str = str + ", debugdir: " + debugDir;
-		str = str + ", nameprefix: " + namePrefix;
+		str = str + ", nameSuggestion: " + nameSuggestion;
 		return str;
 	}
-	
-	/*public Path getInputDir() {
-		return inputDir;
-	}*/
 
 	public Path getOutputDir() {
 		return outputDir;
@@ -105,21 +90,13 @@ public class Global {
 		return debugDir;
 	}
 	
-	public Path getNamePrefix() {
-		return namePrefix;
+	public void setNameSuggestion(String nameSuggestion) {
+		this.nameSuggestion = nameSuggestion;
 	}
-
-	public Path getChatDir() {
-		return chatDir;
+	
+	public String getNameSuggestion() {
+		return nameSuggestion;
 	}
-
-	public Path getConfigDir() {
-		return configDir;
-	}
-
-	/*public Path getImageDir() {
-		return imageDir;
-	}*/
 	
 	// TODO update for WhatsApp
 	public boolean isWriteMediaOmittedHints() {

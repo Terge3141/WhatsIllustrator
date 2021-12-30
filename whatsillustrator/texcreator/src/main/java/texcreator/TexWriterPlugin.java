@@ -54,14 +54,14 @@ public class TexWriterPlugin implements IWriterPlugin {
 		this.globalConfig = globalConfig;
 		this.tsb = new TextStringBuilder();
 
-		this.outputDir = this.globalConfig.getOutputDir().resolve("tex");
+		this.outputDir = this.globalConfig.getOutputDir().resolve(globalConfig.getNameSuggestion()).resolve("tex");
 		this.outputDir.toFile().mkdirs();
 
 		this.emojis = new EmojiParser(globalConfig.getEmojiList());
 		this.emojiOutputDir = this.outputDir.resolve("emojis");
 		this.emojiOutputDir.toFile().mkdir();
 		this.copyList = new ArrayList<CopyItem>();
-		this.texOutputPath = this.outputDir.resolve(globalConfig.getNamePrefix() + ".tex");
+		this.texOutputPath = this.outputDir.resolve(globalConfig.getNameSuggestion() + ".tex");
 
 		try {
 			if (this.header == null) {

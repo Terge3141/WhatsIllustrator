@@ -34,6 +34,8 @@ public class WhatsappParser implements IParser {
 	private Path messageDir;
 	private Path configDir;
 	private Path chatDir;
+	
+	private String namePrefix;
 
 	private List<String> lines;
 	private ImageMatcher imageMatcher;
@@ -72,9 +74,9 @@ public class WhatsappParser implements IParser {
 		
 		this.lines = Files.readAllLines(txtInputPath);
 		
-		String namePrefix = txtInputPath.toFile().getName();
-		namePrefix = namePrefix.substring(0, namePrefix.length() - 4);
-		this.imageMatcher = getImageMatcher(namePrefix);
+		this.namePrefix = txtInputPath.toFile().getName();
+		this.namePrefix = this.namePrefix.substring(0, this.namePrefix.length() - 4);
+		this.imageMatcher = getImageMatcher(this.namePrefix);
 		this.nameLookup = getNameLookup();
 	}
 
@@ -148,6 +150,10 @@ public class WhatsappParser implements IParser {
 			return new TextMessage(date, sender, contentStr);
 		}
 	}
+	
+	public String getNameSuggestion() {
+		return "Whatsapp_" + this.namePrefix;
+	}
 
 	private boolean isHeader(String str) {
 		return str.matches("^" + PATTERN + ".*");
@@ -210,7 +216,7 @@ public class WhatsappParser implements IParser {
 	}
 	
 	private NameLookup getNameLookup() throws IOException {
-		Path lookupInputPath = this.globalConfig.getConfigDir().resolve("namelookup.xml");
+		Path lookupInputPath = this.configDir.resolve("namelookup.xml");
 		NameLookup nl;
 		if (lookupInputPath.toFile().isFile()) {
 			logger.info("Loading name lookup '{}'", lookupInputPath);
