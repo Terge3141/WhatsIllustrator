@@ -1,30 +1,31 @@
 <configuration>
 	<global>
-		<inputdir>inputdirectory</inputdir>
 		<outputdir>outputdirectory</outputdir>
 		<emojidir>emojidirectory</emojidir>
-		<imagepooldir>imagepooldirectory</imagepooldir>
 		<debugdir>debugdirectory</debugdir>
-		<nameprefix>nameprefix</nameprefix>
 	</global>
-	<parser>
+	<!-- uncomment one of the parsers -->
+	<!--<parser>
 		<name>messageparser.TelegramParser</name>
 		<parserconfiguration>
-			<messagepath>messagepath</messagepath>
+			<messagepath>path to json file</messagepath>
 		</parserconfiguration>
-	</parser>
+	</parser>-->
+	<!--<parser>
+		<name>messageparser.WhatsappParser</name>
+		<parserconfiguration>
+			<messagedir>path to extracted zip file</messagedir>
+			<imagepooldir>Path to all whatsapp images (used for ImageMatcher)</imagepooldir>
+		</parserconfiguration>
+	</parser>-->
 	<writers>
 		<writer>
-			<name>namea</name>
-			<writerconfiguration>configa</writerconfiguration>
+			<name>texcreator.TexWriterPlugin</name>
+			<writerconfiguration></writerconfiguration>
 		</writer>
 		<writer>
-			<name>nameb</name>
-			<writerconfiguration>configb</writerconfiguration>
-		</writer>
-		<writer>
-			<name>nameb</name>
-			<writerconfiguration>configb</writerconfiguration>
+			<name>odfcreator.OdfWriterPlugin</name>
+			<writerconfiguration></writerconfiguration>
 		</writer>
 	</writers>
 </configuration>
