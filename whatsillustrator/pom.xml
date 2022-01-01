@@ -9,6 +9,7 @@
 	<name>PDF-Converter for Whatsapp Messages</name>
 	<description>Converts whatsapp messages to pdf</description>
 	<modules>
+		<module>configurator</module>
 		<module>helper</module>
 		<module>imagematcher</module>
 		<module>messageparser</module>
