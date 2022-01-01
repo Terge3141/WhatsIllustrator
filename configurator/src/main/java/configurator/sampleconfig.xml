@@ -4,20 +4,24 @@
 		<emojidir>emojidirectory</emojidir>
 		<debugdir>debugdirectory</debugdir>
 	</global>
-	<!-- uncomment one of the parsers -->
-	<!--<parser>
+	<!-- comment one of the parsers -->
+	<!-- For Telegramparser: Leave the chatname empty to get a list of all available chats -->
+	<parser>
 		<name>messageparser.TelegramParser</name>
 		<parserconfiguration>
 			<messagepath>path to json file</messagepath>
+			<chatname></chatname>
+			<!-- Set this to true if the json file contains the chat only. Used mainly for debugging. If unsure set to false -->
+			<chatonly>false</chatonly>
 		</parserconfiguration>
-	</parser>-->
-	<!--<parser>
+	</parser>
+	<parser>
 		<name>messageparser.WhatsappParser</name>
 		<parserconfiguration>
 			<messagedir>path to extracted zip file</messagedir>
 			<imagepooldir>Path to all whatsapp images (used for ImageMatcher)</imagepooldir>
 		</parserconfiguration>
-	</parser>-->
+	</parser>
 	<writers>
 		<writer>
 			<name>texcreator.TexWriterPlugin</name>

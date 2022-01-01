@@ -36,20 +36,6 @@ public class TelegramParser implements IParser {
 	public TelegramParser() {
 	}
 	
-	public static TelegramParser of(Path messagePath)
-			throws IOException {
-		String json = Files.readString(messagePath);
-		return new TelegramParser(json);
-	}
-	
-	public TelegramParser(String json) {
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		gsonBuilder.registerTypeAdapter(TelegramText.class, new TelegramTextSerializer());
-		
-		Gson gson = gsonBuilder.create(); 
-		telegramChat = gson.fromJson(json, TelegramChat.class);
-	}
-	
 	public void init(String xmlConfig, Global globalConfig) throws IOException, DocumentException {
 		SAXReader reader = new SAXReader();
 		InputStream stream = new ByteArrayInputStream(xmlConfig.getBytes(StandardCharsets.UTF_16));
@@ -59,11 +45,20 @@ public class TelegramParser implements IParser {
 		String json = Files.readString(this.messagePath);
 		this.messageDir = messagePath.getParent();
 		
+		String chatName = document.selectSingleNode("//chatname").getStringValue();
+		
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.registerTypeAdapter(TelegramText.class, new TelegramTextSerializer());
 		
-		Gson gson = gsonBuilder.create(); 
-		this.telegramChat = gson.fromJson(json, TelegramChat.class);
+		boolean chatOnly = Boolean.parseBoolean(document.selectSingleNode("//chatonly").getStringValue());
+		Gson gson = gsonBuilder.create();
+		if(chatOnly) {
+			this.telegramChat = gson.fromJson(json, TelegramChat.class);
+		}
+		else {
+			TelegramResult telegramResult = gson.fromJson(json, TelegramResult.class);
+			this.telegramChat = telegramResult.chats.getChatByName(chatName);
+		}
 	}
 	
 	public IMessage nextMessage() {
@@ -143,9 +138,7 @@ public class TelegramParser implements IParser {
 	}
 	
 	public String getNameSuggestion() {
-		String fileName = this.messagePath.getFileName().toString();
-		int index = fileName.lastIndexOf('.');
-		return "Telegram_" + fileName.substring(0, index);
+		return "Telegram " + this.telegramChat.name;
 	}
 	
 	private Path fullPath(String relativePath) {

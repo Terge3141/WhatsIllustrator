@@ -3,7 +3,7 @@ package messageparser;
 public class TelegramChat {
 	public String name;
 	public String type;
-	public int id;
+	public long id;
 	
 	public TelegramMessage messages[];
 	
