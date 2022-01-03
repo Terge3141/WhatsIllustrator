@@ -18,6 +18,7 @@
 		<module>texcreator</module>
 		<module>fopcreator</module>
 		<module>odfcreator</module>
+		<module>videothumbnails</module>
 	</modules>
 
 	<build>
