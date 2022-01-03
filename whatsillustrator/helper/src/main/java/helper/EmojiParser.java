@@ -75,6 +75,11 @@ public class EmojiParser {
 
 	public List<Token> getTokens(String str) {
 		List<Token> tokens = new ArrayList<Token>();
+		
+		if(str==null) {
+			return tokens;
+		}
+		
 		int index = 0;
 		while (index < str.length()) {
 			index = parseChars(str, index, tokens);

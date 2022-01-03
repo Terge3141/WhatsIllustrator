@@ -84,7 +84,7 @@ public class TelegramParser implements IParser {
 		}
 		
 		String from = message.from;
-		from = from + ": " + message.id;
+		//from = from + ": " + message.id;
 		String text = message.text.text;
 		
 		if(message.type.equals(JSON_MESSAGE)) {
