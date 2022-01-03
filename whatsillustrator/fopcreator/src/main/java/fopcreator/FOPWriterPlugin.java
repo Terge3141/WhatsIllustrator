@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +24,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.Fop;
@@ -30,6 +32,7 @@ import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jcodec.api.JCodecException;
 
 import configurator.Global;
 import creator.plugins.IWriterPlugin;
@@ -40,6 +43,7 @@ import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
 import messageparser.VideoMessage;
+import videothumbnails.ThumbnailCreator;
 import messageparser.LinkMessage;
 
 public class FOPWriterPlugin implements IWriterPlugin {
@@ -53,6 +57,10 @@ public class FOPWriterPlugin implements IWriterPlugin {
 	private Path xslOutputPath;
 	private Path incOutputPath;
 	private Path pdfOutputPath;
+
+	private int videoThumbnailCnt = 6;
+	
+	private Path tmpDir;
 
 	@Override
 	public void preAppend(String xmlConfig, Global globalConfig) throws WriterException {
@@ -86,6 +94,12 @@ public class FOPWriterPlugin implements IWriterPlugin {
 		} catch (FactoryConfigurationError fce) {
 			throw new WriterException(fce);
 		}
+		
+		try {
+			tmpDir = Files.createTempDirectory("foptempdir");
+		} catch (IOException e) {
+			throw new WriterException(e);
+		}
 	}
 
 	@Override
@@ -102,6 +116,12 @@ public class FOPWriterPlugin implements IWriterPlugin {
 		try {
 			toPDF();
 		} catch (FOPException | TransformerException | IOException e) {
+			throw new WriterException(e);
+		}
+		
+		try {
+			FileUtils.deleteDirectory(tmpDir.toFile());
+		} catch (IOException e) {
 			throw new WriterException(e);
 		}
 	}
@@ -133,7 +153,24 @@ public class FOPWriterPlugin implements IWriterPlugin {
 	
 	@Override
 	public void appendVideoMessage(VideoMessage msg) throws WriterException {
-		throw new UnsupportedOperationException();
+		Path videoPath = msg.getFilepath();
+		if(videoPath.toFile().exists()) {
+			ThumbnailCreator tc = ThumbnailCreator.of(videoPath, videoThumbnailCnt , tmpDir);;
+			List<Path> tnPaths;
+			try {
+				tnPaths = tc.createThumbnails();
+			} catch (IOException | JCodecException e) {
+				throw new WriterException(e);
+			}
+			
+			List<FOPImageMessage> fopImageMessages = FOPImageMessage.of(msg, globalConfig.getDateUtils(), tnPaths);
+			for (FOPImageMessage fopImageMessage : fopImageMessages) {
+				appendObject(fopImageMessage, this.writer);
+			}
+	
+		} else {
+			logger.warn("File '{}' does not exist, skipping message", videoPath);
+		}
 	}
 
 	@Override

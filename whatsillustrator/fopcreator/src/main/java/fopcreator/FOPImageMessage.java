@@ -13,6 +13,7 @@ import helper.EmojiParser;
 import helper.EmojiParser.Token;
 import messageparser.ImageMessage;
 import messageparser.MediaOmittedMessage;
+import messageparser.VideoMessage;
 
 @XmlRootElement(name = "imagemessage")
 public class FOPImageMessage implements Serializable {
@@ -52,6 +53,21 @@ public class FOPImageMessage implements Serializable {
 	public static List<FOPImageMessage> of(MediaOmittedMessage message, DateUtils dateUtils) {
 		List<FOPImageMessage> list = new ArrayList<FOPImageMessage>();
 		for (Path absPath : message.getAbspaths()) {
+			FOPImageMessage fopMessage = new FOPImageMessage();
+			fopMessage.timepoint = dateUtils.formatTimeString(message.getTimepoint());
+			fopMessage.sender = message.getSender();
+			fopMessage.src = absPath.toString();
+			fopMessage.tokens = null;
+
+			list.add(fopMessage);
+		}
+
+		return list;
+	}
+	
+	public static List<FOPImageMessage> of(VideoMessage message, DateUtils dateUtils, List<Path> paths) {
+		List<FOPImageMessage> list = new ArrayList<FOPImageMessage>();
+		for (Path absPath : paths) {
 			FOPImageMessage fopMessage = new FOPImageMessage();
 			fopMessage.timepoint = dateUtils.formatTimeString(message.getTimepoint());
 			fopMessage.sender = message.getSender();
