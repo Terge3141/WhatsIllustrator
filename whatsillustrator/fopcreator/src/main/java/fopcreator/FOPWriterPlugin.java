@@ -39,6 +39,7 @@ import messageparser.ImageMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
+import messageparser.VideoMessage;
 import messageparser.LinkMessage;
 
 public class FOPWriterPlugin implements IWriterPlugin {
@@ -128,6 +129,11 @@ public class FOPWriterPlugin implements IWriterPlugin {
 		FOPImageMessage fopImageMessage = FOPImageMessage.of(imageMessage, globalConfig.getDateUtils()
 				, this.emojis);
 		appendObject(fopImageMessage, this.writer);
+	}
+	
+	@Override
+	public void appendVideoMessage(VideoMessage msg) throws WriterException {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

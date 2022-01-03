@@ -100,12 +100,7 @@ public class TelegramParser implements IParser {
 				return new ImageMessage(date, from, fullPath(message.file), text);
 			}
 			else if("video_file".equals(message.media_type) || "animation".equals(message.media_type)) {
-				if(message.thumbnail!=null) {
-					return new ImageMessage(date, from, fullPath(message.thumbnail), text);
-				}
-				else {
-					return new TextMessage(date, from, "video - no thumbnail available");
-				}
+				return new VideoMessage(date, from, fullPath(message.file), text);
 			}
 			else if("voice_message".equals(message.media_type)) {
 				return new TextMessage(date, from, "voice message of " + message.duration_seconds + "s");

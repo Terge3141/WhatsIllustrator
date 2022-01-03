@@ -7,6 +7,7 @@ import messageparser.ImageMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
+import messageparser.VideoMessage;
 import messageparser.LinkMessage;
 
 public interface IWriterPlugin {
@@ -34,14 +35,21 @@ public interface IWriterPlugin {
 	 * @param textMessage Message to be appended
 	 * @throws WriterException
 	 */
-	void appendTextMessage(TextMessage textMessage)throws WriterException;
+	void appendTextMessage(TextMessage textMessage) throws WriterException;
 	
 	/**
 	 * Appends an image message to the document
 	 * @param imageMessage Message to be appended
 	 * @throws WriterException
 	 */
-	void appendImageMessage(ImageMessage imageMessage)throws WriterException;
+	void appendImageMessage(ImageMessage imageMessage) throws WriterException;
+	
+	/**
+	 * Appends a video message to the document
+	 * @param videoMessage Message to be appended
+	 * @throws WriterException
+	 */
+	void appendVideoMessage(VideoMessage videoMessage) throws WriterException;
 	
 	/**
 	 * Appends a media omitted message to the document

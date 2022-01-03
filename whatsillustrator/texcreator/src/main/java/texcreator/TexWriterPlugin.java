@@ -16,6 +16,7 @@ import java.util.List;
 import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jcodec.api.JCodecException;
 
 import configurator.Global;
 import creator.plugins.IWriterPlugin;
@@ -29,6 +30,8 @@ import messageparser.LinkMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
+import messageparser.VideoMessage;
+import videothumbnails.ThumbnailCreator;
 
 public class TexWriterPlugin implements IWriterPlugin {
 	private static Logger logger = LogManager.getLogger(TexWriterPlugin.class);
@@ -47,9 +50,11 @@ public class TexWriterPlugin implements IWriterPlugin {
 	private List<CopyItem> copyList;
 	
 	private Path imageOutputDir;
+	private int videoThumbnailCnt = 6;
 
 	private Path outputDir;
 	private Path texOutputPath;
+
 
 	@Override
 	public void preAppend(String xmlConfig, Global globalConfig) throws WriterException {
@@ -119,15 +124,35 @@ public class TexWriterPlugin implements IWriterPlugin {
 	@Override
 	public void appendImageMessage(ImageMessage msg) throws WriterException {
 		Path absoluteImgPath = msg.getFilepath();
-		/*Path relativeImgPath = this.outputDir.relativize(absoluteImgPath);*/
 
 		if(Files.exists(absoluteImgPath)) {
 			tsb.appendln("%s\\\\", formatSenderAndTime(msg));
-			tsb.append("\\begin{center}");
+			tsb.appendln("\\begin{center}");
 			tsb.append(createLatexImage(absoluteImgPath, msg.getSubscription()));
 			tsb.appendln("\\end{center}");
 		} else {
 			logger.warn("File '{}' does not exist, skipping message", absoluteImgPath);
+		}
+	}
+	
+	@Override
+	public void appendVideoMessage(VideoMessage msg) throws WriterException {
+		Path videoPath = msg.getFilepath();
+		if(videoPath.toFile().exists()) {
+			ThumbnailCreator tc = ThumbnailCreator.of(videoPath, videoThumbnailCnt, imageOutputDir);
+			List<Path> tnPaths;
+			try {
+				tnPaths = tc.createThumbnails();
+			} catch (IOException | JCodecException e) {
+				throw new WriterException(e);
+			}
+			
+			tsb.appendln("%s\\\\", formatSenderAndTime(msg));
+			tsb.appendln("\\begin{center}");
+			tsb.append(createLatexImageStack(tnPaths, tc.isLandScape(), msg.getSubscription()));
+			tsb.appendln("\\end{center}");
+		} else {
+			logger.warn("File '{}' does not exist, skipping message", videoPath);
 		}
 	}
 
@@ -230,7 +255,33 @@ public class TexWriterPlugin implements IWriterPlugin {
 		tsb.appendln("\\small{\\textit{%s}}", encode(subscription));
 		return tsb.toString();
 	}
-
+	
+	public String createLatexImageStack(List<Path> paths, boolean landscapeImages, String subscription) throws WriterException {
+		TextStringBuilder tsb = new TextStringBuilder();
+		String sizeInfo = String.format("width=%f\\columnwidth", landscapeImages ? 0.3 : 0.15);
+		
+		for(Path src : paths) {
+			Path fileName = src.getFileName();
+			Path dst = this.imageOutputDir.resolve(fileName);
+			Path relDst = this.outputDir.relativize(dst);
+			try {
+				Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+			}
+			catch(IOException ioe) {
+				throw new WriterException("Cannot copy file from '" + src.toString() + "' to '" + dst.toString() + "'",
+						ioe);
+			}
+			
+			tsb.appendln("\\includegraphics[%s]{%s}", sizeInfo, relDst); 
+		}
+		
+		tsb.appendln("\\\\");
+		
+		subscription = subscription.replace("\n", " ").replace("\r", "");
+		tsb.appendln("\\small{\\textit{%s}}", encode(subscription));
+		return tsb.toString();
+	}
+	
 	private String createLatexImage(Path path, String subscription) throws WriterException {
 		return createLatexImage(path.toString(), subscription);
 	}

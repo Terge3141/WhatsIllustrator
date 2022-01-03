@@ -54,6 +54,10 @@ public class BookCreator {
 				for (IWriterPlugin plugin : this.plugins) {
 					plugin.appendImageMessage((ImageMessage) msg);
 				}
+			} else if (msg instanceof VideoMessage) {
+				for (IWriterPlugin plugin : this.plugins) {
+					plugin.appendVideoMessage((VideoMessage) msg);
+				}
 			} else if (msg instanceof MediaOmittedMessage) {
 				for (IWriterPlugin plugin : this.plugins) {
 					plugin.appendMediaOmittedMessage((MediaOmittedMessage) msg);

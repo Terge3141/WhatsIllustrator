@@ -36,6 +36,7 @@ import messageparser.ImageMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
+import messageparser.VideoMessage;
 import messageparser.LinkMessage;
 
 public class OdfWriterPlugin implements IWriterPlugin {
@@ -114,6 +115,11 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		Path absoluteImgPath = msg.getFilepath().toAbsolutePath();
 
 		appendImage(absoluteImgPath, msg.getSubscription());
+	}
+	
+	@Override
+	public void appendVideoMessage(VideoMessage msg) throws WriterException {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
