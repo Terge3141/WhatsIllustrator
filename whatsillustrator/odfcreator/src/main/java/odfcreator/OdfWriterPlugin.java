@@ -1,5 +1,6 @@
 package odfcreator;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,8 +9,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jcodec.api.JCodecException;
 import org.odftoolkit.simple.TextDocument;
 import org.odftoolkit.simple.common.navigation.TextNavigation;
 import org.odftoolkit.simple.common.navigation.TextSelection;
@@ -37,11 +40,13 @@ import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
 import messageparser.VideoMessage;
+import videothumbnails.ThumbnailCreator;
 import messageparser.LinkMessage;
 
 public class OdfWriterPlugin implements IWriterPlugin {
 
 	private final double IMAGE_HEIGHT_CM = 2.0;
+	private final double IMAGE_WIDTH_CM = 2.5;
 
 	private final double EMOJI_HEIGHT_CM = 0.5;
 
@@ -55,6 +60,9 @@ public class OdfWriterPlugin implements IWriterPlugin {
 	private Global globalConfig;
 
 	private EmojiParser emojis;
+	private int videoThumbnailCnt = 6;
+	
+	private Path tmpDir;
 
 	@Override
 	public void preAppend(String xmlConfig, Global globalConfig) throws WriterException {
@@ -77,6 +85,12 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		} catch (Exception e) {
 			throw new WriterException(e);
 		}
+		
+		try {
+			tmpDir = Files.createTempDirectory("odftempdir");
+		} catch (IOException e) {
+			throw new WriterException(e);
+		}
 	}
 
 	@Override
@@ -85,6 +99,12 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		try {
 			doc.save(this.odfOutputPath.toFile());
 		} catch (Exception e) {
+			throw new WriterException(e);
+		}
+		
+		try {
+			FileUtils.deleteDirectory(tmpDir.toFile());
+		} catch (IOException e) {
 			throw new WriterException(e);
 		}
 	}
@@ -119,7 +139,22 @@ public class OdfWriterPlugin implements IWriterPlugin {
 	
 	@Override
 	public void appendVideoMessage(VideoMessage msg) throws WriterException {
-		throw new UnsupportedOperationException();
+		appendSenderAndDate(msg, null);
+		
+		Path videoPath = msg.getFilepath();
+		if(videoPath.toFile().exists()) {
+			ThumbnailCreator tc = ThumbnailCreator.of(videoPath, videoThumbnailCnt , tmpDir);
+			List<Path> tnPaths;
+			try {
+				tnPaths = tc.createThumbnails();
+			} catch (IOException | JCodecException e) {
+				throw new WriterException(e);
+			}
+			
+			appendImageStack(tnPaths, tc.isLandScape(), msg.getSubscription());
+		} else {
+			logger.warn("File '{}' does not exist, skipping message", videoPath);
+		}
 	}
 
 	@Override
@@ -182,6 +217,31 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		FrameStyleHandler imageStyleHandler = image.getStyleHandler();
 		imageStyleHandler.setAchorType(AnchorType.AS_CHARACTER);
 
+		if (subscription != null) {
+			Paragraph subscriptionParagraph = doc.addParagraph("");
+			subscriptionParagraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
+			addEmojiEncodedText(subscriptionParagraph, subscription + "\n", FontStyle.ITALIC);
+		}
+
+		return paragraph;
+	}
+	
+	private Paragraph appendImageStack(List<Path> paths, boolean landscape, String subscription) {
+		Paragraph paragraph = this.doc.addParagraph("");
+		paragraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
+		double width = IMAGE_WIDTH_CM * (landscape ? 2.0 : 1.0);
+		for(Path path : paths) {
+			Image image = Image.newImage(paragraph, path.toUri());
+			FrameRectangle rectangle = image.getRectangle();
+			double scaleFactor = width / rectangle.getWidth();
+			rectangle.setWidth(width);
+			rectangle.setHeight(rectangle.getHeight() * scaleFactor);
+			image.setRectangle(rectangle);
+			
+			FrameStyleHandler imageStyleHandler = image.getStyleHandler();
+			imageStyleHandler.setAchorType(AnchorType.AS_CHARACTER);
+		}
+		
 		if (subscription != null) {
 			Paragraph subscriptionParagraph = doc.addParagraph("");
 			subscriptionParagraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
