@@ -32,7 +32,7 @@ public class BookCreator {
 	}
 
 	
-	public void write() throws IOException, ParseException, WriterException  {
+	public void write() throws IOException, ParseException, WriterException, ParserException  {
 		// write messages
 		logger.info("Start parsing messages");
 		IMessage msg;

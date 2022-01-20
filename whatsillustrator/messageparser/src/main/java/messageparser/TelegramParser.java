@@ -36,13 +36,24 @@ public class TelegramParser implements IParser {
 	public TelegramParser() {
 	}
 	
-	public void init(String xmlConfig, Global globalConfig) throws IOException, DocumentException {
+	public void init(String xmlConfig, Global globalConfig) throws ParserException {
 		SAXReader reader = new SAXReader();
 		InputStream stream = new ByteArrayInputStream(xmlConfig.getBytes(StandardCharsets.UTF_16));
-		Document document = reader.read(stream);
+		Document document;
+		try {
+			document = reader.read(stream);
+		} catch (DocumentException e) {
+			throw new ParserException("Could not read xml configuration", e);
+		}
 		
 		this.messagePath = Paths.get(document.selectSingleNode("//messagepath").getStringValue());
-		String json = Files.readString(this.messagePath);
+		String json;
+		try {
+			json = Files.readString(this.messagePath);
+		} catch (IOException e) {
+			String msg = String.format("Could not read message file '%s'", this.messagePath);
+			throw new ParserException(msg, e);
+		}
 		this.messageDir = messagePath.getParent();
 		
 		String chatName = document.selectSingleNode("//chatname").getStringValue();

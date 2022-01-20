@@ -251,6 +251,9 @@ public class TexWriterPlugin implements IWriterPlugin {
 		TextStringBuilder tsb = new TextStringBuilder();
 		tsb.appendln("\\includegraphics[height=0.1\\textheight]{%s}\\\\", relDst);
 		
+		if(subscription==null) {
+			subscription="";
+		}
 		subscription = subscription.replace("\n", " ").replace("\r", "");
 		tsb.appendln("\\small{\\textit{%s}}", encode(subscription));
 		return tsb.toString();
@@ -277,6 +280,9 @@ public class TexWriterPlugin implements IWriterPlugin {
 		
 		tsb.appendln("\\\\");
 		
+		if(subscription==null) {
+			subscription = "";
+		}
 		subscription = subscription.replace("\n", " ").replace("\r", "");
 		tsb.appendln("\\small{\\textit{%s}}", encode(subscription));
 		return tsb.toString();

@@ -20,6 +20,7 @@ import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 
 import configurator.Global;
@@ -56,10 +57,15 @@ public class WhatsappParser implements IParser {
 	}
 	
 	@Override
-	public void init(String xmlConfig, Global globalConfig) throws Exception {
+	public void init(String xmlConfig, Global globalConfig) throws ParserException {
 		SAXReader reader = new SAXReader();
 		InputStream stream = new ByteArrayInputStream(xmlConfig.getBytes(StandardCharsets.UTF_16));
-		Document document = reader.read(stream);
+		Document document;
+		try {
+			document = reader.read(stream);
+		} catch (DocumentException e) {
+			throw new ParserException("Could not read xml configuration", e);
+		}
 		
 		this.globalConfig = globalConfig;
 		this.messageDir = Paths.get(document.selectSingleNode("//messagedir").getStringValue());
@@ -67,20 +73,33 @@ public class WhatsappParser implements IParser {
 		this.configDir = this.messageDir.resolve("config");
 		this.chatDir = this.messageDir.resolve("chat");
 		
-		List<String> txtFiles = FileHandler.listDir(chatDir, ".*.txt");
-		if (txtFiles.size() != 1) {
-			throw new IllegalArgumentException(
-					String.format("Invalid number of .txt-files found: %d", txtFiles.size()));
-		}		
-		Path txtInputPath = Paths.get(txtFiles.get(0));
-		logger.info("Using {} as input", txtInputPath);
-		
-		this.lines = Files.readAllLines(txtInputPath);
+		Path txtInputPath;
+		try {
+			List<String> txtFiles = FileHandler.listDir(chatDir, ".*.txt");
+			if (txtFiles.size() != 1) {
+				throw new ParserException(String.format("Invalid number of .txt-files found: %d", txtFiles.size()));
+			}
+			txtInputPath = Paths.get(txtFiles.get(0));
+			logger.info("Using {} as input", txtInputPath);
+
+			this.lines = Files.readAllLines(txtInputPath);
+		} catch (IOException e) {
+			throw new ParserException("Could not find or read chat text file", e);
+		}
 		
 		this.namePrefix = txtInputPath.toFile().getName();
 		this.namePrefix = this.namePrefix.substring(0, this.namePrefix.length() - 4);
-		this.imageMatcher = getImageMatcher(this.namePrefix);
-		this.nameLookup = getNameLookup();
+		try {
+			this.imageMatcher = getImageMatcher(this.namePrefix);
+		} catch (IOException | ParseException e) {
+			throw new ParserException("Could not read image matcher file", e);
+		}
+		
+		try {
+			this.nameLookup = getNameLookup();
+		} catch (IOException e) {
+			throw new ParserException("Could not read name lookup file", e);
+		}
 	}
 
 	public IMessage nextMessage() {

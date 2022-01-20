@@ -5,13 +5,15 @@
 		<debugdir>debugdirectory</debugdir>
 	</global>
 	<!-- comment one of the parsers -->
-	<!-- For Telegramparser: Leave the chatname empty to get a list of all available chats -->
+	<!-- For Telegramparser: Leave the chatname empty to get a list of all available 
+		chats -->
 	<parser>
 		<name>messageparser.TelegramParser</name>
 		<parserconfiguration>
 			<messagepath>path to json file</messagepath>
 			<chatname></chatname>
-			<!-- Set this to true if the json file contains the chat only. Used mainly for debugging. If unsure set to false -->
+			<!-- Set this to true if the json file contains the chat only. Used mainly 
+				for debugging. If unsure set to false -->
 			<chatonly>false</chatonly>
 		</parserconfiguration>
 	</parser>
@@ -19,7 +21,16 @@
 		<name>messageparser.WhatsappParser</name>
 		<parserconfiguration>
 			<messagedir>path to extracted zip file</messagedir>
-			<imagepooldir>Path to all whatsapp images (used for ImageMatcher)</imagepooldir>
+			<imagepooldir>Path to all whatsapp images (used for ImageMatcher)
+			</imagepooldir>
+		</parserconfiguration>
+	</parser>
+	<parser>
+		<name>messageparser.SignalParser</name>
+		<parserconfiguration>
+			<backupfile>path/to/signal-YYYY-MM-DD-hh-mm-ss.backup</backupfile>
+			<passphrase>12345 12345 12345 12345 12345 12345</passphrase>
+			<chatname>chatname</chatname>
 		</parserconfiguration>
 	</parser>
 	<writers>

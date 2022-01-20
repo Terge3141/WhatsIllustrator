@@ -1,7 +1,7 @@
 # WhatsIllustrator
 
 ## What is WhatsIllustrator?
-WhatsIllustrator is a program and framework which converts WhatsApp and Telegram Messenger chats into a pdf, odt and tex. It is written in Java and can be easily extended for other output formats, layouts and messengers.
+WhatsIllustrator is a program and framework which converts WhatsApp, Telegram Messenger and Signal Messenger chats into a pdf, odt and tex. It is written in Java and can be easily extended for other output formats, layouts and messengers.
 
 ## Getting started
 ### Compile
@@ -34,7 +34,10 @@ This will create the file dist.jar in the same directory.
 #### Telegram
 1. Export a Telegram Chat: https://telegram.org/blog/export-and-more
 
-#### Both 
+#### Signal
+1. Activate backup and copy backup file to your pc, see also https://support.signal.org/hc/en-us/articles/360007059752-Backup-and-Restore-Messages
+
+#### All 
 Open whatsillustrator/configurator/src/main/java/configurator/sampleconfig.xml, modify it and save it to as config.xml.
 
 ```bash
@@ -47,12 +50,12 @@ The reults will be written to *outputdir* (defined in config.xml). Each chat con
 * **odf**: Contains the generated **odt** file. It can be opened for example with *libre office*.
 * **tex** Contains the generated **tex** file and some files the tex document references. The file can be processed for example with *pdflatex*
 
-# Contributions
-Contributions (new features, bug fixes, changes) are very welcome. Just send send me the pull requests or patches. Also, if you find any bugs let me know.
-
 ## Image Pools (WhatsApp only)
 For some chats it appears that it is not possible to export them with media. Then a `<`Media omitted`>` line occurs in the chat file. In this case *whatsillustrator* automatically searches the image pool directory and lists all possible images for the date of interest.
 
 The match file is written to chat output directory. This can be edited and written to the directory $wadir/config. When *whatsillustrator* is invoked next time, it reads the match file and uses it to match `<`Media omitted`>` messages.
 
 The image pool directory should contain *all* images and configured as *imagepooldir* in the config.xml file (parserconfiguration).
+
+# Contributions
+Contributions (new features, bug fixes, changes) are very welcome. Just send send me the pull requests or patches. Also, if you find any bugs let me know.
