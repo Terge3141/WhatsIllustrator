@@ -31,13 +31,13 @@
 			<artifactId>configurator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.apache.odftoolkit/simple-odf -->
+		<!-- https://mvnrepository.com/artifact/org.odftoolkit/simple-odf -->
 		<dependency>
-			<groupId>org.apache.odftoolkit</groupId>
-			<artifactId>simple-odf</artifactId>
-			<version>0.8.2-incubating</version>
+			    <groupId>org.odftoolkit</groupId>
+			    <artifactId>simple-odf</artifactId>
+			    <version>0.9.0</version>
 		</dependency>
+
 
 	</dependencies>
 </project>
