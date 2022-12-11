@@ -81,8 +81,8 @@ public class FOPWriterPlugin implements IWriterPlugin {
 			FileOutputStream out = new FileOutputStream(xmlOutputPath.toFile());
 
 			// write xsl file
-			writeRessourceFile("/fopsample.xsl", xslOutputPath);
-			writeRessourceFile("/fopincludes.xsl", incOutputPath);
+			writeRessourceFile("fopsample.xsl", xslOutputPath);
+			writeRessourceFile("fopincludes.xsl", incOutputPath);
 
 			this.writer = XMLOutputFactory.newInstance().createXMLStreamWriter(out, "UTF-16");
 			this.writer.writeStartDocument();
@@ -247,6 +247,8 @@ public class FOPWriterPlugin implements IWriterPlugin {
 	private void writeRessourceFile(String ressourceName, Path destPath) throws IOException {
 		InputStream inputStream = this.getClass().getResourceAsStream(ressourceName);
 		FileOutputStream fileOutputStream = new FileOutputStream(destPath.toFile());
+
+		System.out.println("rn: " + ressourceName);
 
 		int nRead;
 		byte[] data = new byte[1024];
