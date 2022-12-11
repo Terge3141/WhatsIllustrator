@@ -20,6 +20,7 @@ import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dom4j.Document;
+import org.dom4j.Node;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 
@@ -69,7 +70,10 @@ public class WhatsappParser implements IParser {
 		
 		this.globalConfig = globalConfig;
 		this.messageDir = Paths.get(document.selectSingleNode("//messagedir").getStringValue());
-		this.imagePoolDir = Paths.get(document.selectSingleNode("//imagepooldir").getStringValue());
+		Node node = document.selectSingleNode("//imagepooldir");
+		if(node!=null) {
+			this.imagePoolDir = Paths.get(node.getStringValue());
+		}
 		this.configDir = this.messageDir.resolve("config");
 		this.chatDir = this.messageDir.resolve("chat");
 		
