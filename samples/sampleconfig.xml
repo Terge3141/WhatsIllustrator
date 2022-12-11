@@ -1,6 +1,7 @@
 <configuration>
 	<global>
 		<outputdir>outputdirectory</outputdir>
+		<!-- set it to the path $emojirepodirectory/png/128 -->
 		<emojidir>emojidirectory</emojidir>
 		<debugdir>debugdirectory</debugdir>
 	</global>

@@ -24,7 +24,7 @@ Go to the WhatsIllustrator directory and build package
 cd whatsillustrator
 mvn package
 ```
-This will create the file dist.jar in the same directory.
+This will create the jar files.
 
 ### Run
 #### WhatsApp
