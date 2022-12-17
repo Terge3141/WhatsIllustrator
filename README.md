@@ -8,13 +8,7 @@ WhatsIllustrator is a program and framework which converts WhatsApp, Telegram Me
 First, clone the repository using git (recommended):
 
 ```bash
-git clone https://github.com/Terge3141/WhatsIllustrator.git
-``` 
-
-Get the emojis from noto-emoji using git (recommended)
-
-```bash
-git clone https://github.com/googlei18n/noto-emoji.git
+git clone --recurse-submodules https://github.com/Terge3141/WhatsIllustrator.git
 ``` 
 
 Make sure that *Java 11* and *maven* is installed
@@ -38,14 +32,14 @@ This will create the jar files.
 1. Activate backup and copy backup file to your pc, see also https://support.signal.org/hc/en-us/articles/360007059752-Backup-and-Restore-Messages
 
 #### All 
-Open whatsillustrator/configurator/src/main/java/configurator/sampleconfig.xml, modify it and save it to as config.xml.
+Open samples/sampleconfig.xml, modify it and save it as /path/to/config.xml.
 
 ```bash
 java -cp thebook/target/thebook-0.0.1-SNAPSHOT-jar-with-dependencies.jar\
 	thebook.Program -c /path/to/config.xml
 ```
 
-The reults will be written to *outputdir* (defined in config.xml). Each chat contains following subdirectories (if writers are activated):
+The reults will be written to *outputdir* (defined in config.xml). Each chat contains the following subdirectories (if writers are activated):
 * **fo**: Contains the generated **pdf** file.
 * **odf**: Contains the generated **odt** file. It can be opened for example with *libre office*.
 * **tex** Contains the generated **tex** file and some files the tex document references. The file can be processed for example with *pdflatex*

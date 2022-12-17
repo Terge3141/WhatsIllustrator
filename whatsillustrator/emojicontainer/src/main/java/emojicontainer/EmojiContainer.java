@@ -195,7 +195,7 @@ public class EmojiContainer {
 			}
 		}
 
-		logger.info("Loaded {} entries}", list.size());
+		logger.info("Loaded {} entries", list.size());
 
 		return list;
 	}
