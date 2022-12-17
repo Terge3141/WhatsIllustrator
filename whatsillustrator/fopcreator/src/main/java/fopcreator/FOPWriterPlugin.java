@@ -37,7 +37,7 @@ import org.jcodec.api.JCodecException;
 import configurator.Global;
 import creator.plugins.IWriterPlugin;
 import creator.plugins.WriterException;
-import helper.EmojiParser;
+import emojicontainer.EmojiContainer;
 import messageparser.ImageMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
@@ -50,7 +50,7 @@ public class FOPWriterPlugin implements IWriterPlugin {
 	private static Logger logger = LogManager.getLogger(FOPWriterPlugin.class);
 
 	private Global globalConfig;
-	private EmojiParser emojis;
+	private EmojiContainer emojis;
 	private XMLStreamWriter writer;
 
 	private Path xmlOutputPath;
@@ -66,9 +66,9 @@ public class FOPWriterPlugin implements IWriterPlugin {
 	public void preAppend(String xmlConfig, Global globalConfig) throws WriterException {
 		this.globalConfig = globalConfig;
 
-		this.emojis = new EmojiParser(this.globalConfig.getEmojiList());
-
 		try {
+			this.emojis = new EmojiContainer();
+			
 			Path outputDir = this.globalConfig.getOutputDir().resolve(this.globalConfig.getNameSuggestion())
 					.resolve("fop");
 			outputDir.toFile().mkdirs();

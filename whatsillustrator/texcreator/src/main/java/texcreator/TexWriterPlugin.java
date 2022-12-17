@@ -21,7 +21,7 @@ import org.jcodec.api.JCodecException;
 import configurator.Global;
 import creator.plugins.IWriterPlugin;
 import creator.plugins.WriterException;
-import helper.EmojiParser;
+import emojicontainer.EmojiContainer;
 import helper.Latex;
 import helper.Misc;
 import messageparser.IMessage;
@@ -42,11 +42,12 @@ public class TexWriterPlugin implements IWriterPlugin {
 	private String header;
 	private String footer;
 
-	private EmojiParser emojis;
+	private EmojiContainer emojis;
 
 	// This is the directory where the used written emojis are written to.
 	// Default is OutputDir/emojis
 	private Path emojiOutputDir;
+	
 	private List<CopyItem> copyList;
 	
 	private Path imageOutputDir;
@@ -64,7 +65,11 @@ public class TexWriterPlugin implements IWriterPlugin {
 		this.outputDir = this.globalConfig.getOutputDir().resolve(globalConfig.getNameSuggestion()).resolve("tex");
 		this.outputDir.toFile().mkdirs();
 
-		this.emojis = new EmojiParser(globalConfig.getEmojiList());
+		try {
+			this.emojis = new EmojiContainer();
+		} catch (IOException e) {
+			throw new WriterException(e);
+		}
 		this.emojiOutputDir = this.outputDir.resolve("emojis");
 		this.emojiOutputDir.toFile().mkdirs();
 		
@@ -193,17 +198,17 @@ public class TexWriterPlugin implements IWriterPlugin {
 	}
 
 	private String getEmojiPath(String str) {
-		Path src = this.globalConfig.getEmojiDir().resolve(String.format("%s%s.png", this.emojis.getEmojiPrefix(), str));
 		Path dst = this.emojiOutputDir.resolve(String.format("%s.png", str));
+		Path rel = this.outputDir.relativize(dst);
+		
+		this.copyList.add(new CopyItem(str, dst));
 
-		copyList.add(new CopyItem(src, dst));
-
-		return String.format("\\includegraphics[scale=0.075]{emojis/%s.png}", str);
+		return String.format("\\includegraphics[scale=0.075]{%s}", rel);
 	}
 
 	private void copyList() throws IOException {
 		for (CopyItem x : this.copyList) {
-			Files.copy(x.getSrcPath(), x.getDstPath(), StandardCopyOption.REPLACE_EXISTING);
+			this.emojis.copyEmoji(x.id, x.dst);
 		}
 	}
 
@@ -314,16 +319,16 @@ public class TexWriterPlugin implements IWriterPlugin {
 
 	private class CopyItem {
 
-		private Path src;
+		private String id;
 		private Path dst;
 
-		public CopyItem(Path src, Path dst) {
-			this.src = src;
+		public CopyItem(String id, Path dst) {
+			this.id = id;
 			this.dst = dst;
 		}
 
-		public Path getSrcPath() {
-			return src;
+		public String getId() {
+			return id;
 		}
 
 		public Path getDstPath() {

@@ -31,8 +31,8 @@ import org.odftoolkit.simple.text.Span;
 import configurator.Global;
 import creator.plugins.IWriterPlugin;
 import creator.plugins.WriterException;
-import helper.EmojiParser;
-import helper.EmojiParser.Token;
+import emojicontainer.EmojiContainer;
+import emojicontainer.EmojiContainer.Token;
 import helper.Misc;
 import messageparser.IMessage;
 import messageparser.ImageMessage;
@@ -59,7 +59,7 @@ public class OdfWriterPlugin implements IWriterPlugin {
 
 	private Global globalConfig;
 
-	private EmojiParser emojis;
+	private EmojiContainer emojis;
 	private int videoThumbnailCnt = 6;
 	
 	private Path tmpDir;
@@ -68,7 +68,11 @@ public class OdfWriterPlugin implements IWriterPlugin {
 	public void preAppend(String xmlConfig, Global globalConfig) throws WriterException {
 		this.globalConfig = globalConfig;
 
-		this.emojis = new EmojiParser(globalConfig.getEmojiList());
+		try {
+			this.emojis = new EmojiContainer();
+		} catch (IOException e) {
+			throw new WriterException(e);
+		}
 
 		this.firstDateHeader = true;
 
@@ -198,7 +202,7 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		appendSenderAndDate(msg, msg.getUrl());
 	}
 
-	private Paragraph appendImage(Path path, String subscription) {
+	private Paragraph appendImage(Path path, String subscription) throws WriterException {
 		Paragraph paragraph = this.doc.addParagraph("");
 		
 		if(!Files.exists(path)) {
@@ -226,7 +230,7 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		return paragraph;
 	}
 	
-	private Paragraph appendImageStack(List<Path> paths, boolean landscape, String subscription) {
+	private Paragraph appendImageStack(List<Path> paths, boolean landscape, String subscription) throws WriterException {
 		Paragraph paragraph = this.doc.addParagraph("");
 		paragraph.setHorizontalAlignment(HorizontalAlignmentType.CENTER);
 		double width = IMAGE_WIDTH_CM * (landscape ? 2.0 : 1.0);
@@ -251,7 +255,7 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		return paragraph;
 	}
 
-	private Paragraph appendSenderAndDate(IMessage msg, String extraText) {
+	private Paragraph appendSenderAndDate(IMessage msg, String extraText) throws WriterException {
 		String sender = msg.getSender();
 		String time = this.globalConfig.getDateUtils().formatTimeString(msg.getTimepoint());
 
@@ -266,12 +270,19 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		return paragraph;
 	}
 
-	private void addEmojiEncodedText(Paragraph paragraph, String text, FontStyle fontStyle) {
+	private void addEmojiEncodedText(Paragraph paragraph, String text, FontStyle fontStyle) throws WriterException {
 		List<Token> tokens = this.emojis.getTokens(text);
 		for (Token token : tokens) {
 			if (token.isEmoji()) {
-				URI uri = this.globalConfig.getEmojiDir()
+				/*URI uri = this.globalConfig.getEmojiDir()
 						.resolve(this.emojis.getEmojiPrefix() + token.getString() + ".png").toUri();
+				Image image = Image.newImage(paragraph, uri);*/
+				URI uri;
+				try {
+					uri = this.emojis.copyEmoji(token.getString(), this.tmpDir).toUri();
+				} catch (IOException e) {
+					throw new WriterException(e);
+				}
 				Image image = Image.newImage(paragraph, uri);
 
 				FrameRectangle rectangle = image.getRectangle();
@@ -289,7 +300,7 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		}
 	}
 
-	private void addEmojiEncodedText(Paragraph paragraph, String text) {
+	private void addEmojiEncodedText(Paragraph paragraph, String text) throws WriterException {
 		addEmojiEncodedText(paragraph, text, null);
 	}
 

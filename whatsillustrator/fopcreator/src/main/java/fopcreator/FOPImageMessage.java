@@ -8,9 +8,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import emojicontainer.EmojiContainer;
+import emojicontainer.EmojiContainer.Token;
 import helper.DateUtils;
-import helper.EmojiParser;
-import helper.EmojiParser.Token;
 import messageparser.ImageMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.VideoMessage;
@@ -38,14 +38,14 @@ public class FOPImageMessage implements Serializable {
 	public FOPImageMessage() {
 	}
 
-	public static FOPImageMessage of(ImageMessage message, DateUtils dateUtils, EmojiParser emojiParser) {
+	public static FOPImageMessage of(ImageMessage message, DateUtils dateUtils, EmojiContainer emojiContainer) {
 		FOPImageMessage fopMessage = new FOPImageMessage();
 		fopMessage.timepoint = dateUtils.formatTimeString(message.getTimepoint());
 		fopMessage.sender = message.getSender();
 		fopMessage.src = message.getFilepath().toString();
 
-		List<Token> emojiParserTokens = emojiParser.getTokens(message.getSubscription());
-		fopMessage.tokens = FOPToken.ofEmojiParser(emojiParserTokens, emojiParser.getEmojiPrefix());
+		List<Token> emojiParserTokens = emojiContainer.getTokens(message.getSubscription());
+		fopMessage.tokens = FOPToken.ofEmojiContainer(emojiParserTokens, emojiContainer.getEmojiPrefix());
 
 		return fopMessage;
 	}

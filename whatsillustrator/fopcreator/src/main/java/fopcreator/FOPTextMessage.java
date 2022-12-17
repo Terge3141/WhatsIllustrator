@@ -6,9 +6,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import emojicontainer.EmojiContainer;
+import emojicontainer.EmojiContainer.Token;
 import helper.DateUtils;
-import helper.EmojiParser;
-import helper.EmojiParser.Token;
 import messageparser.TextMessage;
 
 @XmlRootElement(name = "textmessage")
@@ -31,13 +31,13 @@ public class FOPTextMessage implements Serializable {
 	public FOPTextMessage() {
 	}
 
-	public static FOPTextMessage of(TextMessage message, DateUtils dateUtils, EmojiParser emojiParser) {
+	public static FOPTextMessage of(TextMessage message, DateUtils dateUtils, EmojiContainer emojiContainer) {
 		FOPTextMessage fopMessage = new FOPTextMessage();
 		fopMessage.timepoint = dateUtils.formatTimeString(message.getTimepoint());
 		fopMessage.sender = message.getSender();
 
-		List<Token> emojiParserTokens = emojiParser.getTokens(message.content);
-		fopMessage.tokens = FOPToken.ofEmojiParser(emojiParserTokens, emojiParser.getEmojiPrefix());
+		List<Token> emojiContainerTokens = emojiContainer.getTokens(message.content);
+		fopMessage.tokens = FOPToken.ofEmojiContainer(emojiContainerTokens, emojiContainer.getEmojiPrefix());
 
 		return fopMessage;
 	}

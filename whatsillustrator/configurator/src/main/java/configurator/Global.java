@@ -20,18 +20,17 @@ import helper.DateUtils;
 
 public class Global {
 	private final String DEFAULT_LOCALE = "en";
-	private final String EMOJIPREFIX = "emoji_u";
+	//private final String EMOJIPREFIX = "emoji_u";
 	
 	private static Logger logger = LogManager.getLogger(Global.class);
 	
 	private Path outputDir;
-	private Path emojiDir;
 	private Path debugDir;
 	
 	private String nameSuggestion;
 	
 	private DateUtils dateUtils;
-	private List<String> emojiList;
+	//private List<String> emojiList;
 	
 	public static Global fromXmlString(String xml) throws ConfigurationException, DocumentException {
 		SAXReader reader = new SAXReader();
@@ -40,12 +39,11 @@ public class Global {
 		
 		Global global = new Global();
 		global.outputDir = readPath(document, "//global/outputdir");
-		global.emojiDir = readPath(document, "//global/emojidir");
 		global.debugDir = readPath(document, "//global/debugdir");
 		
 		global.dateUtils = new DateUtils(global.DEFAULT_LOCALE);
 		
-		global.emojiList = global.readEmojiList(global.emojiDir);
+		//global.emojiList = global.readEmojiList(global.emojiDir);
 				
 		return global;
 	}
@@ -65,7 +63,7 @@ public class Global {
 	public String toString() {
 		String str = "";
 		str = str + ", outputdir: " + outputDir;
-		str = str + ", emojidir: " + emojiDir;
+		//str = str + ", emojidir: " + emojiDir;
 		str = str + ", debugdir: " + debugDir;
 		str = str + ", nameSuggestion: " + nameSuggestion;
 		return str;
@@ -73,10 +71,6 @@ public class Global {
 
 	public Path getOutputDir() {
 		return outputDir;
-	}
-
-	public Path getEmojiDir() {
-		return emojiDir;
 	}
 
 	public Path getDebugDir() {
@@ -100,11 +94,11 @@ public class Global {
 		return dateUtils;
 	}
 	
-	public List<String> getEmojiList() {
+	/*public List<String> getEmojiList() {
 		return emojiList;
-	}
+	}*/
 	
-	private List<String> readEmojiList(Path dir) {
+	/*private List<String> readEmojiList(Path dir) {
 		List<String> list = new ArrayList<>();
 		for (File x : dir.toFile().listFiles()) {
 			String fileName = x.getName();
@@ -122,5 +116,5 @@ public class Global {
 		logger.info("Loaded {} entries from {}", list.size(), dir);
 
 		return list;
-	}
+	}*/
 }

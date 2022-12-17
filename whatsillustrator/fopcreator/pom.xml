@@ -19,6 +19,11 @@
   		<artifactId>videothumbnails</artifactId>
   		<version>0.0.1-SNAPSHOT</version>
   	</dependency>
+  	<dependency>
+  		<groupId>com.terge</groupId>
+  		<artifactId>emojicontainer</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  	</dependency>
   	
   	<!-- https://mvnrepository.com/artifact/org.apache.xmlgraphics/fop -->
 	<dependency>

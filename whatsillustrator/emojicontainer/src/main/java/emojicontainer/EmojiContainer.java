@@ -1,5 +1,13 @@
-package helper;
+package emojicontainer;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -9,38 +17,20 @@ import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Parses a string for emojis and replaces them using a lambda function which is
- * passed as an argument
- * 
- * @author Michael Elvers
- *
- */
-public class EmojiParser {
+import helper.Misc;
 
+public class EmojiContainer {
+	private List<String> emojiList;
+	
 	private static final String SEPERATOR = "_";
 	private final String EMOJIPREFIX = "emoji_u";
+	private static Logger logger = LogManager.getLogger(EmojiContainer.class);
 	
-	private static Logger logger = LogManager.getLogger(EmojiParser.class);
-
-	private List<String> emojiList;
-
 	private int tokenMax;
-
-	/**
-	 * Constructor
-	 * 
-	 * @param emojiList           A list of emoji codes that can be replaced. If an
-	 *                            emoji is made of more than one unicode the
-	 *                            unicodes are separated by the character '_', for
-	 *                            example 270d_1f3fd
-	 * @param emojiFormatFunction The lambda function that is when an emoji is
-	 *                            found. The unicode(s) are passed to the function
-	 *                            and the formatted code is returned.
-	 */
-	public EmojiParser(List<String> emojiList) {
-		this.emojiList = emojiList;
-
+	
+	public EmojiContainer() throws IOException {
+		this.emojiList = readEmojiList();
+		
 		Iterator<String> it = this.emojiList.iterator();
 
 		this.tokenMax = 0;
@@ -51,11 +41,14 @@ public class EmojiParser {
 
 		this.tokenMax++;
 	}
-
+	
 	/**
 	 * Replaces The emojis for a given string.
 	 * 
 	 * @param str The string to replaced
+	 * @param emojiFormatFunction The lambda function that is when an emoji is
+	 * found. The unicode(s) are passed to the function
+	 * and the formatted code is returned.
 	 * @return The replaced string
 	 */
 	public String replaceEmojis(String str, Function<String, String> emojiFormatFunction) {
@@ -72,7 +65,7 @@ public class EmojiParser {
 
 		return tsb.toString();
 	}
-
+	
 	public List<Token> getTokens(String str) {
 		List<Token> tokens = new ArrayList<Token>();
 		
@@ -86,6 +79,18 @@ public class EmojiParser {
 		}
 
 		return tokens;
+	}
+	
+	public Path copyEmoji(String id, Path dst) throws IOException {
+		String filename = this.EMOJIPREFIX + id + ".png";
+		if(Files.isDirectory(dst)) {
+			dst = dst.resolve(filename);
+		}
+		
+		InputStream in = this.getClass().getResourceAsStream(filename);
+		Files.copy(in, dst, StandardCopyOption.REPLACE_EXISTING);
+		
+		return dst;
 	}
 
 	private int parseChars(String str, int index, List<Token> tokens) {
@@ -170,7 +175,31 @@ public class EmojiParser {
 			return result;
 		}
 	}
+	
+	private List<String> readEmojiList() throws IOException {
+		List<String> list = new ArrayList<>();
+		
+		InputStream in = this.getClass().getResourceAsStream("files.txt");
+		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		
+		String fileName;
+		while((fileName=br.readLine())!=null) {
+			String nr = fileName.replace(EMOJIPREFIX, "").replace(".png", "");
+			list.add(nr);
 
+			String[] excludes = { "0023", "002a", "0030", "0031", "0032", "0033", "0034", "0035", "0036", "0037",
+					"0038", "0039" };
+
+			for (String str : excludes) {
+				list.remove(str);
+			}
+		}
+
+		logger.info("Loaded {} entries}", list.size());
+
+		return list;
+	}
+	
 	private static String fromUtf32toString(int codePoint) {
 		return new String(Character.toChars(codePoint));
 	}
@@ -178,7 +207,7 @@ public class EmojiParser {
 	public String getEmojiPrefix() {
 		return this.EMOJIPREFIX;
 	}
-
+	
 	public class Token {
 		private TextStringBuilder tsb;
 		private boolean emoji;

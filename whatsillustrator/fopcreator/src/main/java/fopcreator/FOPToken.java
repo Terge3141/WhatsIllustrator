@@ -7,7 +7,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import helper.EmojiParser.Token;
+import emojicontainer.EmojiContainer.Token;
+
 
 @XmlRootElement(name = "FOPToken")
 public class FOPToken implements Serializable {
@@ -39,7 +40,7 @@ public class FOPToken implements Serializable {
 		return token;
 	}
 
-	public static List<FOPToken> ofEmojiParser(List<Token> tokens, String emojiPrefix) {
+	public static List<FOPToken> ofEmojiContainer(List<Token> tokens, String emojiPrefix) {
 
 		List<FOPToken> fopTokens = new ArrayList<FOPToken>();
 
