@@ -87,7 +87,7 @@ public class EmojiContainer {
 			dst = dst.resolve(filename);
 		}
 		
-		InputStream in = this.getClass().getResourceAsStream(filename);
+		InputStream in = this.getClass().getResourceAsStream("/" + filename);
 		Files.copy(in, dst, StandardCopyOption.REPLACE_EXISTING);
 		
 		return dst;
@@ -179,7 +179,7 @@ public class EmojiContainer {
 	private List<String> readEmojiList() throws IOException {
 		List<String> list = new ArrayList<>();
 		
-		InputStream in = this.getClass().getResourceAsStream("files.txt");
+		InputStream in = this.getClass().getResourceAsStream("/files.txt");
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		
 		String fileName;
