@@ -6,8 +6,8 @@
 	<artifactId>whatsillustrator</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>PDF-Converter for Whatsapp Messages</name>
-	<description>Converts whatsapp messages to pdf</description>
+	<name>PDF-Converter for Messenger Messages</name>
+	<description>Converts WhatsApp, Signal and Telegram messages to pdf</description>
 	<modules>
 		<module>configurator</module>
 		<module>emojicontainer</module>
