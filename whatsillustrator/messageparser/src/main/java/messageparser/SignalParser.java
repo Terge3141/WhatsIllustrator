@@ -129,6 +129,7 @@ public class SignalParser implements IParser {
 		while(rs.next()) {
 			String contentType = rs.getString("ct");
 			long uniqueId = rs.getLong("unique_id");
+			@SuppressWarnings("unused")
 			long stickerId = rs.getLong("sticker_id");
 			
 			if(contentType.equalsIgnoreCase("image/webp")) {

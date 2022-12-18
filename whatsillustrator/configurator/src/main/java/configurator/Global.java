@@ -18,6 +18,7 @@ import helper.DateUtils;
 public class Global {
 	private final String DEFAULT_LOCALE = "en";
 	
+	@SuppressWarnings("unused")
 	private static Logger logger = LogManager.getLogger(Global.class);
 	
 	private Path outputDir;

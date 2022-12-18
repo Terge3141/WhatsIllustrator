@@ -38,6 +38,7 @@ public class Program {
 		return options;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private static <T> T createObject(String className) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Class<?> myClass = Class.forName(className);
 		Constructor<?> cons = myClass.getConstructor();
