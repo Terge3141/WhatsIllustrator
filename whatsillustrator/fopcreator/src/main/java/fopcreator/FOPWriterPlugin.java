@@ -140,7 +140,12 @@ public class FOPWriterPlugin implements IWriterPlugin {
 
 	@Override
 	public void appendTextMessage(TextMessage textMessage) throws WriterException {
-		FOPTextMessage fopTextMessage = FOPTextMessage.of(textMessage, globalConfig.getDateUtils(), this.emojis);
+		FOPTextMessage fopTextMessage;
+		try {
+			fopTextMessage = FOPTextMessage.of(textMessage, globalConfig.getDateUtils(), this.emojis);
+		} catch (IOException e) {
+			throw new WriterException(e);
+		}
 		appendObject(fopTextMessage, this.writer);
 	}
 
