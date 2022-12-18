@@ -8,7 +8,6 @@
 	</parent>
 
 	<artifactId>emojicontainer</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>Emoji container</name>
 	<description>Class that contains all emojis as pngs</description>
 	<build>

@@ -1,6 +1,5 @@
 package fopcreator;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -41,7 +40,6 @@ import configurator.Global;
 import creator.plugins.IWriterPlugin;
 import creator.plugins.WriterException;
 import emojicontainer.EmojiContainer;
-import jdk.internal.net.http.common.Log;
 import messageparser.ImageMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;

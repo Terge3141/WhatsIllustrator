@@ -326,13 +326,5 @@ public class TexWriterPlugin implements IWriterPlugin {
 			this.id = id;
 			this.dst = dst;
 		}
-
-		public String getId() {
-			return id;
-		}
-
-		public Path getDstPath() {
-			return dst;
-		}
 	}
 }
