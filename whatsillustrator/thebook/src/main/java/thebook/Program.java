@@ -1,11 +1,13 @@
 package thebook;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +20,18 @@ import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 import org.dom4j.Node;
 
+import configurator.ConfigurationException;
 import configurator.Global;
 import creator.BookCreator;
 import creator.plugins.IWriterPlugin;
+import creator.plugins.WriterException;
 import helper.Misc;
 import messageparser.IParser;
+import messageparser.ParserException;
 
 public class Program {
 
@@ -44,24 +50,10 @@ public class Program {
 		Constructor<?> cons = myClass.getConstructor();
 		return (T)cons.newInstance();
 	}
-
-	public static void main(String[] args) throws Exception {
-		logger = LogManager.getLogger(Program.class);
-
-		Options options = getOptions();
-		CommandLineParser commandLineParser = new DefaultParser();
-		String xmlConfigFile = null;
-		try {
-			CommandLine line = commandLineParser.parse(options, args);
-			xmlConfigFile = line.getOptionValue("config");
-		} catch (MissingOptionException moe) {
-			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("thebook", options);
-			return;
-		}
-
+	
+	public static void run(String xml) throws DocumentException, ConfigurationException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserException, WriterException, IOException, ParseException {
 		SAXReader reader = new SAXReader();
-		String xml = Misc.readAllText(Paths.get(xmlConfigFile));
+		
 		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
 		Document document = reader.read(stream);
 		
@@ -88,10 +80,33 @@ public class Program {
 			plugins.add(plugin);
 		}
 		
-		long start = System.currentTimeMillis();
+		
 		
 		BookCreator creator = new BookCreator(global, parser, plugins);
 		creator.write();
+	}
+
+	public static void main(String[] args) throws Exception {
+		logger = LogManager.getLogger(Program.class);
+
+		Options options = getOptions();
+		CommandLineParser commandLineParser = new DefaultParser();
+		String xmlConfigFile = null;
+		try {
+			CommandLine line = commandLineParser.parse(options, args);
+			xmlConfigFile = line.getOptionValue("config");
+		} catch (MissingOptionException moe) {
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("thebook", options);
+			return;
+		}
+		
+		String xml = Misc.readAllText(Paths.get(xmlConfigFile));
+
+		
+		long start = System.currentTimeMillis();
+		
+		run(xml);
 
 		long stop = System.currentTimeMillis();
 		double seconds = 0.001 * (stop - start);
