@@ -3,4 +3,5 @@ module configurator {
 
 	requires helper;
 	requires org.apache.logging.log4j;
+	requires java.xml;
 }

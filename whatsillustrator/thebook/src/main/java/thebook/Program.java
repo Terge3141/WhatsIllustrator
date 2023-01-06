@@ -19,13 +19,23 @@ import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.io.SAXReader;
-import org.dom4j.Node;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import configurator.ConfigurationException;
 import configurator.Global;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import creator.BookCreator;
 import creator.plugins.IWriterPlugin;
 import creator.plugins.WriterException;
@@ -51,30 +61,38 @@ public class Program {
 		return (T)cons.newInstance();
 	}
 	
-	public static void run(String xml) throws DocumentException, ConfigurationException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserException, WriterException, IOException, ParseException {
-		SAXReader reader = new SAXReader();
-		
+	private static Node selectNode(Object source, String xpathExpression) throws XPathExpressionException {
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		Node node = (Node)xpath.compile(xpathExpression).evaluate(source, XPathConstants.NODE);
+		return node;
+	}
+	
+	public static void run(String xml) throws ConfigurationException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserException, WriterException, IOException, ParseException, ParserConfigurationException, XPathExpressionException, SAXException {
 		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
-		Document document = reader.read(stream);
+		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		Document document = builder.parse(stream);
 		
-		Node globalNode = document.selectSingleNode("//configuration/global");
-		Global global = Global.fromXmlString(globalNode.asXML());
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		
+		Node globalNode = selectNode(document, "//configuration/global");
+		Global global = Global.fromXmlString(globalNode.toString());
 		System.out.println(global);
 		
-		Node parserNodeName = document.selectSingleNode("//configuration/parser/name");
-		System.out.println(parserNodeName.getStringValue());
+		Node parserNodeName = selectNode(document, "//configuration/parser/name");
+		System.out.println(parserNodeName.toString());
 		
-		Class<?> myClass = Class.forName(parserNodeName.getStringValue());
+		Class<?> myClass = Class.forName(parserNodeName.toString());
 		Constructor<?> cons = myClass.getConstructor();
 		IParser parser = (IParser)cons.newInstance();
-		parser.init(document.selectSingleNode("//configuration/parser/parserconfiguration").asXML(), global);
+		parser.init(selectNode(document, "//configuration/parser/parserconfiguration").toString(), global);
 		global.setNameSuggestion(parser.getNameSuggestion());
 		
 		List<IWriterPlugin> plugins = new ArrayList<IWriterPlugin>();
-		List<Node> writerNodes = document.selectNodes("//configuration/writers/writer");
-		for(Node writerNode : writerNodes) {
-			String name = writerNode.selectSingleNode("name").getStringValue();
-			String xmlConfig = writerNode.selectSingleNode("writerconfiguration").asXML();
+		NodeList writerNodes = (NodeList)xpath.compile("//configuration/writers/writer").evaluate(document, XPathConstants.NODESET);
+		for(int i=0; i<writerNodes.getLength(); i++) {
+			Node writerNode = writerNodes.item(i);
+			String name = selectNode(writerNode, "name").getNodeValue();
+			String xmlConfig = selectNode(writerNode, "writerconfiguration").getNodeValue();
 			IWriterPlugin plugin = createObject(name);
 			plugin.preAppend(xmlConfig, global);
 			plugins.add(plugin);

@@ -1,13 +1,25 @@
 package configurator;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 import helper.DateUtils;
 
@@ -25,32 +37,36 @@ public class Global {
 	private DateUtils dateUtils;
 	//private List<String> emojiList;
 	
-	public static Global fromXmlString(String xml) throws ConfigurationException {
+	public static Global fromXmlString(String xml) throws ConfigurationException, ParserConfigurationException, SAXException, IOException, XPathExpressionException {
 		/*SAXReader reader = new SAXReader();
 		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
 		Document document = reader.read(stream);*/
-		if(true) throw new IllegalArgumentException("Not implemented");
-		// use javax.xml
+		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
+		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		Document document = builder.parse(stream);
 		
 		Global global = new Global();
-		/*global.outputDir = readPath(document, "//global/outputdir");
-		global.debugDir = readPath(document, "//global/debugdir");*/
+		global.outputDir = readPath(document, "//global/outputdir");
+		global.debugDir = readPath(document, "//global/debugdir");
 		
 		global.dateUtils = new DateUtils(global.DEFAULT_LOCALE);
 				
 		return global;
 	}
 	
-	/*private static Path readPath(Node node, String xPathExpression, String alternative) throws ConfigurationException {
-		Node pathNode = node.selectSingleNode(xPathExpression);
-		String path = (pathNode==null) ? alternative : pathNode.getStringValue();
+	private static Path readPath(Document doc, String xPathExpression, String alternative) throws ConfigurationException, XPathExpressionException {
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		String path = (String)xpath.compile(xPathExpression).evaluate(doc, XPathConstants.STRING);
+		if(path==null) {
+			path = alternative;
+		}
 		
 		return Paths.get(path);
 	}
 	
-	private static Path readPath(Node node, String xPathExpression) throws ConfigurationException {
-		return readPath(node, xPathExpression, null);
-	}*/
+	private static Path readPath(Document doc, String xPathExpression) throws ConfigurationException, XPathExpressionException {
+		return readPath(doc, xPathExpression, null);
+	}
 	
 	@Override
 	public String toString() {
