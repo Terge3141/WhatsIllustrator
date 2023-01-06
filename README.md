@@ -53,3 +53,8 @@ The image pool directory should contain *all* images and configured as *imagepoo
 
 # Contributions
 Contributions (new features, bug fixes, changes) are very welcome. Just send send me the pull requests or patches. Also, if you find any bugs let me know.
+
+## Eclipse
+* Select Workspace WhatsIllustrator (the main directory)
+* File --> Import --> Maven --> Existing Maven Projects
+	* Choose WhatsIllustrator/whatsillustrator

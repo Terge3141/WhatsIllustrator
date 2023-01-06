@@ -22,11 +22,11 @@
 			<artifactId>commons-cli</artifactId>
 			<version>1.4</version>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>com.terge</groupId>
 			<artifactId>fopcreator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>com.terge</groupId>
 			<artifactId>texcreator</artifactId>

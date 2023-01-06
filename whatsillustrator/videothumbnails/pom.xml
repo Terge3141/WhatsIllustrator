@@ -8,16 +8,21 @@
   <artifactId>videothumbnails</artifactId>
   <name>PDF-Converter for Whatsapp Messages Videothumbnails</name>
   <description>Create thumbnails from video files</description>
+  <repositories>        
+	<repository>                             
+		<id>mvn-repo-jcodec</id>                                                                
+		<url>https://github.com/Terge3141/mvn-repo/raw/master/jcodec/</url>
+		<snapshots>     
+			<enabled>true</enabled>
+			<updatePolicy>always</updatePolicy>
+		</snapshots>  
+	</repository>
+  </repositories> 
   <dependencies>
-  	<dependency>
-  		<groupId>org.jcodec</groupId>
-  		<artifactId>jcodec</artifactId>
-  		<version>0.2.5</version>
-  	</dependency>
-  	<dependency>
-	    <groupId>org.jcodec</groupId>
-	    <artifactId>jcodec-javase</artifactId>
-	    <version>0.2.5</version>
+	<dependency>
+		<groupId>jar</groupId>
+		<artifactId>jcodecmerged</artifactId>
+		<version>0.2.5</version>
 	</dependency>
   </dependencies>
 </project>
