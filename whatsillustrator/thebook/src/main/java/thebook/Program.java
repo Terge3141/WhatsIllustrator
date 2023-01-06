@@ -3,6 +3,8 @@ package thebook;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +33,13 @@ import configurator.Global;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -67,38 +76,44 @@ public class Program {
 		return node;
 	}
 	
-	public static void run(String xml) throws ConfigurationException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserException, WriterException, IOException, ParseException, ParserConfigurationException, XPathExpressionException, SAXException {
-		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
+	private static String nodeToString(Node node) throws TransformerFactoryConfigurationError, TransformerException {
+		StringWriter sw = new StringWriter();
+		Transformer t = TransformerFactory.newInstance().newTransformer();
+		t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		t.setOutputProperty(OutputKeys.INDENT, "yes");
+		t.transform(new DOMSource(node), new StreamResult(sw));
+		return sw.toString();
+	}
+	
+	public static void run(String xml) throws ConfigurationException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ParserException, WriterException, IOException, ParseException, ParserConfigurationException, XPathExpressionException, SAXException, TransformerFactoryConfigurationError, TransformerException {
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		Document document = builder.parse(stream);
+		Document document = builder.parse(new InputSource(new StringReader(xml)));
 		
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		
-		Node globalNode = selectNode(document, "//configuration/global");
-		Global global = Global.fromXmlString(globalNode.toString());
-		System.out.println(global);
+		Node globalNode = selectNode(document, "/configuration/global");
+		Global global = Global.fromXmlString(nodeToString(globalNode));
 		
-		Node parserNodeName = selectNode(document, "//configuration/parser/name");
-		System.out.println(parserNodeName.toString());
+		Node parserNodeName = selectNode(document, "/configuration/parser/name");
+		String className = parserNodeName.getTextContent();
 		
-		Class<?> myClass = Class.forName(parserNodeName.toString());
+		Class<?> myClass = Class.forName(className);
 		Constructor<?> cons = myClass.getConstructor();
 		IParser parser = (IParser)cons.newInstance();
-		parser.init(selectNode(document, "//configuration/parser/parserconfiguration").toString(), global);
+		Node parserNodeConfig = selectNode(document, "/configuration/parser/parserconfiguration");
+		parser.init(nodeToString(parserNodeConfig), global);
 		global.setNameSuggestion(parser.getNameSuggestion());
 		
 		List<IWriterPlugin> plugins = new ArrayList<IWriterPlugin>();
-		NodeList writerNodes = (NodeList)xpath.compile("//configuration/writers/writer").evaluate(document, XPathConstants.NODESET);
+		NodeList writerNodes = (NodeList)xpath.compile("/configuration/writers/writer").evaluate(document, XPathConstants.NODESET);
 		for(int i=0; i<writerNodes.getLength(); i++) {
 			Node writerNode = writerNodes.item(i);
-			String name = selectNode(writerNode, "name").getNodeValue();
-			String xmlConfig = selectNode(writerNode, "writerconfiguration").getNodeValue();
+			String name = selectNode(writerNode, "name").getTextContent();
+			String xmlConfig = selectNode(writerNode, "writerconfiguration").getTextContent();
 			IWriterPlugin plugin = createObject(name);
 			plugin.preAppend(xmlConfig, global);
 			plugins.add(plugin);
 		}
-		
-		
 		
 		BookCreator creator = new BookCreator(global, parser, plugins);
 		creator.write();

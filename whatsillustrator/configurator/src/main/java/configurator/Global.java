@@ -3,6 +3,7 @@ package configurator;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import helper.DateUtils;
@@ -38,12 +40,8 @@ public class Global {
 	//private List<String> emojiList;
 	
 	public static Global fromXmlString(String xml) throws ConfigurationException, ParserConfigurationException, SAXException, IOException, XPathExpressionException {
-		/*SAXReader reader = new SAXReader();
-		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
-		Document document = reader.read(stream);*/
-		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		Document document = builder.parse(stream);
+		Document document = builder.parse(new InputSource(new StringReader(xml)));
 		
 		Global global = new Global();
 		global.outputDir = readPath(document, "//global/outputdir");
