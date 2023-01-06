@@ -8,10 +8,6 @@ import java.nio.file.Paths;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
 
 import helper.DateUtils;
 
@@ -29,21 +25,23 @@ public class Global {
 	private DateUtils dateUtils;
 	//private List<String> emojiList;
 	
-	public static Global fromXmlString(String xml) throws ConfigurationException, DocumentException {
-		SAXReader reader = new SAXReader();
+	public static Global fromXmlString(String xml) throws ConfigurationException {
+		/*SAXReader reader = new SAXReader();
 		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
-		Document document = reader.read(stream);
+		Document document = reader.read(stream);*/
+		if(true) throw new IllegalArgumentException("Not implemented");
+		// use javax.xml
 		
 		Global global = new Global();
-		global.outputDir = readPath(document, "//global/outputdir");
-		global.debugDir = readPath(document, "//global/debugdir");
+		/*global.outputDir = readPath(document, "//global/outputdir");
+		global.debugDir = readPath(document, "//global/debugdir");*/
 		
 		global.dateUtils = new DateUtils(global.DEFAULT_LOCALE);
 				
 		return global;
 	}
 	
-	private static Path readPath(Node node, String xPathExpression, String alternative) throws ConfigurationException {
+	/*private static Path readPath(Node node, String xPathExpression, String alternative) throws ConfigurationException {
 		Node pathNode = node.selectSingleNode(xPathExpression);
 		String path = (pathNode==null) ? alternative : pathNode.getStringValue();
 		
@@ -52,7 +50,7 @@ public class Global {
 	
 	private static Path readPath(Node node, String xPathExpression) throws ConfigurationException {
 		return readPath(node, xPathExpression, null);
-	}
+	}*/
 	
 	@Override
 	public String toString() {

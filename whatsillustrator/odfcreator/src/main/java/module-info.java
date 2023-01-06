@@ -5,7 +5,7 @@ module odfcreator {
 	requires creator;
 	requires emojicontainer;
 	requires helper;
-	requires jcodec;
+	requires jcodecmerged;
 	requires messageparser;
 	requires odfdom.java;
 	requires org.apache.commons.io;

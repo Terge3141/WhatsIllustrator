@@ -5,7 +5,7 @@ module texcreator {
 	requires creator;
 	requires emojicontainer;
 	requires helper;
-	requires jcodec;
+	requires jcodecmerged;
 	requires messageparser;
 	requires org.apache.commons.text;
 	requires org.apache.logging.log4j;
