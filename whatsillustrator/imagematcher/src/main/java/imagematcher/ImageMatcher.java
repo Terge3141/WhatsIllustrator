@@ -218,6 +218,4 @@ public class ImageMatcher {
 	public void setMatchOutputPath(Path matchOutputPath) {
 		this.matchOutputPath = matchOutputPath;
 	}
-
-	
 }

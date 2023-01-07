@@ -116,13 +116,8 @@ class FileEntryTest {
 		Document document = DocumentHelper.createDocument();
 		Element root = document.addElement("Parent");
 		fileEntry.addNode(root);
-		checkStringNode(root, "//Parent/FileEntry/Timepoint", "2023-01-07T00:00");
-		checkStringNode(root, "//Parent/FileEntry/Filename", "IMG-20230107-WA0000.jpg");
-		checkStringNode(root, "//Parent/FileEntry/Relpath", "asd/fgh/IMG-20230107-WA0000.jpg");
-	}
-	
-	private void checkStringNode(Element element, String xpath, String expectedValue) {
-		Node node = element.selectSingleNode(xpath);
-		assertEquals(expectedValue, node.getStringValue());
+		TestHelper.checkStringNode(root, "//Parent/FileEntry/Timepoint", "2023-01-07T00:00");
+		TestHelper.checkStringNode(root, "//Parent/FileEntry/Filename", "IMG-20230107-WA0000.jpg");
+		TestHelper.checkStringNode(root, "//Parent/FileEntry/Relpath", "asd/fgh/IMG-20230107-WA0000.jpg");
 	}
 }

@@ -23,17 +23,7 @@ class MatchEntryTest {
 
 	@Test
 	void testFromNode() {
-		String fm = ""
-				+ createFileEntryXmlString(2023, 1, 6, 1)
-				+ createFileEntryXmlString(2023, 1, 7, 2);
-		fm = xmlWrap("Filematches", fm);
-		
-		String xml = ""
-				+ xmlWrap("Timepoint", "2023-01-07T15:21")
-				+ xmlWrap("IsImage", "true")
-				+ fm
-				+ xmlWrap("Cnt", "23");
-		xml = xmlWrap("MatchEntry", xml);
+		String xml = TestHelper.createMatchEntryXmlString(2023, 1, 7, 15, 21);
 		
 		SAXReader reader = new SAXReader();
 		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
@@ -77,41 +67,12 @@ class MatchEntryTest {
 		Element root = document.addElement("Parent");
 		matchEntry.addNode(root);
 		
-		checkStringNode(root, "//Parent/MatchEntry/Timepoint", "2023-01-07T15:47");
-		checkStringNode(root, "//Parent/MatchEntry/IsImage", "true");
-		checkStringNode(root, "//Parent/MatchEntry/Cnt", "2");
+		TestHelper.checkStringNode(root, "//Parent/MatchEntry/Timepoint", "2023-01-07T15:47");
+		TestHelper.checkStringNode(root, "//Parent/MatchEntry/IsImage", "true");
+		TestHelper.checkStringNode(root, "//Parent/MatchEntry/Cnt", "2");
 		
 		List<Node> fes = root.selectNodes("//Parent/MatchEntry/Filematches/FileEntry");
 		// only smoke tests, detailed tests are done in FileEntry unit tests
 		assertEquals(2, fes.size());
-	}
-
-	private String createFileEntryXmlString(int year, int month, int day, int wa) {
-		String yearstr = String.format("%04d", year);
-		String monthstr = String.format("%02d", month);
-		String daystr = String.format("%02d", day);
-		String wastr = String.format("%04d", wa);
-		
-		String tp = String.format("%s-%s-%sT00:00", yearstr, monthstr, daystr);
-		String fn = String.format("IMG-%s%s%s-WA%s.jpg", yearstr, monthstr, daystr, wastr);
-		String rp = String.format("asd/fgh/%s", fn);
-		
-		String xml = ""
-				+ xmlWrap("Timepoint", tp)
-				+ xmlWrap("Filename", fn)
-				+ xmlWrap("Relpath", rp);
-		
-		xml = xmlWrap("FileEntry", xml);
-		
-		return xml;	
-	}
-	
-	private String xmlWrap(String tag, String value) {
-		return String.format("<%s>%s</%s>", tag, value, tag);
-	}
-	
-	private void checkStringNode(Element element, String xpath, String expectedValue) {
-		Node node = element.selectSingleNode(xpath);
-		assertEquals(expectedValue, node.getStringValue());
 	}
 }
