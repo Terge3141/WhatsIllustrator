@@ -1,13 +1,10 @@
 package thebook;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.ArrayList;
