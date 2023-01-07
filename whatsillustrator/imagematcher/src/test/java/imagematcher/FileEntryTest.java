@@ -3,18 +3,23 @@ package imagematcher;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.LocalDate;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 class FileEntryTest {
 
@@ -88,16 +93,14 @@ class FileEntryTest {
 				+ "<Relpath>asd/fgh/IMG-20120804-WA0000.jpg</Relpath>"
 				+ "</FileEntry>";
 
-		SAXReader reader = new SAXReader();
-		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
-		Document document = null;
+		FileEntry fileEntry = null;
 		try {
-			document = reader.read(stream);
-		} catch (DocumentException e) {
+			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			Document document = builder.parse(new InputSource(new StringReader(xml)));
+			fileEntry = FileEntry.fromNode(document);
+		} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
 			fail(e);
-		}
-		
-		FileEntry fileEntry = FileEntry.fromNode(document.selectSingleNode("FileEntry"));
+		} 
 		
 		LocalDate dateExpected = LocalDate.of(2023, 1, 7);
 		assertEquals(dateExpected, fileEntry.getTimePoint());
@@ -113,8 +116,14 @@ class FileEntryTest {
 		fileEntry.setFileName("IMG-20230107-WA0000.jpg");
 		fileEntry.setRelPath("asd/fgh/IMG-20230107-WA0000.jpg");
 		
-		Document document = DocumentHelper.createDocument();
-		Element root = document.addElement("Parent");
+		DocumentBuilder builder = null;
+		try {
+			builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			fail(e);
+		}
+		Document document = builder.newDocument();
+		Element root = document.createElement("Parent");
 		fileEntry.addNode(root);
 		TestHelper.checkStringNode(root, "//Parent/FileEntry/Timepoint", "2023-01-07T00:00");
 		TestHelper.checkStringNode(root, "//Parent/FileEntry/Filename", "IMG-20230107-WA0000.jpg");

@@ -4,8 +4,15 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dom4j.Element;
-import org.dom4j.Node;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Handles a list of possible file matches for a given date and time
@@ -41,47 +48,71 @@ public class MatchEntry {
 	 * Creates a MatchEntry object for a given xml node.
 	 * @param node Node containing the match entry information
 	 * @return The created MatchEntry
+	 * @throws XPathExpressionException 
 	 */
-	public static MatchEntry fromNode(Node node) {
+	public static MatchEntry fromNode(Node node) throws XPathExpressionException {
 		MatchEntry me = new MatchEntry();
 
-		String tpStr = node.selectSingleNode("Timepoint").getText();
+		String tpStr = getTextFromNode(node, "Timepoint");
 		me.timePoint = LocalDateTime.parse(tpStr);
 
-		me.imageType = Boolean.parseBoolean(node.selectSingleNode("IsImage").getText());
-		me.cnt = Integer.parseInt(node.selectSingleNode("Cnt").getText());
+		me.imageType = Boolean.parseBoolean(getTextFromNode(node, "IsImage"));
+		me.cnt = Integer.parseInt(getTextFromNode(node, "Cnt"));
 
 		me.fileMatches = new ArrayList<FileEntry>();
-		Node fileMatchesNode = node.selectSingleNode("Filematches");
-		for (Node fileEntryNode : fileMatchesNode.selectNodes("FileEntry")) {
+		Node fileMatchesNode = selectNode(node, "Filematches");
+		NodeList fileEntryNodes = selectNodes(fileMatchesNode, "FileEntry");
+		
+		for (int i=0; i<fileEntryNodes.getLength(); i++) {
+			Node fileEntryNode = fileEntryNodes.item(i);
 			me.fileMatches.add(FileEntry.fromNode(fileEntryNode));
 		}
 
 		return me;
+	}
+	
+	private static NodeList selectNodes(Node node, String xPathExpression) throws XPathExpressionException {
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		return (NodeList)xpath.compile(xPathExpression).evaluate(node, XPathConstants.NODESET);
+	}
+	
+	private static Node selectNode(Node node, String xPathExpression) throws XPathExpressionException {
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		return (Node)xpath.compile(xPathExpression).evaluate(node, XPathConstants.NODE);
+	}
+	
+	private static String getTextFromNode(Node parent, String xPathExpression) throws XPathExpressionException {
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		Node node = (Node)xpath.compile(xPathExpression).evaluate(parent, XPathConstants.NODE);
+		return node.getTextContent();
 	}
 
 	/**
 	 * Adds the object information to a given root node
 	 * @param root The root node
 	 */
-	public Element addNode(Element root) {
-		Element matchEntry = root.addElement("MatchEntry");
+	public void addNode(Element root) {
+		Document doc = root.getOwnerDocument();
+		Element matchEntry = doc.createElement("MatchEntry");
 
-		Element timepoint = matchEntry.addElement("Timepoint");
-		timepoint.addText(this.timePoint.toString());
+		addTextElement(matchEntry, "Timepoint", this.timePoint.toString());
 
-		Element isimage = matchEntry.addElement("IsImage");
-		isimage.addText(this.imageType ? "true" : "false");
+		addTextElement(matchEntry, "IsImage", this.imageType ? "true" : "false");
 
-		Element filematches = matchEntry.addElement("Filematches");
-		for (FileEntry fileEntry : fileMatches) {
+		Element filematches = doc.createElement("Filematches");
+		matchEntry.appendChild(filematches);
+		for (FileEntry fileEntry : this.fileMatches) {
 			fileEntry.addNode(filematches);
 		}
 
-		Element cnt = matchEntry.addElement("Cnt");
-		cnt.addText(Integer.toString(this.cnt));
-
-		return matchEntry;
+		addTextElement(matchEntry, "Cnt", Integer.toString(this.cnt));
+	}
+	
+	private void addTextElement(Element el, String name, String value) {
+		Document doc = el.getOwnerDocument();
+		Element te = doc.createElement(name);
+		te.setTextContent(value);
+		el.appendChild(te);
 	}
 
 	public LocalDateTime getTimePoint() {

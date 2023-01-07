@@ -1,18 +1,30 @@
 package imagematcher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.dom4j.Element;
-import org.dom4j.Node;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 public class TestHelper {
 	public static String xmlWrap(String tag, String value) {
 		return String.format("<%s>%s</%s>", tag, value, tag);
 	}
 	
-	public static void checkStringNode(Element element, String xpath, String expectedValue) {
-		Node node = element.selectSingleNode(xpath);
-		assertEquals(expectedValue, node.getStringValue());
+	public static void checkStringNode(Element element, String xpathExpression, String expectedValue) {
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		Node node = null;
+		try {
+			node = (Node)xpath.compile(xpathExpression).evaluate(node, XPathConstants.NODE);
+		} catch (XPathExpressionException e) {
+			fail(e);
+		}
+		assertEquals(expectedValue, node.getTextContent());
 	}
 	
 	public static String createFileEntryXmlString(int year, int month, int day, int wa) {

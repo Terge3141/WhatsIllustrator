@@ -30,5 +30,4 @@ class ImageMatcherTest {
 		assertEquals(LocalDateTime.of(date, LocalTime.of(16, 19)), mes.get(1).getTimePoint());
 		assertEquals(LocalDateTime.of(date, LocalTime.of(16, 20)), mes.get(2).getTimePoint());
 	}
-
 }

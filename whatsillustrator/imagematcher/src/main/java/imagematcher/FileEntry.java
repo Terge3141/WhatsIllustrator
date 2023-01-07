@@ -6,8 +6,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import org.dom4j.Element;
-import org.dom4j.Node;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Contains information for a single image file.
@@ -71,17 +77,29 @@ public class FileEntry {
 	 * Creates a FileEntry object for a given xml node.
 	 * @param node Node containing the file entry information
 	 * @return The created FileEntry
+	 * @throws XPathExpressionException 
 	 */
-	public static FileEntry fromNode(Node node) {
+	public static FileEntry fromNode(Node node) throws XPathExpressionException {
 		FileEntry fe = new FileEntry();
 
-		String tpStr = node.selectSingleNode("Timepoint").getText();
+		String tpStr = getTextFromNode(node, "Timepoint");
 		fe.timePoint = LocalDateTime.parse(tpStr).toLocalDate();
 
-		fe.fileName = node.selectSingleNode("Filename").getText();
-		fe.relPath = node.selectSingleNode("Relpath").getText();
+		fe.fileName = getTextFromNode(node, "Filename");
+		fe.relPath = getTextFromNode(node, "Relpath");
 
 		return fe;
+	}
+	
+	private static Node selectNode(Node node, String xPathExpression) throws XPathExpressionException {
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		return (Node)xpath.compile(xPathExpression).evaluate(node, XPathConstants.NODE);
+	}
+	
+	private static String getTextFromNode(Node parent, String xPathExpression) throws XPathExpressionException {
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		Node node = (Node)xpath.compile(xPathExpression).evaluate(parent, XPathConstants.NODE);
+		return node.getTextContent();
 	}
 
 	/**
@@ -89,16 +107,19 @@ public class FileEntry {
 	 * @param root The root node
 	 */
 	public void addNode(Element root) {
-		Element fileEntry = root.addElement("FileEntry");
+		Document doc = root.getOwnerDocument();
+		Element fileEntry = doc.createElement("FileEntry");
 
-		Element timepoint = fileEntry.addElement("Timepoint");
-		timepoint.setText(this.timePoint.atTime(0, 0).toString());
-
-		Element filename = fileEntry.addElement("Filename");
-		filename.setText(this.fileName);
-
-		Element relpath = fileEntry.addElement("Relpath");
-		relpath.setText(this.relPath);
+		addTextElement(fileEntry, "Timepoint", this.timePoint.atTime(0, 0).toString());
+		addTextElement(fileEntry, "Filename", this.fileName);
+		addTextElement(fileEntry, "Relpath", this.relPath);
+	}
+	
+	private void addTextElement(Element el, String name, String value) {
+		Document doc = el.getOwnerDocument();
+		Element te = doc.createElement(name);
+		te.setTextContent(value);
+		el.appendChild(te);
 	}
 	
 	private LocalDate getTimePointFromFilename(String filename) throws ParseException {

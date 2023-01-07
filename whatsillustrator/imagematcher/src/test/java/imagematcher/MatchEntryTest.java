@@ -3,7 +3,9 @@ package imagematcher;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -11,13 +13,21 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 class MatchEntryTest {
 
@@ -25,15 +35,14 @@ class MatchEntryTest {
 	void testFromNode() {
 		String xml = TestHelper.createMatchEntryXmlString(2023, 1, 7, 15, 21);
 		
-		SAXReader reader = new SAXReader();
-		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
-		Document document = null;
+		MatchEntry matchEntry = null;
 		try {
-			document = reader.read(stream);
-		} catch (DocumentException e) {
+			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			Document document = builder.parse(new InputSource(new StringReader(xml)));
+			matchEntry = MatchEntry.fromNode(document);
+		} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
 			fail(e);
 		}
-		MatchEntry matchEntry = MatchEntry.fromNode(document.selectSingleNode("MatchEntry"));
 		
 		LocalDateTime dtExpected = LocalDateTime.of(2023, 1, 7, 15, 21);
 		assertEquals(dtExpected, matchEntry.getTimePoint());
@@ -63,16 +72,31 @@ class MatchEntryTest {
 		
 		MatchEntry matchEntry = new MatchEntry(dt, fesInput, 2);
 		
-		Document document = DocumentHelper.createDocument();
-		Element root = document.addElement("Parent");
+		/*Document document = DocumentHelper.createDocument();
+		Element root = document.addElement("Parent");*/
+		
+		DocumentBuilder builder = null;
+		try {
+			builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			fail(e);
+		}
+		Document document = builder.newDocument();
+		Element root = document.createElement("Parent");
 		matchEntry.addNode(root);
 		
-		TestHelper.checkStringNode(root, "//Parent/MatchEntry/Timepoint", "2023-01-07T15:47");
-		TestHelper.checkStringNode(root, "//Parent/MatchEntry/IsImage", "true");
-		TestHelper.checkStringNode(root, "//Parent/MatchEntry/Cnt", "2");
+		TestHelper.checkStringNode(root, "/Parent/MatchEntry/Timepoint", "2023-01-07T15:47");
+		TestHelper.checkStringNode(root, "/Parent/MatchEntry/IsImage", "true");
+		TestHelper.checkStringNode(root, "/Parent/MatchEntry/Cnt", "2");
 		
-		List<Node> fes = root.selectNodes("//Parent/MatchEntry/Filematches/FileEntry");
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		NodeList fes = null;
+		try {
+			fes = (NodeList)xpath.compile("/Parent/MatchEntry/Filematches/FileEntry").evaluate(root, XPathConstants.NODESET);
+		} catch (XPathExpressionException e) {
+			fail(e);
+		}
 		// only smoke tests, detailed tests are done in FileEntry unit tests
-		assertEquals(2, fes.size());
+		assertEquals(2, fes.getLength());
 	}
 }
