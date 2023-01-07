@@ -16,11 +16,11 @@ public class TestHelper {
 		return String.format("<%s>%s</%s>", tag, value, tag);
 	}
 	
-	public static void checkStringNode(Element element, String xpathExpression, String expectedValue) {
+	public static void checkStringNode(Node parent, String xpathExpression, String expectedValue) {
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		Node node = null;
 		try {
-			node = (Node)xpath.compile(xpathExpression).evaluate(node, XPathConstants.NODE);
+			node = (Node)xpath.compile(xpathExpression).evaluate(parent, XPathConstants.NODE);
 		} catch (XPathExpressionException e) {
 			fail(e);
 		}

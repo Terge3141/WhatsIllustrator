@@ -82,11 +82,11 @@ public class FileEntry {
 	public static FileEntry fromNode(Node node) throws XPathExpressionException {
 		FileEntry fe = new FileEntry();
 
-		String tpStr = getTextFromNode(node, "Timepoint");
+		String tpStr = getTextFromNode(node, "FileEntry/Timepoint");
 		fe.timePoint = LocalDateTime.parse(tpStr).toLocalDate();
 
-		fe.fileName = getTextFromNode(node, "Filename");
-		fe.relPath = getTextFromNode(node, "Relpath");
+		fe.fileName = getTextFromNode(node, "FileEntry/Filename");
+		fe.relPath = getTextFromNode(node, "FileEntry/Relpath");
 
 		return fe;
 	}
@@ -109,6 +109,7 @@ public class FileEntry {
 	public void addNode(Element root) {
 		Document doc = root.getOwnerDocument();
 		Element fileEntry = doc.createElement("FileEntry");
+		root.appendChild(fileEntry);
 
 		addTextElement(fileEntry, "Timepoint", this.timePoint.atTime(0, 0).toString());
 		addTextElement(fileEntry, "Filename", this.fileName);
