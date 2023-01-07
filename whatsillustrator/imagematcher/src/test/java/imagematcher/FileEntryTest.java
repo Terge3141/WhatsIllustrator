@@ -110,15 +110,15 @@ class FileEntryTest {
 	void testAddNode() {
 		FileEntry fileEntry = new FileEntry();
 		fileEntry.setTimePoint(LocalDate.of(2023, 1, 7));
-		fileEntry.setFileName("IMG-20120804-WA0000.jpg");
-		fileEntry.setRelPath("asd/fgh/IMG-20120804-WA0000.jpg");
+		fileEntry.setFileName("IMG-20230107-WA0000.jpg");
+		fileEntry.setRelPath("asd/fgh/IMG-20230107-WA0000.jpg");
 		
 		Document document = DocumentHelper.createDocument();
 		Element root = document.addElement("Parent");
 		fileEntry.addNode(root);
 		checkStringNode(root, "//Parent/FileEntry/Timepoint", "2023-01-07T00:00");
-		checkStringNode(root, "//Parent/FileEntry/Filename", "IMG-20120804-WA0000.jpg");
-		checkStringNode(root, "//Parent/FileEntry/Relpath", "asd/fgh/IMG-20120804-WA0000.jpg");
+		checkStringNode(root, "//Parent/FileEntry/Filename", "IMG-20230107-WA0000.jpg");
+		checkStringNode(root, "//Parent/FileEntry/Relpath", "asd/fgh/IMG-20230107-WA0000.jpg");
 	}
 	
 	private void checkStringNode(Element element, String xpath, String expectedValue) {
