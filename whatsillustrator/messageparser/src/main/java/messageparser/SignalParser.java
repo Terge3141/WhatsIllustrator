@@ -3,6 +3,7 @@ package messageparser;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,13 +19,19 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.io.SAXReader;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import configurator.Global;
+import helper.Xml;
 import signalbackupreader.DatabaseAndBlobDumper;
 import signalbackupreader.SignalBackupReaderException;
 
@@ -46,19 +53,33 @@ public class SignalParser implements IParser {
 
 	@Override
 	public void init(String xmlConfig, Global globalConfig) throws ParserException {
-		SAXReader reader = new SAXReader();
+		/*SAXReader reader = new SAXReader();
 		InputStream stream = new ByteArrayInputStream(xmlConfig.getBytes(StandardCharsets.UTF_16));
 		Document document;
 		try {
 			document = reader.read(stream);
 		} catch (DocumentException e) {
 			throw new ParserException("Could not read xml configuration", e);
+		}*/
+		
+		String passphrase;
+		try {
+			/*DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			Document document = builder.parse(new InputSource(new StringReader(xmlConfig)));
+			System.out.println(xmlConfig);*/
+			Document document = Xml.documentFromString(xmlConfig);
+			
+			this.globalConfig = globalConfig;
+			this.backupFilePath = Xml.getPathFromNode(document, "//backupfile");
+			passphrase = Xml.getTextFromNode(document, "//passphrase");
+			this.chatName = Xml.getTextFromNode(document, "//chatname");
+		} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
+			throw new ParserException("Could not read xml configuration", e);
 		}
 		
-		this.globalConfig = globalConfig;
-		this.backupFilePath = Paths.get(document.selectSingleNode("//backupfile").getStringValue());
-		String passphrase = document.selectSingleNode("//passphrase").getStringValue();
-		this.chatName = document.selectSingleNode("//chatname").getStringValue();
+		System.out.println(this.backupFilePath);
+		System.out.println(passphrase);
+		System.out.println(this.chatName);
 		
 		this.workdir = this.globalConfig.getOutputDir().resolve("signalparser");
 		
