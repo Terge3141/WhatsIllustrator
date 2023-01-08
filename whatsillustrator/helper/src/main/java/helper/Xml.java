@@ -41,6 +41,10 @@ public class Xml {
 		return Paths.get(getTextFromNode(parent, xPathExpression));
 	}
 	
+	public static boolean getBooleanFromNode(Node parent, String xPathExpression) throws XPathExpressionException {
+		return Boolean.parseBoolean(getTextFromNode(parent, xPathExpression));
+	}
+	
 	public static void addTextElement(Element el, String name, String value) {
 		Document doc = el.getOwnerDocument();
 		Element te = doc.createElement(name);

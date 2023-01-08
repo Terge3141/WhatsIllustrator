@@ -1,26 +1,25 @@
 package messageparser;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.io.SAXReader;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import com.google.gson.*;
 
 import configurator.Global;
+import helper.Xml;
 
 public class TelegramParser implements IParser {
 	
@@ -37,31 +36,29 @@ public class TelegramParser implements IParser {
 	}
 	
 	public void init(String xmlConfig, Global globalConfig) throws ParserException {
-		SAXReader reader = new SAXReader();
-		InputStream stream = new ByteArrayInputStream(xmlConfig.getBytes(StandardCharsets.UTF_16));
-		Document document;
+		String json;
+		String chatName;
+		
+		GsonBuilder gsonBuilder;
+		boolean chatOnly;
 		try {
-			document = reader.read(stream);
-		} catch (DocumentException e) {
+			Document document = Xml.documentFromString(xmlConfig);
+			this.messagePath = Xml.getPathFromNode(document, "//messagepath");
+			try {
+				json = Files.readString(this.messagePath);
+			} catch (IOException e) {
+				String msg = String.format("Could not read message file '%s'", this.messagePath);
+				throw new ParserException(msg, e);
+			}
+			this.messageDir = messagePath.getParent();
+			chatName = Xml.getTextFromNode(document, "//chatname");
+			gsonBuilder = new GsonBuilder();
+			gsonBuilder.registerTypeAdapter(TelegramText.class, new TelegramTextSerializer());
+			chatOnly = Xml.getBooleanFromNode(document, "//chatonly");
+		} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
 			throw new ParserException("Could not read xml configuration", e);
 		}
 		
-		this.messagePath = Paths.get(document.selectSingleNode("//messagepath").getStringValue());
-		String json;
-		try {
-			json = Files.readString(this.messagePath);
-		} catch (IOException e) {
-			String msg = String.format("Could not read message file '%s'", this.messagePath);
-			throw new ParserException(msg, e);
-		}
-		this.messageDir = messagePath.getParent();
-		
-		String chatName = document.selectSingleNode("//chatname").getStringValue();
-		
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		gsonBuilder.registerTypeAdapter(TelegramText.class, new TelegramTextSerializer());
-		
-		boolean chatOnly = Boolean.parseBoolean(document.selectSingleNode("//chatonly").getStringValue());
 		Gson gson = gsonBuilder.create();
 		if(chatOnly) {
 			this.telegramChat = gson.fromJson(json, TelegramChat.class);

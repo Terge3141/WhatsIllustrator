@@ -53,20 +53,8 @@ public class SignalParser implements IParser {
 
 	@Override
 	public void init(String xmlConfig, Global globalConfig) throws ParserException {
-		/*SAXReader reader = new SAXReader();
-		InputStream stream = new ByteArrayInputStream(xmlConfig.getBytes(StandardCharsets.UTF_16));
-		Document document;
-		try {
-			document = reader.read(stream);
-		} catch (DocumentException e) {
-			throw new ParserException("Could not read xml configuration", e);
-		}*/
-		
 		String passphrase;
 		try {
-			/*DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			Document document = builder.parse(new InputSource(new StringReader(xmlConfig)));
-			System.out.println(xmlConfig);*/
 			Document document = Xml.documentFromString(xmlConfig);
 			
 			this.globalConfig = globalConfig;
