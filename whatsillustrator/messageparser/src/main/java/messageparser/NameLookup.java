@@ -1,19 +1,19 @@
 package messageparser;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Hashtable;
-import java.util.List;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import helper.Misc;
+import helper.Xml;
 
 public class NameLookup {
 
@@ -26,20 +26,19 @@ public class NameLookup {
 	public static NameLookup fromXmlString(String xml) {
 		try {
 			NameLookup nl = new NameLookup();
-
-			SAXReader reader = new SAXReader();
-			InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16));
-			Document document = reader.read(stream);
-			List<Node> elements = document.selectNodes("//NameLookup/ReplaceItem");
-			for (Node element : elements) {
-				String oldName = element.selectSingleNode("oldName").getText();
-				String newName = element.selectSingleNode("newName").getText();
+			Document document = Xml.documentFromString(xml);
+			
+			NodeList nodes = Xml.selectNodes(document.getDocumentElement(), "/NameLookup/ReplaceItem");
+			for(int i=0; i<nodes.getLength(); i++) {
+				Node node = nodes.item(i);
+				String oldName = Xml.getTextFromNode(node, "oldName");
+				String newName = Xml.getTextFromNode(node, "newName");
 				nl.add(oldName, newName);
 			}
 			
 			return nl;
-		} catch (DocumentException de) {
-			throw new IllegalArgumentException("Cannot parse string",de);
+		} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
+			throw new IllegalArgumentException("Cannot parse string", e);
 		}
 
 	}

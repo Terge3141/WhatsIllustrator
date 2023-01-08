@@ -16,6 +16,7 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -23,6 +24,11 @@ public class Xml {
 	public static Node selectNode(Node node, String xPathExpression) throws XPathExpressionException {
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		return (Node)xpath.compile(xPathExpression).evaluate(node, XPathConstants.NODE);
+	}
+	
+	public static NodeList selectNodes(Node node, String xPathExpression) throws XPathExpressionException {
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		return (NodeList)xpath.compile(xPathExpression).evaluate(node, XPathConstants.NODESET);
 	}
 	
 	public static String getTextFromNode(Node parent, String xPathExpression) throws XPathExpressionException {
