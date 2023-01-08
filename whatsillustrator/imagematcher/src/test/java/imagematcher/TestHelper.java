@@ -8,7 +8,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class TestHelper {
