@@ -94,6 +94,7 @@ public class MatchEntry {
 	public void addNode(Element root) {
 		Document doc = root.getOwnerDocument();
 		Element matchEntry = doc.createElement("MatchEntry");
+		root.appendChild(matchEntry);
 
 		addTextElement(matchEntry, "Timepoint", this.timePoint.toString());
 

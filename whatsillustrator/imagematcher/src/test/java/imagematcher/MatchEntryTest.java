@@ -39,7 +39,7 @@ class MatchEntryTest {
 		try {
 			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			Document document = builder.parse(new InputSource(new StringReader(xml)));
-			matchEntry = MatchEntry.fromNode(document);
+			matchEntry = MatchEntry.fromNode(document.getDocumentElement());
 		} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
 			fail(e);
 		}
@@ -72,9 +72,6 @@ class MatchEntryTest {
 		
 		MatchEntry matchEntry = new MatchEntry(dt, fesInput, 2);
 		
-		/*Document document = DocumentHelper.createDocument();
-		Element root = document.addElement("Parent");*/
-		
 		DocumentBuilder builder = null;
 		try {
 			builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -83,6 +80,7 @@ class MatchEntryTest {
 		}
 		Document document = builder.newDocument();
 		Element root = document.createElement("Parent");
+		document.appendChild(root);
 		matchEntry.addNode(root);
 		
 		TestHelper.checkStringNode(root, "/Parent/MatchEntry/Timepoint", "2023-01-07T15:47");

@@ -105,7 +105,7 @@ class FileEntryTest {
 		try {
 			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			Document document = builder.parse(new InputSource(new StringReader(xml)));
-			fileEntry = FileEntry.fromNode(document);
+			fileEntry = FileEntry.fromNode(document.getDocumentElement());
 		} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
 			fail(e);
 		} 
