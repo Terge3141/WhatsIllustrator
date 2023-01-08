@@ -15,6 +15,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import helper.Xml;
+
 /**
  * Contains information for a single image file.
  * 
@@ -82,26 +84,15 @@ public class FileEntry {
 	public static FileEntry fromNode(Node node) throws XPathExpressionException {
 		FileEntry fe = new FileEntry();
 
-		String tpStr = getTextFromNode(node, "Timepoint");
+		String tpStr = Xml.getTextFromNode(node, "Timepoint");
 		fe.timePoint = LocalDateTime.parse(tpStr).toLocalDate();
 
-		fe.fileName = getTextFromNode(node, "Filename");
-		fe.relPath = getTextFromNode(node, "Relpath");
+		fe.fileName = Xml.getTextFromNode(node, "Filename");
+		fe.relPath = Xml.getTextFromNode(node, "Relpath");
 
 		return fe;
 	}
 	
-	private static Node selectNode(Node node, String xPathExpression) throws XPathExpressionException {
-		XPath xpath = XPathFactory.newInstance().newXPath();
-		return (Node)xpath.compile(xPathExpression).evaluate(node, XPathConstants.NODE);
-	}
-	
-	private static String getTextFromNode(Node parent, String xPathExpression) throws XPathExpressionException {
-		XPath xpath = XPathFactory.newInstance().newXPath();
-		Node node = (Node)xpath.compile(xPathExpression).evaluate(parent, XPathConstants.NODE);
-		return node.getTextContent();
-	}
-
 	/**
 	 * Adds the object information to a given root node
 	 * @param root The root node
@@ -111,16 +102,9 @@ public class FileEntry {
 		Element fileEntry = doc.createElement("FileEntry");
 		root.appendChild(fileEntry);
 
-		addTextElement(fileEntry, "Timepoint", this.timePoint.atTime(0, 0).toString());
-		addTextElement(fileEntry, "Filename", this.fileName);
-		addTextElement(fileEntry, "Relpath", this.relPath);
-	}
-	
-	private void addTextElement(Element el, String name, String value) {
-		Document doc = el.getOwnerDocument();
-		Element te = doc.createElement(name);
-		te.setTextContent(value);
-		el.appendChild(te);
+		Xml.addTextElement(fileEntry, "Timepoint", this.timePoint.atTime(0, 0).toString());
+		Xml.addTextElement(fileEntry, "Filename", this.fileName);
+		Xml.addTextElement(fileEntry, "Relpath", this.relPath);
 	}
 	
 	private LocalDate getTimePointFromFilename(String filename) throws ParseException {

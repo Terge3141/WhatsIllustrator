@@ -14,6 +14,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import helper.Xml;
+
 /**
  * Handles a list of possible file matches for a given date and time
  * 
@@ -96,9 +98,9 @@ public class MatchEntry {
 		Element matchEntry = doc.createElement("MatchEntry");
 		root.appendChild(matchEntry);
 
-		addTextElement(matchEntry, "Timepoint", this.timePoint.toString());
+		Xml.addTextElement(matchEntry, "Timepoint", this.timePoint.toString());
 
-		addTextElement(matchEntry, "IsImage", this.imageType ? "true" : "false");
+		Xml.addTextElement(matchEntry, "IsImage", this.imageType ? "true" : "false");
 
 		Element filematches = doc.createElement("Filematches");
 		matchEntry.appendChild(filematches);
@@ -106,14 +108,7 @@ public class MatchEntry {
 			fileEntry.addNode(filematches);
 		}
 
-		addTextElement(matchEntry, "Cnt", Integer.toString(this.cnt));
-	}
-	
-	private void addTextElement(Element el, String name, String value) {
-		Document doc = el.getOwnerDocument();
-		Element te = doc.createElement(name);
-		te.setTextContent(value);
-		el.appendChild(te);
+		Xml.addTextElement(matchEntry, "Cnt", Integer.toString(this.cnt));
 	}
 
 	public LocalDateTime getTimePoint() {
