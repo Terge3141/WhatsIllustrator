@@ -42,6 +42,7 @@ import org.xml.sax.SAXException;
 
 import helper.FileHandler;
 import helper.Misc;
+import helper.Xml;
 
 public class ImageMatcher {
 
@@ -64,7 +65,7 @@ public class ImageMatcher {
 		try {
 			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			Document document = builder.parse(new InputSource(new StringReader(xml)));
-			NodeList nodes = selectNodes(document, "/ArrayOfMatchEntry/MatchEntry");
+			NodeList nodes = Xml.selectNodes(document, "/ArrayOfMatchEntry/MatchEntry");
 			for(int i=0; i<nodes.getLength(); i++) {
 				Node node = nodes.item(i);
 				im.matchList.add(MatchEntry.fromNode(node));
@@ -76,11 +77,6 @@ public class ImageMatcher {
 		return im;
 	}
 	
-	private static NodeList selectNodes(Document doc, String xPathExpression) throws XPathExpressionException {
-		XPath xpath = XPathFactory.newInstance().newXPath();
-		return (NodeList)xpath.compile(xPathExpression).evaluate(doc, XPathConstants.NODESET);
-	}
-
 	public static ImageMatcher fromXmlFile(Path path) throws IOException {
 		return fromXmlString(Misc.readAllText(path));
 	}
