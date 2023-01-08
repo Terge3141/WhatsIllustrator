@@ -3,7 +3,6 @@ module messageparser {
 
 	requires com.google.gson;
 	requires configurator;
-	requires dom4j;
 	requires helper;
 	requires imagematcher;
 	requires java.sql;

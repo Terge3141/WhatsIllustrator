@@ -1,9 +1,6 @@
 package messageparser;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,16 +13,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.dom4j.Document;
-import org.dom4j.Node;
-import org.dom4j.DocumentException;
-import org.dom4j.io.SAXReader;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 import configurator.Global;
 import helper.FileHandler;
+import helper.Xml;
 import imagematcher.*;
 
 public class WhatsappParser implements IParser {
@@ -59,20 +59,17 @@ public class WhatsappParser implements IParser {
 	
 	@Override
 	public void init(String xmlConfig, Global globalConfig) throws ParserException {
-		SAXReader reader = new SAXReader();
-		InputStream stream = new ByteArrayInputStream(xmlConfig.getBytes(StandardCharsets.UTF_16));
-		Document document;
-		try {
-			document = reader.read(stream);
-		} catch (DocumentException e) {
-			throw new ParserException("Could not read xml configuration", e);
-		}
-		
 		this.globalConfig = globalConfig;
-		this.messageDir = Paths.get(document.selectSingleNode("//messagedir").getStringValue());
-		Node node = document.selectSingleNode("//imagepooldir");
-		if(node!=null) {
-			this.imagePoolDir = Paths.get(node.getStringValue());
+		
+		try {
+			Document document = Xml.documentFromString(xmlConfig);
+			this.messageDir = Xml.getPathFromNode(document, "//messagedir");
+			Node node = Xml.selectNode(document, "//imagepooldir");
+			if (node != null) {
+				this.imagePoolDir = Paths.get(node.getTextContent());
+			} 
+		} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
+			throw new ParserException("Could not read xml configuration", e);
 		}
 		this.configDir = this.messageDir.resolve("config");
 		this.chatDir = this.messageDir.resolve("chat");
