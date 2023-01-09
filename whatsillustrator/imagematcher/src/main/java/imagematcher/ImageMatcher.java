@@ -57,8 +57,7 @@ public class ImageMatcher {
 		ImageMatcher im = new ImageMatcher();
 
 		try {
-			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			Document document = builder.parse(new InputSource(new StringReader(xml)));
+			Document document = Xml.documentFromString(xml);
 			NodeList nodes = Xml.selectNodes(document, "/ArrayOfMatchEntry/MatchEntry");
 			for(int i=0; i<nodes.getLength(); i++) {
 				Node node = nodes.item(i);

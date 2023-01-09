@@ -1,12 +1,12 @@
 module odfcreator {
 	exports odfcreator;
 
-	requires configurator;
+	requires transitive configurator;
 	requires creator;
 	requires emojicontainer;
 	requires helper;
 	requires jcodecmerged;
-	requires messageparser;
+	requires transitive messageparser;
 	requires odfdom.java;
 	requires org.apache.commons.io;
 	requires org.apache.logging.log4j;

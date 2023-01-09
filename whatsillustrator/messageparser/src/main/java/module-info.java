@@ -2,7 +2,7 @@ module messageparser {
 	exports messageparser;
 
 	requires com.google.gson;
-	requires configurator;
+	requires transitive configurator;
 	requires helper;
 	requires imagematcher;
 	requires java.sql;

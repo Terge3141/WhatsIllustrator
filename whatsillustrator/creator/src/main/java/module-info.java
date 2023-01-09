@@ -2,8 +2,8 @@ module creator {
 	exports creator.plugins;
 	exports creator;
 
-	requires configurator;
+	requires transitive configurator;
 	requires helper;
-	requires messageparser;
+	requires transitive messageparser;
 	requires org.apache.logging.log4j;
 }

@@ -1,7 +1,7 @@
 module configurator {
 	exports configurator;
 
-	requires helper;
+	requires transitive helper;
 	requires org.apache.logging.log4j;
 	requires java.xml;
 }
