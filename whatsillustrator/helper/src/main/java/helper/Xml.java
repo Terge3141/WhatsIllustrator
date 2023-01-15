@@ -34,6 +34,11 @@ public class Xml {
 	public static String getTextFromNode(Node parent, String xPathExpression) throws XPathExpressionException {
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		Node node = (Node)xpath.compile(xPathExpression).evaluate(parent, XPathConstants.NODE);
+		
+		if(node==null) {
+			return null;
+		}
+		
 		return node.getTextContent();
 	}
 	
@@ -42,7 +47,12 @@ public class Xml {
 	}
 	
 	public static boolean getBooleanFromNode(Node parent, String xPathExpression) throws XPathExpressionException {
-		return Boolean.parseBoolean(getTextFromNode(parent, xPathExpression));
+		String val = getTextFromNode(parent, xPathExpression);
+		if(val==null) {
+			return false;
+		}
+		
+		return Boolean.parseBoolean(val);
 	}
 	
 	public static void addTextElement(Element el, String name, String value) {
