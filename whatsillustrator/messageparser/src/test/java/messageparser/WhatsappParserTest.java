@@ -57,6 +57,8 @@ class WhatsappParserTest {
 		assertEquals(LocalDateTime.of(2015, 10, 21, 10, 14), tm.getTimepoint());
 		assertEquals("Marty", tm.getSender());
 		assertEquals("Be right with you!", tm.getContent());
+		
+		assertNull(wap.nextMessage());
 	}
 	
 	@Test
@@ -115,6 +117,38 @@ class WhatsappParserTest {
 
 		assertNull(wap.nextMessage());
 	}
+	
+	@Test
+	void testNextMessageNameLookup(@TempDir Path tmpDir) throws IOException {
+		String xmlNameLookup = "";
+		String tmp = ""
+				+ xmlWrap("oldName", "myself")
+				+ xmlWrap("newName", "Terge");
+		xmlNameLookup += xmlWrap("ReplaceItem", tmp);
+		xmlNameLookup = xmlWrap("NameLookup", xmlNameLookup);
+		
+		String msgTxt = "21/10/2015, 10:11 - myself: My message!";
+		
+		Path chatDir = createChatDir(tmpDir);
+		createChatMessage(chatDir, msgTxt);
+		Path configDir = createConfigDir(tmpDir);
+		Misc.writeAllText(configDir.resolve("namelookup.xml"), xmlNameLookup);
+		
+		String xmlConfig = getXmlConfig(tmpDir);
+		WhatsappParser wap = new WhatsappParser();
+		try {
+			wap.init(xmlConfig, new Global());
+		} catch (ParserException e) {
+			fail(e);
+		}
+		
+		IMessage msg = wap.nextMessage();
+		assertNotNull(msg);
+		assertTrue(msg instanceof TextMessage);
+		TextMessage tm = (TextMessage)msg;
+		
+		assertEquals("Terge", tm.getSender());
+	}
 
 	private Path createChatMessage(Path chatDir, String msg) throws IOException {
 		Path chatFile = chatDir.resolve("WhatsApp Chat with Terge.txt");
@@ -130,6 +164,13 @@ class WhatsappParserTest {
 		return chatDir;
 	}
 	
+	private Path createConfigDir(Path tmpDir) throws IOException {
+		Path configDir = tmpDir.resolve("config");
+		Files.createDirectories(configDir);
+		
+		return configDir;
+	}
+	
 	private String getXmlConfig(Path tmpDir) {
 		String xml = ""
 				+ "<parserconfiguration>\n"
@@ -138,5 +179,9 @@ class WhatsappParserTest {
 				//+ "                        </imagepooldir>\n"
 				+ "</parserconfiguration>\n";
 		return xml;
+	}
+	
+	private String xmlWrap(String tag, String value) {
+		return String.format("<%s>%s</%s>", tag, value, tag);
 	}
 }
