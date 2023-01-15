@@ -149,6 +149,40 @@ class WhatsappParserTest {
 		
 		assertEquals("Terge", tm.getSender());
 	}
+	
+	@Test
+	void testGetNameSuggestion1(@TempDir Path tmpDir) throws IOException {
+		Path chatDir = createChatDir(tmpDir);
+		Path chatFile = chatDir.resolve("WhatsApp Mytest.txt");
+		chatFile.toFile().createNewFile();
+		
+		String xmlConfig = getXmlConfig(tmpDir);
+		WhatsappParser wap = new WhatsappParser();
+		try {
+			wap.init(xmlConfig, new Global());
+		} catch (ParserException e) {
+			fail(e);
+		}
+		
+		assertEquals("WhatsApp Mytest", wap.getNameSuggestion());
+	}
+	
+	@Test
+	void testGetNameSuggestion2(@TempDir Path tmpDir) throws IOException {
+		Path chatDir = createChatDir(tmpDir);
+		Path chatFile = chatDir.resolve("Mytest.txt");
+		chatFile.toFile().createNewFile();
+		
+		String xmlConfig = getXmlConfig(tmpDir);
+		WhatsappParser wap = new WhatsappParser();
+		try {
+			wap.init(xmlConfig, new Global());
+		} catch (ParserException e) {
+			fail(e);
+		}
+		
+		assertEquals("Whatsapp_Mytest", wap.getNameSuggestion());
+	}
 
 	private Path createChatMessage(Path chatDir, String msg) throws IOException {
 		Path chatFile = chatDir.resolve("WhatsApp Chat with Terge.txt");
