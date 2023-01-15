@@ -83,9 +83,8 @@ public class TelegramParser implements IParser {
 		
 		LocalDateTime date = null;
 		try {
-			// TODO: Replace dirty hack
-			String datestr = message.date.replace('T', ' ');
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			String datestr = message.date;
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 			date = LocalDateTime.parse(datestr, formatter);
 		} catch (DateTimeParseException dtpe) {
 			throw new IllegalArgumentException(message.date);
