@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -104,7 +105,6 @@ class TelegramParserTest {
 		Misc.writeAllText(jsonPath, json);
 		
 		String xmlConfig = getXmlConfig(jsonPath, "Tergechat");
-		
 		TelegramParser tp = createTelegramParser(xmlConfig);
 		
 		IMessage msg = tp.nextMessage();
@@ -119,6 +119,32 @@ class TelegramParserTest {
 		assertEquals("subscription", im.getSubscription());
 		
 		assertNull(tp.nextMessage());
+	}
+	
+	@Test
+	void testNextMessageSticker(@TempDir Path tmpDir) throws IOException {
+		tmpDir = Paths.get("/tmp/bla");
+		Path jsonPath = tmpDir.resolve("chats.json");
+		LocalDateTime dt = LocalDateTime.of(2023, 1, 16, 23, 8, 1);
+		String emoji = new String(Character.toChars(0x1F601));
+		String json = createStickerMessage("From", "", dt, emoji);
+		
+		json = wrapAll("Mychat", json);
+		
+		Files.createDirectories(tmpDir);
+		Misc.writeAllText(jsonPath, json);
+		
+		String xmlConfig = getXmlConfig(jsonPath, "Mychat");
+		TelegramParser tp = createTelegramParser(xmlConfig);
+		
+		IMessage msg = tp.nextMessage();
+		assertNotNull(msg);
+		assertTrue(msg instanceof TextMessage);
+		
+		TextMessage tm = (TextMessage)msg;
+		assertEquals("From", tm.getSender());
+		assertEquals(dt, tm.getTimepoint());
+		assertEquals(emoji, tm.getContent());
 	}
 	
 	private TelegramParser createTelegramParser(String xmlConfig) {
@@ -141,6 +167,18 @@ class TelegramParserTest {
 	private String createImageMessage(String from, String message, LocalDateTime dt, String filepath) {
 		String json = createBaseMessage(from, message, dt)
 				+ addKeyValue("photo", filepath);
+		
+		json = "{" + json + "}";
+		
+		return json;
+	}
+	
+	private String createStickerMessage(String from, String message, LocalDateTime dt, String emoji) {
+		String json = createBaseMessage(from, message, dt)
+				+ addKeyValue("file", "chats/bla.webp")
+				+ addKeyValue("thumbnail", "chats/bla_thumb.webp.jpg")
+				+ addKeyValue("media_type", "sticker")
+				+ addKeyValue("sticker_emoji", emoji);
 		
 		json = "{" + json + "}";
 		
