@@ -32,12 +32,7 @@ class TelegramParserTest {
 		
 		String xmlConfig = getXmlConfig(jsonPath, "Tergechat");
 		
-		TelegramParser tp = new TelegramParser();
-		try {
-			tp.init(xmlConfig, new Global());
-		} catch (ParserException e) {
-			fail(e);
-		}
+		TelegramParser tp = createTelegramParser(xmlConfig);
 		
 		IMessage msg = null;
 		TextMessage tm = null;
@@ -89,12 +84,7 @@ class TelegramParserTest {
 		
 		String xmlConfig = getXmlConfig(jsonPath, "chat2");
 		
-		TelegramParser tp = new TelegramParser();
-		try {
-			tp.init(xmlConfig, new Global());
-		} catch (ParserException e) {
-			fail(e);
-		}
+		TelegramParser tp = createTelegramParser(xmlConfig);
 		
 		IMessage msg = tp.nextMessage();
 		assertNotNull(msg);
@@ -115,12 +105,7 @@ class TelegramParserTest {
 		
 		String xmlConfig = getXmlConfig(jsonPath, "Tergechat");
 		
-		TelegramParser tp = new TelegramParser();
-		try {
-			tp.init(xmlConfig, new Global());
-		} catch (ParserException e) {
-			fail(e);
-		}
+		TelegramParser tp = createTelegramParser(xmlConfig);
 		
 		IMessage msg = tp.nextMessage();
 		assertNotNull(msg);
@@ -134,6 +119,17 @@ class TelegramParserTest {
 		assertEquals("subscription", im.getSubscription());
 		
 		assertNull(tp.nextMessage());
+	}
+	
+	private TelegramParser createTelegramParser(String xmlConfig) {
+		TelegramParser tp = new TelegramParser();
+		try {
+			tp.init(xmlConfig, new Global());
+		} catch (ParserException e) {
+			fail(e);
+		}
+		
+		return tp;
 	}
 	
 	private String createTextMessage(String from, String message, LocalDateTime dt) {
