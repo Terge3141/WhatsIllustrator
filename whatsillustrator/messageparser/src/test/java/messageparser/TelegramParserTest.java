@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -19,7 +18,6 @@ class TelegramParserTest {
 
 	@Test
 	void testNextMessageMultipleTexts(@TempDir Path tmpDir) throws IOException {
-		//tmpDir = Paths.get("/tmp/bla");
 		Path jsonPath = tmpDir.resolve("chats.json");
 		
 		LocalDateTime dt1 = LocalDateTime.of(2023, 1, 15, 19, 27, 12);
@@ -65,7 +63,6 @@ class TelegramParserTest {
 	
 	@Test
 	void testNextMessageMultipleChats(@TempDir Path tmpDir) throws IOException {
-		tmpDir = Paths.get("/tmp/bla");
 		Path jsonPath = tmpDir.resolve("chats.json");
 		
 		LocalDateTime dt1 = LocalDateTime.of(2023, 1, 15, 23, 23, 23);
@@ -104,7 +101,57 @@ class TelegramParserTest {
 		assertEquals("from2", msg.getSender());
 	}
 	
+	@Test
+	void testNextMessagePicture(@TempDir Path tmpDir) throws IOException {
+		Path jsonPath = tmpDir.resolve("chats.json");
+		
+		LocalDateTime dt = LocalDateTime.of(2023, 1, 16, 23, 8, 1);
+		String json = createImageMessage("From", "subscription", dt, "chats/bla.jpg");
+		
+		json = wrapAll("Tergechat", json);
+		
+		Files.createDirectories(tmpDir);
+		Misc.writeAllText(jsonPath, json);
+		
+		String xmlConfig = getXmlConfig(jsonPath, "Tergechat");
+		
+		TelegramParser tp = new TelegramParser();
+		try {
+			tp.init(xmlConfig, new Global());
+		} catch (ParserException e) {
+			fail(e);
+		}
+		
+		IMessage msg = tp.nextMessage();
+		assertNotNull(msg);
+		assertTrue(msg instanceof ImageMessage);
+		
+		ImageMessage im = (ImageMessage)msg;
+		assertEquals("From", im.getSender());
+		assertEquals(dt, im.getTimepoint());
+		Path expFilePath = tmpDir.resolve("chats/bla.jpg").toAbsolutePath();
+		assertEquals(expFilePath, im.getFilepath());
+		assertEquals("subscription", im.getSubscription());
+		
+		assertNull(tp.nextMessage());
+	}
+	
 	private String createTextMessage(String from, String message, LocalDateTime dt) {
+		String json = "{" + createBaseMessage(from, message, dt) + "}";
+		
+		return json;
+	}
+	
+	private String createImageMessage(String from, String message, LocalDateTime dt, String filepath) {
+		String json = createBaseMessage(from, message, dt)
+				+ addKeyValue("photo", filepath);
+		
+		json = "{" + json + "}";
+		
+		return json;
+	}
+	
+	private String createBaseMessage(String from, String message, LocalDateTime dt) {
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 		String dateStr = dt.format(dtf);
 		
@@ -115,8 +162,6 @@ class TelegramParserTest {
 				+ addKeyValue("from", from)
 				+ addKeyValue("from_id", "user12345")
 				+ addKeyValue("text", message);
-		
-		json = "{" + json + "}";
 		
 		return json;
 	}
