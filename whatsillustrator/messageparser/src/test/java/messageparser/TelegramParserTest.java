@@ -3,7 +3,6 @@ package messageparser;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -28,7 +27,6 @@ class TelegramParserTest {
 				+ "," + createTextMessage("Biff", "This is message2", dt2);
 		json = wrapAll("Tergechat", json);
 		
-		Files.createDirectories(tmpDir);
 		Misc.writeAllText(jsonPath, json);
 		
 		String xmlConfig = getXmlConfig(jsonPath, "Tergechat");
@@ -80,7 +78,6 @@ class TelegramParserTest {
 		
 		json = "{" + json + "}";
 		
-		Files.createDirectories(tmpDir);
 		Misc.writeAllText(jsonPath, json);
 		
 		String xmlConfig = getXmlConfig(jsonPath, "chat2");
@@ -93,7 +90,7 @@ class TelegramParserTest {
 	}
 	
 	@Test
-	void testNextMessagePicture(@TempDir Path tmpDir) throws IOException {
+	void testNextMessagePhoto(@TempDir Path tmpDir) throws IOException {
 		Path jsonPath = tmpDir.resolve("chats.json");
 		
 		LocalDateTime dt = LocalDateTime.of(2023, 1, 16, 23, 8, 1);
@@ -101,7 +98,6 @@ class TelegramParserTest {
 		
 		json = wrapAll("Tergechat", json);
 		
-		Files.createDirectories(tmpDir);
 		Misc.writeAllText(jsonPath, json);
 		
 		String xmlConfig = getXmlConfig(jsonPath, "Tergechat");
@@ -123,7 +119,6 @@ class TelegramParserTest {
 	
 	@Test
 	void testNextMessageSticker(@TempDir Path tmpDir) throws IOException {
-		tmpDir = Paths.get("/tmp/bla");
 		Path jsonPath = tmpDir.resolve("chats.json");
 		LocalDateTime dt = LocalDateTime.of(2023, 1, 16, 23, 8, 1);
 		String emoji = new String(Character.toChars(0x1F601));
@@ -131,7 +126,6 @@ class TelegramParserTest {
 		
 		json = wrapAll("Mychat", json);
 		
-		Files.createDirectories(tmpDir);
 		Misc.writeAllText(jsonPath, json);
 		
 		String xmlConfig = getXmlConfig(jsonPath, "Mychat");
@@ -145,6 +139,41 @@ class TelegramParserTest {
 		assertEquals("From", tm.getSender());
 		assertEquals(dt, tm.getTimepoint());
 		assertEquals(emoji, tm.getContent());
+		
+		assertNull(tp.nextMessage());
+	}
+	
+	@Test
+	void testNextMessageJpeg(@TempDir Path tmpDir) throws IOException {
+		Path jsonPath = tmpDir.resolve("chats.json");
+		LocalDateTime dt = LocalDateTime.of(2023, 1, 20, 22, 40, 12);
+		
+		String json = createBaseMessage("From", "", dt);
+		json = json
+				+ addKeyValue("file", "chats/bla.jpg")
+				+ addKeyValue("thumbnail", "chats/bla.jpg_thumb.jpg")
+				+ addKeyValue("mime_type", "image/jpeg");
+		
+		json = "{" + json + "}";
+		json = wrapAll("Mychat", json);
+		
+		Misc.writeAllText(jsonPath, json);
+		
+		String xmlConfig = getXmlConfig(jsonPath, "Mychat");
+		TelegramParser tp = createTelegramParser(xmlConfig);
+		
+		IMessage msg = tp.nextMessage();
+		assertNotNull(msg);
+		assertTrue(msg instanceof ImageMessage);
+		
+		ImageMessage im = (ImageMessage)msg;
+		assertEquals("From", im.getSender());
+		assertEquals(dt, im.getTimepoint());
+		Path expFilePath = tmpDir.resolve("chats/bla.jpg").toAbsolutePath();
+		assertEquals(expFilePath, im.getFilepath());
+		assertEquals("", im.getSubscription());
+		
+		assertNull(tp.nextMessage());
 	}
 	
 	private TelegramParser createTelegramParser(String xmlConfig) {
