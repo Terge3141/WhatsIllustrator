@@ -80,7 +80,6 @@ class TelegramParserTest {
 		
 		String jsonMessage = TelegramMessageMocker.createBaseMessage("From", "subscription", dt)
 			+ TelegramMessageMocker.addKeyValue("photo", photoPath.toString());
-		jsonMessage = "{" + jsonMessage + "}";
 		
 		TelegramMessageMocker tmm = new TelegramMessageMocker(tmpDir);
 		tmm.addMessage(jsonMessage);
@@ -110,7 +109,6 @@ class TelegramParserTest {
 				+ TelegramMessageMocker.addKeyValue("thumbnail", "chats/bla_thumb.webp.jpg")
 				+ TelegramMessageMocker.addKeyValue("media_type", "sticker")
 				+ TelegramMessageMocker.addKeyValue("sticker_emoji", emoji);
-		jsonMessage = "{" + jsonMessage + "}";
 		
 		TelegramMessageMocker tmm = new TelegramMessageMocker(tmpDir);
 		tmm.addMessage(jsonMessage);
@@ -136,7 +134,6 @@ class TelegramParserTest {
 				+ TelegramMessageMocker.addKeyValue("file", "chats/bla.jpg")
 				+ TelegramMessageMocker.addKeyValue("thumbnail", "chats/bla.jpg_thumb.jpg")
 				+ TelegramMessageMocker.addKeyValue("mime_type", "image/jpeg");
-		jsonMessage = "{" + jsonMessage + "}";
 		
 		TelegramMessageMocker tmm = new TelegramMessageMocker(tmpDir);
 		tmm.addMessage(jsonMessage);

@@ -29,12 +29,11 @@ public class TelegramMessageMocker {
 		}
 		firstMessage = false;
 		
-		json += jsonMessage;
+		json = json + "{" + jsonMessage + "}";
 	}
 	
 	public void addTextMessage(String from, String message, LocalDateTime dt) {
-		String jsonMessage = "{" + createBaseMessage(from, message, dt) + "}";
-		addMessage(jsonMessage);
+		addMessage(createBaseMessage(from, message, dt));
 	}
 	
 	public TelegramParser createTelegramParser(String chatName) throws IOException {
