@@ -43,7 +43,13 @@ public class Xml {
 	}
 	
 	public static Path getPathFromNode(Node parent, String xPathExpression) throws XPathExpressionException {
-		return Paths.get(getTextFromNode(parent, xPathExpression));
+		String str = getTextFromNode(parent, xPathExpression);
+		
+		if(str==null) {
+			return null;
+		}
+		
+		return Paths.get(str);
 	}
 	
 	public static boolean getBooleanFromNode(Node parent, String xPathExpression) throws XPathExpressionException {

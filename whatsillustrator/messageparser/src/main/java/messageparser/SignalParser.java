@@ -37,6 +37,8 @@ public class SignalParser implements IParser {
 	private Global globalConfig;
 	private Path backupFilePath;
 	private String chatName;
+	// Direct path to extracted sql database --> for testing and debugging
+	private Path sqliteDBPath;
 	private Path workdir;
 	private ResultSet resultSet;
 	private Connection connection;
@@ -53,30 +55,31 @@ public class SignalParser implements IParser {
 			this.backupFilePath = Xml.getPathFromNode(document, "//backupfile");
 			passphrase = Xml.getTextFromNode(document, "//passphrase");
 			this.chatName = Xml.getTextFromNode(document, "//chatname");
+			this.sqliteDBPath = Xml.getPathFromNode(document, "//sqlitedbpath");
 		} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
 			throw new ParserException("Could not read xml configuration", e);
 		}
 		
-		System.out.println(this.backupFilePath);
-		System.out.println(passphrase);
-		System.out.println(this.chatName);
-		
 		this.workdir = this.globalConfig.getOutputDir().resolve("signalparser");
 		
-		DatabaseAndBlobDumper dumper;
-		try {
-			dumper = DatabaseAndBlobDumper.of(backupFilePath, passphrase, this.workdir);
-			dumper.setCreateExtraSqlViews(true);
-			dumper.run();
-		} catch (SignalBackupReaderException | SQLException e) {
-			throw new ParserException("Could not dump database and blobs", e);
+		if(this.sqliteDBPath==null) {
+			DatabaseAndBlobDumper dumper;
+			try {
+				dumper = DatabaseAndBlobDumper.of(backupFilePath, passphrase, this.workdir);
+				dumper.setCreateExtraSqlViews(true);
+				dumper.run();
+			} catch (SignalBackupReaderException | SQLException e) {
+				throw new ParserException("Could not dump database and blobs", e);
+			}
+			
+			this.sqliteDBPath = dumper.getSqliteOutputPath();
 		}
 		
 		this.messages = new ArrayList<IMessage>();
 		this.messageIndex = 0;
 		
 		try {
-			String url = String.format("jdbc:sqlite:%s", dumper.getSqliteOutputPath());
+			String url = String.format("jdbc:sqlite:%s", sqliteDBPath);
 			connection = DriverManager.getConnection(url);
 
 			String query = "select msgid, date, sender, chatname, text, type from v_chats where chatname=? order by date";
@@ -91,7 +94,7 @@ public class SignalParser implements IParser {
 	}
 	
 	@Override
-	public IMessage nextMessage() throws ParserException {
+	public IMessage nextMessage() {
 		if(messageIndex>=messages.size()) {
 			return null;
 		}
@@ -109,7 +112,7 @@ public class SignalParser implements IParser {
 			String text = resultSet.getString("text");
 			long messageId = resultSet.getLong("msgid");
 			
-			text = messageId + ": " + text;	
+			//text = messageId + ": " + text;	
 			
 			logger.info(timepoint);
 
