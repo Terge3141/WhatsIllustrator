@@ -37,19 +37,15 @@ class TelegramParserTest {
 		TextMessage tm = null;
 		
 		msg = tp.nextMessage();
-		assertNotNull(msg);
+		checkBaseMessage(msg, "Terge", dt1);
 		assertTrue(msg instanceof TextMessage);
 		tm = (TextMessage)msg;
-		assertEquals(dt1, tm.getTimepoint());
-		assertEquals("Terge", tm.getSender());
 		assertEquals(tm.getContent(), "This is message1");
 		
 		msg = tp.nextMessage();
-		assertNotNull(msg);
+		checkBaseMessage(msg, "Biff", dt2);
 		assertTrue(msg instanceof TextMessage);
 		tm = (TextMessage)msg;
-		assertEquals(dt2, tm.getTimepoint());
-		assertEquals("Biff", tm.getSender());
 		assertEquals(tm.getContent(), "This is message2");
 		
 		assertNull(tp.nextMessage());
@@ -104,12 +100,11 @@ class TelegramParserTest {
 		TelegramParser tp = createTelegramParser(xmlConfig);
 		
 		IMessage msg = tp.nextMessage();
-		assertNotNull(msg);
-		assertTrue(msg instanceof ImageMessage);
+		checkBaseMessage(msg, "From", dt);
 		
+		assertTrue(msg instanceof ImageMessage);
 		ImageMessage im = (ImageMessage)msg;
-		assertEquals("From", im.getSender());
-		assertEquals(dt, im.getTimepoint());
+
 		Path expFilePath = tmpDir.resolve("chats/bla.jpg").toAbsolutePath();
 		assertEquals(expFilePath, im.getFilepath());
 		assertEquals("subscription", im.getSubscription());
@@ -132,12 +127,11 @@ class TelegramParserTest {
 		TelegramParser tp = createTelegramParser(xmlConfig);
 		
 		IMessage msg = tp.nextMessage();
-		assertNotNull(msg);
+		checkBaseMessage(msg, "From", dt);
+
 		assertTrue(msg instanceof TextMessage);
-		
 		TextMessage tm = (TextMessage)msg;
-		assertEquals("From", tm.getSender());
-		assertEquals(dt, tm.getTimepoint());
+
 		assertEquals(emoji, tm.getContent());
 		
 		assertNull(tp.nextMessage());
@@ -163,17 +157,21 @@ class TelegramParserTest {
 		TelegramParser tp = createTelegramParser(xmlConfig);
 		
 		IMessage msg = tp.nextMessage();
-		assertNotNull(msg);
-		assertTrue(msg instanceof ImageMessage);
+		checkBaseMessage(msg, "From", dt);
 		
+		assertTrue(msg instanceof ImageMessage);
 		ImageMessage im = (ImageMessage)msg;
-		assertEquals("From", im.getSender());
-		assertEquals(dt, im.getTimepoint());
 		Path expFilePath = tmpDir.resolve("chats/bla.jpg").toAbsolutePath();
 		assertEquals(expFilePath, im.getFilepath());
 		assertEquals("", im.getSubscription());
 		
 		assertNull(tp.nextMessage());
+	}
+	
+	private void checkBaseMessage(IMessage msg, String sender, LocalDateTime dt) {
+		assertNotNull(msg);
+		assertEquals(sender, msg.getSender());
+		assertEquals(dt, msg.getTimepoint());
 	}
 	
 	private TelegramParser createTelegramParser(String xmlConfig) {
