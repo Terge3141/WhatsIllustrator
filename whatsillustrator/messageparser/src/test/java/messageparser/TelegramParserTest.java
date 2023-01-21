@@ -4,14 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import configurator.Global;
 import helper.Misc;
 
 class TelegramParserTest {
@@ -30,13 +27,13 @@ class TelegramParserTest {
 		TextMessage tm = null;
 		
 		msg = tp.nextMessage();
-		tmm.checkBaseMessage(msg, "Terge", dt1);
+		TelegramMessageMocker.checkBaseMessage(msg, "Terge", dt1);
 		assertTrue(msg instanceof TextMessage);
 		tm = (TextMessage)msg;
 		assertEquals(tm.getContent(), "This is message1");
 		
 		msg = tp.nextMessage();
-		tmm.checkBaseMessage(msg, "Biff", dt2);
+		TelegramMessageMocker.checkBaseMessage(msg, "Biff", dt2);
 		assertTrue(msg instanceof TextMessage);
 		tm = (TextMessage)msg;
 		assertEquals(tm.getContent(), "This is message2");
@@ -147,7 +144,7 @@ class TelegramParserTest {
 		TelegramParser tp = tmm.createTelegramParser("Mychat");
 		
 		IMessage msg = tp.nextMessage();
-		tmm.checkBaseMessage(msg, "From", dt);
+		TelegramMessageMocker.checkBaseMessage(msg, "From", dt);
 		
 		assertTrue(msg instanceof ImageMessage);
 		ImageMessage im = (ImageMessage)msg;
