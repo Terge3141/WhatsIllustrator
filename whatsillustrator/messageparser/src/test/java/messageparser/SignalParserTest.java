@@ -3,18 +3,12 @@ package messageparser;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -87,40 +81,6 @@ class SignalParserTest {
 		assertEquals("Content2", tm.getContent());
 		
 		assertNull(sp.nextMessage());
-	}
-	
-	private Connection createSqlDatabase(Path sqliteDBPath) throws SQLException {
-		String url = String.format("jdbc:sqlite:%s", sqliteDBPath);
-		Connection con = DriverManager.getConnection(url);
-		
-		String sql = null;
-		
-		// v_chats
-		sql = "CREATE TABLE v_chats (\n"
-				+ "msgid INTEGER,\n"
-				+ "date INTEGER,\n"
-				+ "sender TEXT,\n"
-				+ "chatname TEXT,\n"
-				+ "text TEXT,\n"
-				+ "type TEXT\n"
-				+ ");";
-		invokeSQL(con, sql);
-		
-		// part
-		sql = "CREATE TABLE part (\n"
-				+ "mid INTEGER,\n"
-				+ "ct TEXT,\n"
-				+ "unique_id INTEGER,\n"
-				+ "sticker_id INTEGER\n"
-				+ ");";
-		invokeSQL(con, sql);
-		
-		return con;
-	}
-	
-	private boolean invokeSQL(Connection con, String sql) throws SQLException {
-		Statement stmt = con.createStatement();
-		return stmt.execute(sql);
 	}
 	
 	private void createTextMessage(Connection con, int msgid, ZonedDateTime zdt, String sender, String chatname, String text) throws SQLException {
