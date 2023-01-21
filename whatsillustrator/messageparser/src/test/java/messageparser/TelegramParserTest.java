@@ -29,9 +29,7 @@ class TelegramParserTest {
 		
 		Misc.writeAllText(jsonPath, json);
 		
-		String xmlConfig = getXmlConfig(jsonPath, "Tergechat");
-		
-		TelegramParser tp = createTelegramParser(xmlConfig);
+		TelegramParser tp = createTelegramParser(jsonPath, "Tergechat");
 		
 		IMessage msg = null;
 		TextMessage tm = null;
@@ -76,9 +74,7 @@ class TelegramParserTest {
 		
 		Misc.writeAllText(jsonPath, json);
 		
-		String xmlConfig = getXmlConfig(jsonPath, "chat2");
-		
-		TelegramParser tp = createTelegramParser(xmlConfig);
+		TelegramParser tp = createTelegramParser(jsonPath, "chat2");
 		
 		IMessage msg = tp.nextMessage();
 		assertNotNull(msg);
@@ -96,8 +92,7 @@ class TelegramParserTest {
 		
 		Misc.writeAllText(jsonPath, json);
 		
-		String xmlConfig = getXmlConfig(jsonPath, "Tergechat");
-		TelegramParser tp = createTelegramParser(xmlConfig);
+		TelegramParser tp = createTelegramParser(jsonPath, "Tergechat");
 		
 		IMessage msg = tp.nextMessage();
 		checkBaseMessage(msg, "From", dt);
@@ -123,8 +118,7 @@ class TelegramParserTest {
 		
 		Misc.writeAllText(jsonPath, json);
 		
-		String xmlConfig = getXmlConfig(jsonPath, "Mychat");
-		TelegramParser tp = createTelegramParser(xmlConfig);
+		TelegramParser tp = createTelegramParser(jsonPath, "Mychat");
 		
 		IMessage msg = tp.nextMessage();
 		checkBaseMessage(msg, "From", dt);
@@ -153,8 +147,7 @@ class TelegramParserTest {
 		
 		Misc.writeAllText(jsonPath, json);
 		
-		String xmlConfig = getXmlConfig(jsonPath, "Mychat");
-		TelegramParser tp = createTelegramParser(xmlConfig);
+		TelegramParser tp = createTelegramParser(jsonPath, "Mychat");
 		
 		IMessage msg = tp.nextMessage();
 		checkBaseMessage(msg, "From", dt);
@@ -183,6 +176,11 @@ class TelegramParserTest {
 		}
 		
 		return tp;
+	}
+	
+	private TelegramParser createTelegramParser(Path jsonPath, String chatName) {
+		String xmlConfig = getXmlConfig(jsonPath, chatName);
+		return createTelegramParser(xmlConfig);
 	}
 	
 	private String createTextMessage(String from, String message, LocalDateTime dt) {
