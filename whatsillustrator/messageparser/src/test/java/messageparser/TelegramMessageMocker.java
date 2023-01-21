@@ -153,4 +153,13 @@ public class TelegramMessageMocker {
 	public static String addKeyValue(String key, int value) {
 		return addKeyValue(key, value, false);
 	}
+	
+	public static String addKeyValue(String key, double value, boolean first) {
+		String comma = first ? "" : ",";
+		return String.format("%s\n\"%s\": %f", comma, key, value);
+	}
+	
+	public static String addKeyValue(String key, double value) {
+		return addKeyValue(key, value, false);
+	}
 }

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
@@ -148,6 +149,197 @@ class TelegramParserTest {
 		Path expFilePath = tmpDir.resolve("chats/bla.jpg").toAbsolutePath();
 		assertEquals(expFilePath, im.getFilepath());
 		assertEquals("", im.getSubscription());
+		
+		assertNull(tp.nextMessage());
+	}
+	
+	@Test
+	void testNextMessageVideoFile(@TempDir Path tmpDir) throws IOException {
+		LocalDateTime dt = LocalDateTime.of(2023, 1, 21, 19, 3, 56);
+		
+		Path videoPath = tmpDir.resolve("chats/video.mp4");
+		
+		String jsonMessage = TelegramMessageMocker.createBaseMessage("From", "Mymessage", dt)
+				+ TelegramMessageMocker.addKeyValue("media_type", "video_file")
+				+ TelegramMessageMocker.addKeyValue("mime_type", "video/mp4")
+				+ TelegramMessageMocker.addKeyValue("file", videoPath.toString());
+		
+		TelegramMessageMocker tmm = new TelegramMessageMocker(tmpDir);
+		tmm.addMessage(jsonMessage);
+		
+		TelegramParser tp = tmm.createTelegramParser("Mychat");
+		
+		IMessage msg = tp.nextMessage();
+		TelegramMessageMocker.checkBaseMessage(msg, "From", dt);
+		
+		assertTrue(msg instanceof VideoMessage);
+		VideoMessage vm = (VideoMessage)msg;
+		
+		assertEquals("Mymessage", vm.getSubscription());
+		assertEquals(videoPath, vm.getFilepath());
+	}
+	
+	@Test
+	void testNextMessageAnimation(@TempDir Path tmpDir) throws IOException {
+		LocalDateTime dt = LocalDateTime.of(2023, 1, 21, 19, 13, 57);
+		
+		Path videoPath = tmpDir.resolve("chats/video.mp4");
+		
+		String jsonMessage = TelegramMessageMocker.createBaseMessage("From", "Mymessage", dt)
+				+ TelegramMessageMocker.addKeyValue("media_type", "animation")
+				+ TelegramMessageMocker.addKeyValue("mime_type", "video/mp4")
+				+ TelegramMessageMocker.addKeyValue("file", videoPath.toString());
+		
+		TelegramMessageMocker tmm = new TelegramMessageMocker(tmpDir);
+		tmm.addMessage(jsonMessage);
+		
+		TelegramParser tp = tmm.createTelegramParser("Mychat");
+		
+		IMessage msg = tp.nextMessage();
+		TelegramMessageMocker.checkBaseMessage(msg, "From", dt);
+		
+		assertTrue(msg instanceof VideoMessage);
+		VideoMessage vm = (VideoMessage)msg;
+		
+		assertEquals(videoPath, vm.getFilepath());
+		
+		assertEquals("Mymessage", vm.getSubscription());
+		assertNull(tp.nextMessage());
+	}
+	
+	@Test
+	void testNextMessageVoice(@TempDir Path tmpDir) throws IOException {
+		LocalDateTime dt = LocalDateTime.of(2023, 1, 21, 19, 13, 57);
+		
+		Path audioFile = tmpDir.resolve("chats/audio.ogg");
+		
+		String jsonMessage = TelegramMessageMocker.createBaseMessage("From",  "", dt)
+				+ TelegramMessageMocker.addKeyValue("file", audioFile.toString())
+				+ TelegramMessageMocker.addKeyValue("media_type", "voice_message")
+				+ TelegramMessageMocker.addKeyValue("mime_type", "audio/ogg")
+				+ TelegramMessageMocker.addKeyValue("duration_seconds", 34);
+		
+		TelegramMessageMocker tmm = new TelegramMessageMocker(tmpDir);
+		tmm.addMessage(jsonMessage);
+		
+		TelegramParser tp = tmm.createTelegramParser("Mychat");
+		
+		IMessage msg = tp.nextMessage();
+		TelegramMessageMocker.checkBaseMessage(msg, "From", dt);
+		
+		assertTrue(msg instanceof TextMessage);
+		TextMessage tm = (TextMessage)msg;
+		
+		assertEquals("voice message of 34s", tm.getContent());
+		
+		assertNull(tp.nextMessage());
+	}
+	
+	@Test
+	void testNextMessageAudio(@TempDir Path tmpDir) throws IOException {
+		LocalDateTime dt = LocalDateTime.of(2023, 1, 21, 19, 13, 57);
+		
+		Path audioFile = tmpDir.resolve("chats/audio.ogg");
+		
+		String jsonMessage = TelegramMessageMocker.createBaseMessage("From",  "", dt)
+				+ TelegramMessageMocker.addKeyValue("file", audioFile.toString())
+				+ TelegramMessageMocker.addKeyValue("media_type", "audio_file")
+				+ TelegramMessageMocker.addKeyValue("mime_type", "audio/ogg")
+				+ TelegramMessageMocker.addKeyValue("duration_seconds", 123);
+		
+		TelegramMessageMocker tmm = new TelegramMessageMocker(tmpDir);
+		tmm.addMessage(jsonMessage);
+		
+		TelegramParser tp = tmm.createTelegramParser("Mychat");
+		
+		IMessage msg = tp.nextMessage();
+		TelegramMessageMocker.checkBaseMessage(msg, "From", dt);
+		
+		assertTrue(msg instanceof TextMessage);
+		TextMessage tm = (TextMessage)msg;
+		
+		assertEquals("audio file of 123s", tm.getContent());
+		
+		assertNull(tp.nextMessage());
+	}
+	
+	@Test
+	void testNextMessageVideoMessage(@TempDir Path tmpDir) throws IOException {
+		LocalDateTime dt = LocalDateTime.of(2023, 1, 21, 19, 47, 32);
+		
+		Path videoDir = tmpDir.resolve("chats");
+		String videoFilename = "video.mp4";
+		String thumbFilename = videoFilename + "_thumb.jpg";
+		Path thumbPath = videoDir.resolve(thumbFilename);
+		
+		String jsonMessage = TelegramMessageMocker.createBaseMessage("From", "Mymessage", dt)
+				+ TelegramMessageMocker.addKeyValue("file", videoDir.resolve(videoFilename).toString())
+				+ TelegramMessageMocker.addKeyValue("thumbnail", thumbPath.toString())
+				+ TelegramMessageMocker.addKeyValue("media_type", "video_message")
+				+ TelegramMessageMocker.addKeyValue("mime_type", "video/mp4");
+		
+		TelegramMessageMocker tmm = new TelegramMessageMocker(tmpDir);
+		tmm.addMessage(jsonMessage);
+		
+		TelegramParser tp = tmm.createTelegramParser("Mychat");
+		
+		IMessage msg = tp.nextMessage();
+		TelegramMessageMocker.checkBaseMessage(msg, "From", dt);
+		assertTrue(msg instanceof ImageMessage);
+		ImageMessage im = (ImageMessage)msg;
+		
+		assertEquals("Mymessage", im.getSubscription());
+		assertEquals(thumbPath, im.getFilepath());
+		
+		assertNull(tp.nextMessage());
+	}
+	
+	@Test
+	void testNextMessagePDF(@TempDir Path tmpDir) throws IOException {
+		LocalDateTime dt = LocalDateTime.of(2023, 1, 21, 19, 47, 32);
+		
+		String jsonMessage = TelegramMessageMocker.createBaseMessage("From", "Mymessage", dt)
+				+ TelegramMessageMocker.addKeyValue("file", "chats/doc.pdf")
+				+ TelegramMessageMocker.addKeyValue("mime_type", "application/pdf");
+		
+		TelegramMessageMocker tmm = new TelegramMessageMocker(tmpDir);
+		tmm.addMessage(jsonMessage);
+		
+		TelegramParser tp = tmm.createTelegramParser("Mychat");
+		
+		IMessage msg = tp.nextMessage();
+		TelegramMessageMocker.checkBaseMessage(msg, "From", dt);
+		assertTrue(msg instanceof TextMessage);
+		TextMessage tm = (TextMessage)msg;
+		
+		assertEquals("Mymessage (attached PDF document)", tm.getContent());
+		
+		assertNull(tp.nextMessage());
+	}
+	
+	@Test
+	void testNextMessageLocation(@TempDir Path tmpDir) throws IOException {
+		tmpDir = Paths.get("/tmp/bla");
+		LocalDateTime dt = LocalDateTime.of(2007, 10, 1, 9, 0, 0);
+		
+		String jsonMessage = TelegramMessageMocker.createBaseMessage("developer", "", dt)
+				+ ",\n\"location_information\": {"
+				+ TelegramMessageMocker.addKeyValue("latitude", 37.782979, true)
+				+ TelegramMessageMocker.addKeyValue("longitude", -122.390864)
+				+ "}";
+		
+		TelegramMessageMocker tmm = new TelegramMessageMocker(tmpDir);
+		tmm.addMessage(jsonMessage);
+		
+		TelegramParser tp = tmm.createTelegramParser("Mychat");
+		
+		IMessage msg = tp.nextMessage();
+		TelegramMessageMocker.checkBaseMessage(msg, "developer", dt);
+		
+		assertTrue(msg instanceof TextMessage);
+		TextMessage tm = (TextMessage)msg;
+		
+		assertEquals("Latitude: 37.782979\nLongitude: -122.390864\n", tm.getContent());
 		
 		assertNull(tp.nextMessage());
 	}
