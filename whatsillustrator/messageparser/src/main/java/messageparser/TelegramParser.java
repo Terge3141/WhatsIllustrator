@@ -119,7 +119,7 @@ public class TelegramParser implements IParser {
 				return new ImageMessage(date, from, fullPath(message.thumbnail), text);
 			}
 			else if("application/pdf".equals(message.mime_type)) {
-				return new ImageMessage(date, from, fullPath(message.thumbnail), text);
+				return new TextMessage(date, from, text + " (attached PDF document)");
 			}
 			else if(message.location_information!=null) {
 				TextStringBuilder sb = new TextStringBuilder();
