@@ -35,17 +35,23 @@ public class Global {
 	private DateUtils dateUtils;
 	//private List<String> emojiList;
 	
+	public Global() {
+	}
+	
+	public Global(Path outputDir, Path debugDir) {
+		this.outputDir = outputDir;
+		this.debugDir = debugDir;
+		this.dateUtils = new DateUtils(DEFAULT_LOCALE);
+	}
+	
 	public static Global fromXmlString(String xml) throws ConfigurationException, ParserConfigurationException, SAXException, IOException, XPathExpressionException {
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		Document document = builder.parse(new InputSource(new StringReader(xml)));
 		
-		Global global = new Global();
-		global.outputDir = readPath(document, "//global/outputdir");
-		global.debugDir = readPath(document, "//global/debugdir");
+		Path outputDir = readPath(document, "//global/outputdir");
+		Path debugDir = readPath(document, "//global/debugdir");
 		
-		global.dateUtils = new DateUtils(global.DEFAULT_LOCALE);
-				
-		return global;
+		return new Global(outputDir, debugDir);
 	}
 	
 	private static Path readPath(Document doc, String xPathExpression, String alternative) throws ConfigurationException, XPathExpressionException {

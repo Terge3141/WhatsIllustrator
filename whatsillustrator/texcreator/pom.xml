@@ -9,6 +9,13 @@
   <name>PDF-Converter for Whatsapp Messages TexCreator</name>
   <description>Tex Creator Plugin</description>
   <dependencies>
+	<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
+	<dependency>
+	    <groupId>org.junit.jupiter</groupId>
+	    <artifactId>junit-jupiter-engine</artifactId>
+	    <version>5.9.1</version>
+	    <scope>test</scope>
+	</dependency>
   	<dependency>
   		<groupId>com.terge</groupId>
   		<artifactId>creator</artifactId>
