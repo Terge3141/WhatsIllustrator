@@ -111,6 +111,49 @@ class SignalParserTest {
 		assertNull(sp.nextMessage());
 	}
 	
+	@Test
+	void testNextMessageVideo(@TempDir Path tmpDir) throws SQLException, IOException {
+		Path inputDir = tmpDir.resolve("input");
+		SignalParserSQLMocker sm = new SignalParserSQLMocker(inputDir);
+		Connection con = sm.getConnection();
+		
+		ZonedDateTime zdt = createZonedDT(2023, 1, 21, 23, 23, 40);
+		Path signalDir = tmpDir.resolve("workdir").resolve("signalparser");
+		Files.createDirectories(signalDir);
+		createMultiMediaMessage(con, signalDir, 123, zdt, "From", "Mychat", "Text", "video/mp4", 123456, 2345);
+		
+		con.close();
+		
+		SignalParser sp = createSignalParser(tmpDir, sm.getSqliteDBPath(), "Mychat");
+		
+		IMessage msg = sp.nextMessage();
+		checkBaseMessage(msg, "From", zdt);
+		assertTrue(msg instanceof VideoMessage);
+		VideoMessage vm = (VideoMessage)msg;
+		
+		assertEquals("Text", vm.getSubscription());
+		Path expImagePath = signalDir.resolve("video_123456.mp4");
+		assertEquals(expImagePath, vm.getFilepath());
+		
+		assertNull(sp.nextMessage());
+	}
+	
+	@Test
+	void testNextMessageUnknownContentType(@TempDir Path tmpDir) throws SQLException, IOException {
+		Path inputDir = tmpDir.resolve("input");
+		SignalParserSQLMocker sm = new SignalParserSQLMocker(inputDir);
+		Connection con = sm.getConnection();
+		
+		ZonedDateTime zdt = createZonedDT(2023, 1, 21, 23, 23, 40);
+		Path signalDir = tmpDir.resolve("workdir").resolve("signalparser");
+		Files.createDirectories(signalDir);
+		createMultiMediaMessage(con, signalDir, 123, zdt, "From", "Mychat", "Text", "image/webp", 123456, 2345);
+	
+		SignalParser sp = createSignalParser(tmpDir, sm.getSqliteDBPath(), "Mychat");
+		
+		assertNull(sp.nextMessage());
+	}
+	
 	private void createTextMessage(Connection con, int msgid, ZonedDateTime zdt, String sender, String chatname, String text) throws SQLException {
 		createChatsEntry(con, msgid, zdt, sender, chatname, text, "sms");
 	}
