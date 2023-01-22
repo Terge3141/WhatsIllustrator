@@ -3,6 +3,7 @@ package messageparser;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -83,11 +84,38 @@ class SignalParserTest {
 		assertNull(sp.nextMessage());
 	}
 	
+	@Test
+	void testNextMessageImage(@TempDir Path tmpDir) throws SQLException, IOException {
+		Path inputDir = tmpDir.resolve("input");
+		SignalParserSQLMocker sm = new SignalParserSQLMocker(inputDir);
+		Connection con = sm.getConnection();
+		
+		ZonedDateTime zdt = createZonedDT(2023, 1, 21, 23, 23, 40);
+		Path signalDir = tmpDir.resolve("workdir").resolve("signalparser");
+		Files.createDirectories(signalDir);
+		createMultiMediaMessage(con, signalDir, 123, zdt, "From", "Mychat", "Text", "image/jpeg", 123456, 2345);
+		
+		con.close();
+		
+		SignalParser sp = createSignalParser(tmpDir, sm.getSqliteDBPath(), "Mychat");
+		
+		IMessage msg = sp.nextMessage();
+		checkBaseMessage(msg, "From", zdt);
+		assertTrue(msg instanceof ImageMessage);
+		ImageMessage im = (ImageMessage)msg;
+		
+		assertEquals("Text", im.getSubscription());
+		Path expImagePath = signalDir.resolve("image_123456.jpg");
+		assertEquals(expImagePath, im.getFilepath());
+		
+		assertNull(sp.nextMessage());
+	}
+	
 	private void createTextMessage(Connection con, int msgid, ZonedDateTime zdt, String sender, String chatname, String text) throws SQLException {
 		createChatsEntry(con, msgid, zdt, sender, chatname, text, "sms");
 	}
 
-	private void createMultiMediaMessage(Connection con, int msgid, ZonedDateTime zdt, String sender, String chatname, String text, String contentType, long uniqueId, long stickerId) throws SQLException {
+	private void createMultiMediaMessage(Connection con, Path signalDir, int msgid, ZonedDateTime zdt, String sender, String chatname, String text, String contentType, long uniqueId, long stickerId) throws SQLException, IOException {
 		createChatsEntry(con, msgid, zdt, sender, chatname, text, "mms");
 		
 		String sql = "INSERT INTO part (mid, ct, unique_id, sticker_id) VALUES (?, ?, ?, ?);";
@@ -96,12 +124,17 @@ class SignalParserTest {
 		pstmt.setString(2, contentType);
 		pstmt.setLong(3, uniqueId);
 		pstmt.setLong(4, stickerId);
+		
+		pstmt.execute();
+		
+		Path attachmentPath = signalDir.resolve(String.format("Attachment_%d.bin", uniqueId));
+		
+		attachmentPath.toFile().createNewFile();
 	}
 	
 	private void createChatsEntry(Connection con, int msgid, ZonedDateTime zdt, String sender, String chatname, String text,
 			String type) throws SQLException {
 		long unixtime = zdt.toInstant().toEpochMilli();
-		
 		
 		String sql = "INSERT INTO v_chats (msgid, date, sender, chatname, text, type) VALUES (?, ?, ?, ?, ?, ?)";
 		PreparedStatement pstmt = con.prepareStatement(sql);
