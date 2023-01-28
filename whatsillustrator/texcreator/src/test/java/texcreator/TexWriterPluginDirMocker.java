@@ -10,6 +10,7 @@ public class TexWriterPluginDirMocker {
 	private Path outputDir;
 	private Path texDir;
 	private Path emojiDir;
+	private Path imageDir;
 	
 	
 	public TexWriterPluginDirMocker(Path tmpDir) throws IOException {
@@ -21,6 +22,7 @@ public class TexWriterPluginDirMocker {
 		this.outputDir = tmpDir.resolve("output");
 		this.texDir = outputDir.resolve("Myname").resolve("tex");
 		this.emojiDir = texDir.resolve("emojis");
+		this.imageDir  = texDir.resolve("images");
 	}
 
 	public Path getInputDir() {
@@ -37,5 +39,9 @@ public class TexWriterPluginDirMocker {
 	
 	public Path getEmojiDir() {
 		return emojiDir;
+	}
+	
+	public Path getImageDir() {
+		return imageDir;
 	}
 }
