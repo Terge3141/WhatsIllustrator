@@ -13,9 +13,9 @@ git clone --recurse-submodules https://github.com/Terge3141/WhatsIllustrator.git
 
 Make sure that *Java 11* and *maven* is installed
 
-Go to the WhatsIllustrator directory and build package
+Build the package:
 ```bash
-cd whatsillustrator
+cd WhatsIllustrator/whatsillustrator
 mvn package
 ```
 This will create the jar files.
