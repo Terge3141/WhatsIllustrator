@@ -45,8 +45,17 @@ public class TelegramMessageMocker {
 		return createTelegramParser(getJsonPath(), chatName, xmlConfig);
 	}
 	
+	public TelegramParser createTelegramParser(String chatName, LocalDateTime dtmin, LocalDateTime dtmax) throws IOException {
+		String wrappedJson = wrapAll(chatName, json);
+		Misc.writeAllText(getJsonPath(), wrappedJson);
+		
+		this.xmlConfig = createXmlConfig(getJsonPath(), chatName, dtmin, dtmax);
+		
+		return createTelegramParser(getJsonPath(), chatName, xmlConfig);
+	}
+	
 	public static TelegramParser createTelegramParser(Path jsonPath, String chatName) {
-		String xmlConfig = createXmlConfig(jsonPath, chatName);
+		String xmlConfig = createXmlConfig(jsonPath, chatName, null, null);
 		return createTelegramParser(jsonPath, chatName, xmlConfig);
 	}
 	
@@ -86,18 +95,27 @@ public class TelegramMessageMocker {
 		return json;
 	}
 	
-	public static String createXmlConfig(Path jsonPath, String chatName) {
+	public static String createXmlConfig(Path jsonPath, String chatName, LocalDateTime dtmin, LocalDateTime dtmax) {
 		String xml = ""
 				+ "<parserconfiguration>\n"
 				+ "<messagepath>" + jsonPath + "</messagepath>\n"
-				+ "<chatname>" + chatName + "</chatname>\n"
-				+ "</parserconfiguration>\n";
+				+ "<chatname>" + chatName + "</chatname>\n";
+		
+		if(dtmin!=null) {
+			xml += "<mindate>" + dtmin + "</mindate>\n";
+		}
+		
+		if(dtmax!=null) {
+			xml += "<maxdate>" + dtmax + "</maxdate>\n";
+		}
+		
+		xml += "</parserconfiguration>\n";
 		
 		return xml;
-	}
+	}	
 	
 	private String createXmlConfig(String chatName) {
-		return createXmlConfig(getJsonPath(), chatName);
+		return createXmlConfig(getJsonPath(), chatName, null, null);
 	}
 	
 	public static String wrapAll(String chatName, String messages) {

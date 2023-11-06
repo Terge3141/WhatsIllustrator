@@ -29,6 +29,8 @@ public class TelegramParser implements IParser {
 	private TelegramChat telegramChat;
 	private Path messagePath;
 	private Path messageDir;
+	private LocalDateTime dtmin;
+	private LocalDateTime dtmax; 
 	
 	private static final String JSON_MESSAGE = "message";
 	
@@ -55,6 +57,9 @@ public class TelegramParser implements IParser {
 			gsonBuilder = new GsonBuilder();
 			gsonBuilder.registerTypeAdapter(TelegramText.class, new TelegramTextSerializer());
 			chatOnly = Xml.getBooleanFromNode(document, "//chatonly");
+			
+			dtmin = str2Dt(Xml.getTextFromNode(document, "//mindate"));
+			dtmax = str2Dt(Xml.getTextFromNode(document, "//maxdate"));
 		} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
 			throw new ParserException("Could not read xml configuration", e);
 		}
@@ -88,6 +93,14 @@ public class TelegramParser implements IParser {
 			date = LocalDateTime.parse(datestr, formatter);
 		} catch (DateTimeParseException dtpe) {
 			throw new IllegalArgumentException(message.date);
+		}
+		
+		if(dtmin!=null && date.isBefore(dtmin)) {
+			return nextMessage();
+		}
+		
+		if(dtmax!=null && date.isAfter(dtmax)) {
+			return nextMessage();
 		}
 		
 		String from = message.from;
@@ -145,5 +158,13 @@ public class TelegramParser implements IParser {
 	
 	private Path fullPath(String relativePath) {
 		return this.messageDir.resolve(relativePath);
+	}
+	
+	private LocalDateTime str2Dt(String dateStr) {
+		if(dateStr==null) {
+			return null;
+		}
+		
+		return LocalDateTime.parse(dateStr);
 	}
 }

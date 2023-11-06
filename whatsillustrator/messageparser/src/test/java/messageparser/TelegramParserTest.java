@@ -319,7 +319,6 @@ class TelegramParserTest {
 	
 	@Test
 	void testNextMessageLocation(@TempDir Path tmpDir) throws IOException {
-		tmpDir = Paths.get("/tmp/bla");
 		LocalDateTime dt = LocalDateTime.of(2007, 10, 1, 9, 0, 0);
 		
 		String jsonMessage = TelegramMessageMocker.createBaseMessage("developer", "", dt)
@@ -340,6 +339,74 @@ class TelegramParserTest {
 		TextMessage tm = (TextMessage)msg;
 		
 		assertEquals("Latitude: 37.782979\nLongitude: -122.390864\n", tm.getContent());
+		
+		assertNull(tp.nextMessage());
+	}
+	
+	@Test
+	void testMinDate(@TempDir Path tmpDir) throws IOException {
+		LocalDateTime dt1 = LocalDateTime.of(2023, 11, 6, 20, 00, 00);
+		LocalDateTime dt2 = LocalDateTime.of(2023, 11, 6, 20, 01, 00);
+		TelegramMessageMocker tmm = new TelegramMessageMocker(tmpDir);
+		tmm.addTextMessage("Terge", "This is message1", dt1);
+		tmm.addTextMessage("Biff", "This is message2", dt2);
+		
+		TelegramParser tp = tmm.createTelegramParser("Tergechat", LocalDateTime.of(2023, 11, 6, 20, 00, 30), null);
+		
+		IMessage msg = null;
+		TextMessage tm = null;
+		
+		msg = tp.nextMessage();
+		TelegramMessageMocker.checkBaseMessage(msg, "Biff", dt2);
+		assertTrue(msg instanceof TextMessage);
+		tm = (TextMessage)msg;
+		assertEquals(tm.getContent(), "This is message2");
+		
+		assertNull(tp.nextMessage());
+	}
+	
+	@Test
+	void testMaxDate(@TempDir Path tmpDir) throws IOException {
+		LocalDateTime dt1 = LocalDateTime.of(2023, 11, 6, 20, 00, 00);
+		LocalDateTime dt2 = LocalDateTime.of(2023, 11, 6, 20, 01, 00);
+		TelegramMessageMocker tmm = new TelegramMessageMocker(tmpDir);
+		tmm.addTextMessage("Terge", "This is message1", dt1);
+		tmm.addTextMessage("Biff", "This is message2", dt2);
+		
+		TelegramParser tp = tmm.createTelegramParser("Tergechat", null, LocalDateTime.of(2023, 11, 6, 20, 00, 30));
+		
+		IMessage msg = null;
+		TextMessage tm = null;
+		
+		msg = tp.nextMessage();
+		TelegramMessageMocker.checkBaseMessage(msg, "Terge", dt1);
+		assertTrue(msg instanceof TextMessage);
+		tm = (TextMessage)msg;
+		assertEquals(tm.getContent(), "This is message1");
+		
+		assertNull(tp.nextMessage());
+	}
+	
+	@Test
+	void testMinMaxDate(@TempDir Path tmpDir) throws IOException {
+		LocalDateTime dt1 = LocalDateTime.of(2023, 11, 6, 20, 00, 00);
+		LocalDateTime dt2 = LocalDateTime.of(2023, 11, 6, 20, 01, 00);
+		LocalDateTime dt3 = LocalDateTime.of(2023, 11, 6, 20, 02, 00);
+		TelegramMessageMocker tmm = new TelegramMessageMocker(tmpDir);
+		tmm.addTextMessage("Terge", "This is message1", dt1);
+		tmm.addTextMessage("Biff", "This is message2", dt2);
+		tmm.addTextMessage("Terge", "This is message3", dt3);
+		
+		TelegramParser tp = tmm.createTelegramParser("Tergechat", LocalDateTime.of(2023, 11, 6, 20, 00, 30), LocalDateTime.of(2023, 11, 6, 20, 01, 30));
+		
+		IMessage msg = null;
+		TextMessage tm = null;
+		
+		msg = tp.nextMessage();
+		TelegramMessageMocker.checkBaseMessage(msg, "Biff", dt2);
+		assertTrue(msg instanceof TextMessage);
+		tm = (TextMessage)msg;
+		assertEquals(tm.getContent(), "This is message2");
 		
 		assertNull(tp.nextMessage());
 	}

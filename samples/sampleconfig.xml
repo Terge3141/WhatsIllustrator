@@ -14,6 +14,9 @@
 			<!-- Set this to true if the json file contains the chat only. Used mainly 
 				for debugging. If unsure set to false -->
 			<chatonly>false</chatonly>
+			<!-- Uncomment the next lines if you only want messages with a minimal or maximal date, respectively -->
+			<!-- <mindate>YYYY-MM-DDThh:mm:ss</mindate> -->
+			<!-- <maxdate>YYYY-MM-DDThh:mm:ss</maxdate> -->
 		</parserconfiguration>
 	</parser>
 	<parser>
