@@ -82,3 +82,5 @@ libraries/Log4j-levels.xsd
 .settings
 
 .ownconfig
+
+outputdirectory

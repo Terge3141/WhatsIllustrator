@@ -75,34 +75,42 @@ public class TelegramParser implements IParser {
 	}
 	
 	public IMessage nextMessage() {
-		if(this.index >= this.telegramChat.messages.length) {
-			return null;
-		}		
-		
-		if(this.index%100==0) {
-			logger.info("{}/{} messages parsed", this.index, this.telegramChat.messages.length);
-		}
-		
-		TelegramMessage message = this.telegramChat.messages[this.index];
-		this.index++;
-		
+		TelegramMessage message = null;
 		LocalDateTime date = null;
-		try {
-			String datestr = message.date;
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-			date = LocalDateTime.parse(datestr, formatter);
-		} catch (DateTimeParseException dtpe) {
-			throw new IllegalArgumentException(message.date);
-		}
 		
-		if(dtmin!=null && date.isBefore(dtmin)) {
-			return nextMessage();
+		boolean found = false;		
+		while(!found) {
+			
+			found = true;
+			
+			if(this.index >= this.telegramChat.messages.length) {
+				return null;
+			}		
+			
+			if(this.index%100==0) {
+				logger.info("{}/{} messages parsed", this.index, this.telegramChat.messages.length);
+			}
+			
+			message = this.telegramChat.messages[this.index];
+			this.index++;
+			
+			try {
+				String datestr = message.date;
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+				date = LocalDateTime.parse(datestr, formatter);
+			} catch (DateTimeParseException dtpe) {
+				throw new IllegalArgumentException(message.date);
+			}
+			
+			if(dtmin!=null && date.isBefore(dtmin)) {
+				found = false;
+			}
+			
+			if(dtmax!=null && date.isAfter(dtmax)) {
+				found = false;
+			}
 		}
-		
-		if(dtmax!=null && date.isAfter(dtmax)) {
-			return nextMessage();
-		}
-		
+			
 		String from = message.from;
 		//from = from + ": " + message.id;
 		String text = message.text.text;
