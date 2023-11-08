@@ -90,9 +90,7 @@ class ImageMessageConcatenatorTest {
 	
 	@Test
 	// Scenario: Two image messages different sender
-	void testAddMessage_ImageMessage3() {
-		ImageMessageConcatenator imc = new ImageMessageConcatenator();
-
+	void testAddMessage_ImageMessage2() {
 		LocalDateTime tp = LocalDateTime.of(2023, 11, 8, 21, 02, 00);
 		String subscription = "sub";
 		Path p1 = Paths.get("path1");
@@ -101,19 +99,12 @@ class ImageMessageConcatenatorTest {
 		ImageMessage im1 = new ImageMessage(tp, "Sender1", p1, subscription);
 		ImageMessage im2 = new ImageMessage(tp, "Sender2", p2, subscription);
 		
-		assertEquals(0, imc.addMessage(im1).size());
-		
-		List<IMessage> list = imc.addMessage(im2);
-		assertEquals(2, list.size());
-		assertTrue(im1 == list.get(0));
-		assertTrue(im2 == list.get(1));
+		testNonStackable(im1, im2);
 	}
 	
 	@Test
 	// Scenario: Two image messages different subscription
-	void testAddMessage_ImageMessage4() {
-		ImageMessageConcatenator imc = new ImageMessageConcatenator();
-
+	void testAddMessage_ImageMessage3() {
 		LocalDateTime tp = LocalDateTime.of(2023, 11, 8, 21, 02, 00);
 		String sender = "Terge";
 		Path p1 = Paths.get("path1");
@@ -122,19 +113,12 @@ class ImageMessageConcatenatorTest {
 		ImageMessage im1 = new ImageMessage(tp, sender, p1, "sub1");
 		ImageMessage im2 = new ImageMessage(tp, sender, p2, "sub2");
 		
-		assertEquals(0, imc.addMessage(im1).size());
-		
-		List<IMessage> list = imc.addMessage(im2);
-		assertEquals(2, list.size());
-		assertTrue(im1 == list.get(0));
-		assertTrue(im2 == list.get(1));
+		testNonStackable(im1, im2);
 	}
 	
 	@Test
 	// Scenario: Two image messages different date
-	void testAddMessage_ImageMessage2() {
-		ImageMessageConcatenator imc = new ImageMessageConcatenator();
-
+	void testAddMessage_ImageMessage4() {
 		String sender = "Terge";
 		String subscription = "sub";
 		Path p1 = Paths.get("path1");
@@ -143,12 +127,13 @@ class ImageMessageConcatenatorTest {
 		ImageMessage im1 = new ImageMessage(LocalDateTime.of(2023, 11, 8, 21, 02, 1), sender, p1, subscription);
 		ImageMessage im2 = new ImageMessage(LocalDateTime.of(2023, 11, 8, 21, 02, 2), sender, p2, subscription);
 		
-		assertEquals(0, imc.addMessage(im1).size());
-		
-		List<IMessage> list = imc.addMessage(im2);
-		assertEquals(2, list.size());
-		assertTrue(im1 == list.get(0));
-		assertTrue(im2 == list.get(1));
+		testNonStackable(im1, im2);
+	}
+	
+	@Test
+	// Scenario: Two image messages same date, one image other date, text message
+	void testAddMessage_ImageMessage5() {
+		fail("Not implemented");
 	}
 	
 	void testSingleMessage(IMessage msg) {
@@ -157,5 +142,22 @@ class ImageMessageConcatenatorTest {
 
 		assertEquals(1, list.size());
 		assertTrue(msg == list.get(0));
+	}
+	
+	void testNonStackable(ImageMessage im1, ImageMessage im2) {
+		ImageMessageConcatenator imc = new ImageMessageConcatenator();
+		
+		TextMessage tm = new TextMessage(LocalDateTime.of(2023, 11, 8, 21, 02, 00), "Terge", "Hi");
+		
+		assertEquals(0, imc.addMessage(im1).size());
+		
+		List<IMessage> list1 = imc.addMessage(im2);
+		assertEquals(1, list1.size());
+		assertTrue(im1 == list1.get(0));
+		
+		List<IMessage> list2 = imc.addMessage(tm);
+		assertEquals(2, list2.size());
+		assertTrue(im2 == list2.get(0));
+		assertTrue(tm == list2.get(1));
 	}
 }
