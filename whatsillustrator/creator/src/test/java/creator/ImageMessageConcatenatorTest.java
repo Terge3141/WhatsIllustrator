@@ -131,9 +131,56 @@ class ImageMessageConcatenatorTest {
 	}
 	
 	@Test
-	// Scenario: Two image messages same date, one image other date, text message
+	// Scenario: Two image messages different sender
 	void testAddMessage_ImageMessage5() {
-		fail("Not implemented");
+		LocalDateTime tp = LocalDateTime.of(2023, 11, 8, 21, 02, 00);
+		String subscription = "sub";
+		Path p1 = Paths.get("path1");
+		Path p2 = Paths.get("path2");
+		
+		ImageMessage im1 = new ImageMessage(tp, "Terge", p1, subscription);
+		ImageMessage im2 = new ImageMessage(tp, "Biff", p2, subscription);
+		
+		testNonStackable(im1, im2);
+	}
+	
+	@Test
+	// Scenario: Two image messages same date, one image other date, text message
+	void testAddMessage_ImageMessage6() {
+		ImageMessageConcatenator imc = new ImageMessageConcatenator();
+		
+		LocalDateTime tp1 = LocalDateTime.of(2023, 11, 9, 22, 26, 0);
+		LocalDateTime tp2 = LocalDateTime.of(2023, 11, 9, 22, 27, 0);
+		String sender = "Terge";
+		String subscription = "sub";
+		
+		Path p1 = Paths.get("path1");
+		Path p2 = Paths.get("path2");
+		Path p3 = Paths.get("path3");
+		
+		ImageMessage im1 = new ImageMessage(tp1, sender, p1, subscription);
+		ImageMessage im2 = new ImageMessage(tp1, sender, p2, subscription);
+		ImageMessage im3 = new ImageMessage(tp2, sender, p3, subscription);
+		TextMessage tm = new TextMessage(tp2, sender, "Hi");
+		
+		assertEquals(0, imc.addMessage(im1).size());
+		assertEquals(0, imc.addMessage(im2).size());
+		
+		List<IMessage> list1 = imc.addMessage(im3);
+		assertEquals(1, list1.size());
+		assertTrue(list1.get(0) instanceof ImageStackMessage);
+		ImageStackMessage ism = (ImageStackMessage)list1.get(0);
+		assertEquals(tp1, ism.getTimepoint());
+		assertEquals(sender, ism.getSender());
+		assertEquals(subscription, ism.getSubscription());
+		assertEquals(2, ism.getFilepaths().size());
+		assertEquals(p1, ism.getFilepaths().get(0));
+		assertEquals(p2, ism.getFilepaths().get(1));
+		
+		List<IMessage> list2 = imc.addMessage(tm);
+		assertEquals(2, list2.size());
+		assertTrue(im3 == list2.get(0));
+		assertTrue(tm == list2.get(1));
 	}
 	
 	void testSingleMessage(IMessage msg) {
