@@ -52,7 +52,7 @@ class ImageMessageConcatenatorTest {
 	}
 	
 	@Test
-	// Scenario: Two image messages same date and a text message
+	// Scenario: Three image messages same date and a text message
 	void testAddMessage_ImageMessage1() {
 		ImageMessageConcatenator imc = new ImageMessageConcatenator();
 
@@ -61,28 +61,21 @@ class ImageMessageConcatenatorTest {
 		String subscription = "sub";
 		Path p1 = Paths.get("path1");
 		Path p2 = Paths.get("path2");
+		Path p3 = Paths.get("path3");
 		
 		ImageMessage im1 = new ImageMessage(tp, sender, p1, subscription);
 		ImageMessage im2 = new ImageMessage(tp, sender, p2, subscription);
+		ImageMessage im3 = new ImageMessage(tp, sender, p3, subscription);
 		TextMessage tm = new TextMessage(LocalDateTime.of(2023, 11, 8, 21, 02, 00), "Terge", "Hi");
 		
 		assertEquals(0, imc.addMessage(im1).size());
 		assertEquals(0, imc.addMessage(im2).size());
+		assertEquals(0, imc.addMessage(im3).size());
 		
 		List<IMessage> list = imc.addMessage(tm);
 		assertEquals(2, list.size());
 		
-		// check that im1 and im 2 become stackmessage
-		assertTrue(list.get(0) instanceof ImageStackMessage);
-		ImageStackMessage ism = (ImageStackMessage)list.get(0);
-		
-		assertEquals(tp, ism.getTimepoint());
-		assertEquals(sender, ism.getSender());
-		assertEquals(subscription, ism.getSubscription());
-		
-		assertEquals(2, ism.getFilepaths().size());
-		assertEquals(ism.getFilepaths().get(0), p1);
-		assertEquals(ism.getFilepaths().get(1), p2);
+		checkImageStackMessage(list.get(0), tp, sender, subscription, List.of(p1, p2, p3));
 		
 		// check that tm remains unchanged
 		assertTrue(tm == list.get(1));
@@ -168,19 +161,45 @@ class ImageMessageConcatenatorTest {
 		
 		List<IMessage> list1 = imc.addMessage(im3);
 		assertEquals(1, list1.size());
-		assertTrue(list1.get(0) instanceof ImageStackMessage);
-		ImageStackMessage ism = (ImageStackMessage)list1.get(0);
-		assertEquals(tp1, ism.getTimepoint());
-		assertEquals(sender, ism.getSender());
-		assertEquals(subscription, ism.getSubscription());
-		assertEquals(2, ism.getFilepaths().size());
-		assertEquals(p1, ism.getFilepaths().get(0));
-		assertEquals(p2, ism.getFilepaths().get(1));
+		checkImageStackMessage(list1.get(0), tp1, sender, subscription, List.of(p1, p2));
 		
 		List<IMessage> list2 = imc.addMessage(tm);
 		assertEquals(2, list2.size());
 		assertTrue(im3 == list2.get(0));
 		assertTrue(tm == list2.get(1));
+	}
+	
+	@Test
+	void testFlush_OneImageMessage() {
+		ImageMessageConcatenator imc = new ImageMessageConcatenator();
+		ImageMessage im = new ImageMessage(LocalDateTime.of(2023, 11, 9, 22, 44, 0), "Terge", Paths.get("path"), "sub");
+		
+		imc.addMessage(im);
+		
+		List<IMessage> list = imc.flush();
+		assertEquals(1, list.size());
+		assertTrue(im == list.get(0));
+	}
+	
+	@Test
+	void testFlush_TwoImageMessages() {
+		ImageMessageConcatenator imc = new ImageMessageConcatenator();
+		
+		LocalDateTime tp = LocalDateTime.of(2023, 11, 9, 22, 58, 0);
+		String sender = "Terge";
+		Path p1 = Paths.get("path1");
+		Path p2 = Paths.get("path2");
+		String subscription = "sub";
+		
+		ImageMessage im1 = new ImageMessage(tp, sender, p1, subscription);
+		ImageMessage im2 = new ImageMessage(tp, sender, p2, subscription);
+		
+		imc.addMessage(im1);
+		imc.addMessage(im2);
+		
+		List<IMessage> list = imc.flush();
+		assertEquals(1, list.size());
+		checkImageStackMessage(list.get(0), tp, sender, subscription, List.of(p1, p2));
 	}
 	
 	void testSingleMessage(IMessage msg) {
@@ -206,5 +225,19 @@ class ImageMessageConcatenatorTest {
 		assertEquals(2, list2.size());
 		assertTrue(im2 == list2.get(0));
 		assertTrue(tm == list2.get(1));
+	}
+	
+	void checkImageStackMessage(IMessage msg, LocalDateTime tp, String sender, String subscription, List<Path> paths) {
+		assertTrue(msg instanceof ImageStackMessage);
+		ImageStackMessage ism = (ImageStackMessage)msg;
+		
+		assertEquals(tp, ism.getTimepoint());
+		assertEquals(sender, ism.getSender());
+		assertEquals(subscription, ism.getSubscription());
+		
+		assertEquals(paths.size(), ism.getFilepaths().size());
+		for(int i=0; i<paths.size(); i++) {
+			assertEquals(ism.getFilepaths().get(i), paths.get(i));
+		}
 	}
 }

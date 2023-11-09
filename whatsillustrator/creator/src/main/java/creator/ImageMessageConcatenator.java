@@ -14,7 +14,7 @@ public class ImageMessageConcatenator {
 	private List<ImageMessage> imList;
 	
 	public ImageMessageConcatenator() {
-		imList = new ArrayList<ImageMessage>();
+		resetImList();
 	}
 	
 	public List<IMessage> addMessage(IMessage msg) {
@@ -44,6 +44,10 @@ public class ImageMessageConcatenator {
 		return list;
 	}
 	
+	public List<IMessage> flush() {
+		return stackImages();
+	}
+	
 	// Create one image stack message out of all image messages
 	private List<IMessage> stackImages() {
 		List<IMessage> list = new ArrayList<IMessage>();
@@ -66,9 +70,13 @@ public class ImageMessageConcatenator {
 			ImageStackMessage ism = new ImageStackMessage(tp, sender, filepaths, subscription);
 			list.add(ism);
 			
-			imList = new ArrayList<ImageMessage>();			
+			resetImList();		
 		}
 		
 		return list;
+	}
+	
+	private void resetImList() {
+		imList = new ArrayList<ImageMessage>();
 	}
 }
