@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import configurator.Global;
 import messageparser.ImageMessage;
+import messageparser.ImageStackMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
@@ -43,6 +44,13 @@ public interface IWriterPlugin {
 	 * @throws WriterException
 	 */
 	void appendImageMessage(ImageMessage imageMessage) throws WriterException;
+	
+	/**
+	 * Appends an image stack message to the document
+	 * @param imageStackMessage Message to be appended
+	 * @throws WriterException
+	 */
+	void appendImageStackMessage(ImageStackMessage imageStackMessage) throws WriterException;
 	
 	/**
 	 * Appends a video message to the document

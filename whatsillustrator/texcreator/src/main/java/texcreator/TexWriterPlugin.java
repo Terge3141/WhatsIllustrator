@@ -26,6 +26,7 @@ import helper.Latex;
 import helper.Misc;
 import messageparser.IMessage;
 import messageparser.ImageMessage;
+import messageparser.ImageStackMessage;
 import messageparser.LinkMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
@@ -98,14 +99,14 @@ public class TexWriterPlugin implements IWriterPlugin {
 	public void postAppend() throws WriterException {
 		tsb.appendln(this.footer);
 
-		logger.info("Writing tex file to '{}'", texOutputPath);
+		logger.info("Writing tex file to '{}'", texOutputPath.toAbsolutePath());
 		try {
 			Misc.writeAllText(texOutputPath, tsb.toString());
 		} catch (IOException ioe) {
 			throw new WriterException(ioe);
 		}
 
-		logger.info("Copy emojis to '{}'", emojiOutputDir);
+		logger.info("Copy emojis to '{}'", emojiOutputDir.toAbsolutePath());
 		try {
 			copyList();
 		} catch (IOException ioe) {
@@ -141,6 +142,16 @@ public class TexWriterPlugin implements IWriterPlugin {
 	}
 	
 	@Override
+	public void appendImageStackMessage(ImageStackMessage msg) throws WriterException {
+		tsb.appendln("%s\\\\", formatSenderAndTime(msg));
+		
+		String latexSizeInfo = "height=0.1\\textheight";
+		tsb.appendln("\\begin{center}");
+		tsb.append(createLatexImageStack(msg.getFilepaths(), latexSizeInfo, msg.getSubscription()));
+		tsb.appendln("\\end{center}");
+	}
+	
+	@Override
 	public void appendVideoMessage(VideoMessage msg) throws WriterException {
 		Path videoPath = msg.getFilepath();
 		if(videoPath.toFile().exists()) {
@@ -152,9 +163,10 @@ public class TexWriterPlugin implements IWriterPlugin {
 				throw new WriterException(e);
 			}
 			
+			String latexSizeInfo = String.format("width=%f\\columnwidth", tc.isLandScape() ? 0.3 : 0.15);
 			tsb.appendln("%s\\\\", formatSenderAndTime(msg));
 			tsb.appendln("\\begin{center}");
-			tsb.append(createLatexImageStack(tnPaths, tc.isLandScape(), msg.getSubscription()));
+			tsb.append(createLatexImageStack(tnPaths, latexSizeInfo, msg.getSubscription()));
 			tsb.appendln("\\end{center}");
 		} else {
 			logger.warn("File '{}' does not exist, skipping message", videoPath);
@@ -264,9 +276,8 @@ public class TexWriterPlugin implements IWriterPlugin {
 		return tsb.toString();
 	}
 	
-	public String createLatexImageStack(List<Path> paths, boolean landscapeImages, String subscription) throws WriterException {
+	public String createLatexImageStack(List<Path> paths, String latexSizeInfo, String subscription) throws WriterException {
 		TextStringBuilder tsb = new TextStringBuilder();
-		String sizeInfo = String.format("width=%f\\columnwidth", landscapeImages ? 0.3 : 0.15);
 		
 		for(Path src : paths) {
 			Path fileName = src.getFileName();
@@ -280,7 +291,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 						ioe);
 			}
 			
-			tsb.appendln("\\includegraphics[%s]{%s}", sizeInfo, relDst); 
+			tsb.appendln("\\includegraphics[%s]{%s}", latexSizeInfo, relDst); 
 		}
 		
 		tsb.appendln("\\\\");

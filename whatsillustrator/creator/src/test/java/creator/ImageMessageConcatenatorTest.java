@@ -170,6 +170,70 @@ class ImageMessageConcatenatorTest {
 	}
 	
 	@Test
+	// Scenario: Three image messages datediff <= 60 and a text message
+	void testAddMessage_ImageMessage7() {
+		ImageMessageConcatenator imc = new ImageMessageConcatenator(60);
+
+		LocalDateTime tp1 = LocalDateTime.of(2023, 11, 8, 21, 02, 0);
+		LocalDateTime tp2 = LocalDateTime.of(2023, 11, 8, 21, 02, 20);
+		LocalDateTime tp3 = LocalDateTime.of(2023, 11, 8, 21, 03, 0);
+		String sender = "Terge";
+		String subscription = "sub";
+		Path p1 = Paths.get("path1");
+		Path p2 = Paths.get("path2");
+		Path p3 = Paths.get("path3");
+		
+		ImageMessage im1 = new ImageMessage(tp1, sender, p1, subscription);
+		ImageMessage im2 = new ImageMessage(tp2, sender, p2, subscription);
+		ImageMessage im3 = new ImageMessage(tp3, sender, p3, subscription);
+		TextMessage tm = new TextMessage(LocalDateTime.of(2023, 11, 8, 21, 04, 00), "Terge", "Hi");
+		
+		assertEquals(0, imc.addMessage(im1).size());
+		assertEquals(0, imc.addMessage(im2).size());
+		assertEquals(0, imc.addMessage(im3).size());
+		
+		List<IMessage> list = imc.addMessage(tm);
+		assertEquals(2, list.size());
+		
+		checkImageStackMessage(list.get(0), tp1, sender, subscription, List.of(p1, p2, p3));
+		
+		// check that tm remains unchanged
+		assertTrue(tm == list.get(1));
+	}
+	
+	@Test
+	// Scenario: Two image messages datediff <= 60, one image message later, and a text message
+	void testAddMessage_ImageMessage8() {
+		ImageMessageConcatenator imc = new ImageMessageConcatenator(60);
+
+		LocalDateTime tp1 = LocalDateTime.of(2023, 11, 8, 21, 02, 0);
+		LocalDateTime tp2 = LocalDateTime.of(2023, 11, 8, 21, 02, 20);
+		LocalDateTime tp3 = LocalDateTime.of(2023, 11, 8, 21, 03, 20);
+		String sender = "Terge";
+		String subscription = "sub";
+		Path p1 = Paths.get("path1");
+		Path p2 = Paths.get("path2");
+		Path p3 = Paths.get("path3");
+		
+		ImageMessage im1 = new ImageMessage(tp1, sender, p1, subscription);
+		ImageMessage im2 = new ImageMessage(tp2, sender, p2, subscription);
+		ImageMessage im3 = new ImageMessage(tp3, sender, p3, subscription);
+		TextMessage tm = new TextMessage(LocalDateTime.of(2023, 11, 8, 21, 04, 00), "Terge", "Hi");
+		
+		assertEquals(0, imc.addMessage(im1).size());
+		assertEquals(0, imc.addMessage(im2).size());
+		
+		List<IMessage> list1 = imc.addMessage(im3);
+		assertEquals(1, list1.size());
+		checkImageStackMessage(list1.get(0), tp1, sender, subscription, List.of(p1, p2));
+		
+		List<IMessage> list2 = imc.addMessage(tm);
+		assertEquals(2, list2.size());
+		assertTrue(im3 == list2.get(0));
+		assertTrue(tm == list2.get(1));
+	}
+	
+	@Test
 	void testFlush_OneImageMessage() {
 		ImageMessageConcatenator imc = new ImageMessageConcatenator();
 		ImageMessage im = new ImageMessage(LocalDateTime.of(2023, 11, 9, 22, 44, 0), "Terge", Paths.get("path"), "sub");

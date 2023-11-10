@@ -2,6 +2,7 @@ package creator;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,9 +13,15 @@ import messageparser.ImageStackMessage;
 public class ImageMessageConcatenator {
 	
 	private List<ImageMessage> imList;
+	private long maxTimeDifferenceSeconds = 0;
 	
 	public ImageMessageConcatenator() {
 		resetImList();
+	}
+	
+	public ImageMessageConcatenator(long maxTimeDifferenceSeconds) {
+		this();
+		this.maxTimeDifferenceSeconds = maxTimeDifferenceSeconds;
 	}
 	
 	public List<IMessage> addMessage(IMessage msg) {
@@ -27,9 +34,9 @@ public class ImageMessageConcatenator {
 				imList.add(im);
 			} else {
 				ImageMessage ref = imList.get(0);
-				if(ref.getTimepoint().equals(im.getTimepoint())
+				if(timeDifferenceOkay(ref.getTimepoint(), im.getTimepoint())
 						&& ref.getSender().equals(im.getSender())
-						& ref.getSubscription().equals(im.getSubscription())) {
+						&& ref.getSubscription().equals(im.getSubscription())) {
 					imList.add(im);
 				} else {
 					list = stackImages();
@@ -74,6 +81,11 @@ public class ImageMessageConcatenator {
 		}
 		
 		return list;
+	}
+	
+	private boolean timeDifferenceOkay(LocalDateTime tp1, LocalDateTime tp2) {
+		long diff = tp1.until(tp2, ChronoUnit.SECONDS);
+		return diff <= maxTimeDifferenceSeconds;
 	}
 	
 	private void resetImList() {

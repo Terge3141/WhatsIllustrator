@@ -36,6 +36,7 @@ import emojicontainer.EmojiContainer.Token;
 import helper.Misc;
 import messageparser.IMessage;
 import messageparser.ImageMessage;
+import messageparser.ImageStackMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
 import messageparser.TextMessage;
@@ -139,6 +140,17 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		Path absoluteImgPath = msg.getFilepath().toAbsolutePath();
 
 		appendImage(absoluteImgPath, msg.getSubscription());
+	}
+	
+	@Override
+	public void appendImageStackMessage(ImageStackMessage msg) throws WriterException {
+		for(Path p : msg.getFilepaths()) {
+			appendSenderAndDate(msg, null);
+
+			Path absoluteImgPath = p.toAbsolutePath();
+
+			appendImage(absoluteImgPath, msg.getSubscription());
+		}
 	}
 	
 	@Override

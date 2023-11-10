@@ -23,7 +23,7 @@
 		<module>creator</module>
 		<module>thebook</module>
 		<module>texcreator</module>
-		<module>fopcreator</module>
+		<!--<module>fopcreator</module>-->
 		<module>odfcreator</module>
 		<module>videothumbnails</module>
 	</modules>
