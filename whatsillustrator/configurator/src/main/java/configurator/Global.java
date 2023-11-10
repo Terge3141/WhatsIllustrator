@@ -20,9 +20,10 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import helper.DateUtils;
+import helper.Xml;
 
 public class Global {
-	private final String DEFAULT_LOCALE = "en";
+	private static final String DEFAULT_LOCALE = "en";
 	
 	@SuppressWarnings("unused")
 	private static Logger logger = LogManager.getLogger(Global.class);
@@ -33,15 +34,17 @@ public class Global {
 	private String nameSuggestion;
 	
 	private DateUtils dateUtils;
-	//private List<String> emojiList;
 	
 	public Global() {
 	}
 	
-	public Global(Path outputDir, Path debugDir) {
+	public Global(Path outputDir, Path debugDir, String locale) {
 		this.outputDir = outputDir;
 		this.debugDir = debugDir;
-		this.dateUtils = new DateUtils(DEFAULT_LOCALE);
+		this.dateUtils = new DateUtils(locale);
+	}
+	public Global(Path outputDir, Path debugDir) {
+		this(outputDir, debugDir, DEFAULT_LOCALE);
 	}
 	
 	public static Global fromXmlString(String xml) throws ConfigurationException, ParserConfigurationException, SAXException, IOException, XPathExpressionException {
@@ -50,8 +53,9 @@ public class Global {
 		
 		Path outputDir = readPath(document, "//global/outputdir");
 		Path debugDir = readPath(document, "//global/debugdir");
+		String locale = Xml.getTextFromNode(document, "//global/locale"); 
 		
-		return new Global(outputDir, debugDir);
+		return new Global(outputDir, debugDir, locale);
 	}
 	
 	private static Path readPath(Document doc, String xPathExpression, String alternative) throws ConfigurationException, XPathExpressionException {

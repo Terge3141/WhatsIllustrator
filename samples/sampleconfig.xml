@@ -2,6 +2,7 @@
 	<global>
 		<outputdir>outputdirectory</outputdir>
 		<debugdir>debugdirectory</debugdir>
+		<locale>en</locale>
 	</global>
 	<!-- comment one of the parsers -->
 	<!-- For Telegramparser: Leave the chatname empty to get a list of all available 
