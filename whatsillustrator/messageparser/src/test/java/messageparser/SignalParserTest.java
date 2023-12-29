@@ -202,6 +202,7 @@ class SignalParserTest {
 					+ "<outputdir>"
 					+ workDir
 					+ "</outputdir>"
+					+ "<locale>en</locale>"
 					+ "</global>");
 		} catch (XPathExpressionException | ConfigurationException | ParserConfigurationException | SAXException
 				| IOException e) {
