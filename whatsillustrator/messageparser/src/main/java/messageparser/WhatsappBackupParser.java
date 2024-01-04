@@ -38,6 +38,7 @@ public class WhatsappBackupParser implements IParser {
 	private Path cryptFilePath;
 	private String chatName;
 	private Path msgstoreDBPath;
+	private Path contactsCsvPath;
 	private Path workdir;
 	// Directory where one of the subdirectories is "Media"
 	private Path whatsappdir;
@@ -63,6 +64,7 @@ public class WhatsappBackupParser implements IParser {
 			this.chatName = Xml.getTextFromNode(document, "//chatname");
 			this.whatsappdir = Xml.getPathFromNode(document, "//whatsappdir");
 			this.msgstoreDBPath = Xml.getPathFromNode(document, "//msgstoredbpath");
+			this.contactsCsvPath = Xml.getPathFromNode(document, "//contactscsvpath");
 			
 			this.workdir = this.globalConfig.getOutputDir().resolve("whatsappparser");
 			Files.createDirectories(this.workdir);
@@ -77,8 +79,9 @@ public class WhatsappBackupParser implements IParser {
 			try {
 				dumper = DatabaseDumper.of(cryptFilePath, key, this.msgstoreDBPath);
 				dumper.setCreateExtraSqlViews(true);
+				dumper.readContacts(contactsCsvPath);
 				dumper.run();
-			} catch (WhatsappBackupReaderException | SQLException e) {
+			} catch (WhatsappBackupReaderException | SQLException | IOException e) {
 				throw new ParserException("Could not dump database", e);
 			}
 		}

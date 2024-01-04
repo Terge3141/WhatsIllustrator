@@ -226,16 +226,15 @@ public class WhatsappBackupParserTest {
 	}
 
 	private String createXmlConfig(Path sqliteDBPath, Path whatsappDir, String chatName) {
-System.out.println("createXmlConfig: " + sqliteDBPath);
 		String xml = ""
-				+ "<parserconfiguration>\n"
-				+ "<backupfile>/tmp/msgstore.db.crypt15</backupfile>\n"
+				+ "<parserconfiguration>"
+				+ "<backupfile>/tmp/msgstore.db.crypt15</backupfile>"
 				+ "<passphrase>12345678 12345678 12345678 12345678"
-				+ " 12345678 12345678 12345678 12345678</passphrase>\n"
+				+ " 12345678 12345678 12345678 12345678</passphrase>"
 				+ "<msgstoredbpath>" + sqliteDBPath + "</msgstoredbpath>"
 				+ "<whatsappdir>" + whatsappDir + "</whatsappdir>"
 				+ "<chatname>" + chatName + "</chatname>"
-				+ "</parserconfiguration>\n";
+				+ "</parserconfiguration>";
 		return xml;
 	}
 	
