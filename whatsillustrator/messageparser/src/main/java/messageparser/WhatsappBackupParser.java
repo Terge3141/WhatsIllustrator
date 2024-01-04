@@ -1,6 +1,7 @@
 package messageparser;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -62,18 +63,19 @@ public class WhatsappBackupParser implements IParser {
 			this.chatName = Xml.getTextFromNode(document, "//chatname");
 			this.whatsappdir = Xml.getPathFromNode(document, "//whatsappdir");
 			this.msgstoreDBPath = Xml.getPathFromNode(document, "//msgstoredbpath");
+			
+			this.workdir = this.globalConfig.getOutputDir().resolve("whatsappparser");
+			Files.createDirectories(this.workdir);
 		} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
 			throw new ParserException("Could not read xml configuration", e);
 		}
-		
-		this.workdir = this.globalConfig.getOutputDir().resolve("whatsappparser");
 		
 		if(this.msgstoreDBPath==null) {
 			this.msgstoreDBPath = this.workdir.resolve("msgstore.db");
 			
 			DatabaseDumper dumper;
 			try {
-				dumper = DatabaseDumper.of(cryptFilePath, key, this.workdir);
+				dumper = DatabaseDumper.of(cryptFilePath, key, this.msgstoreDBPath);
 				dumper.setCreateExtraSqlViews(true);
 				dumper.run();
 			} catch (WhatsappBackupReaderException | SQLException e) {
@@ -87,7 +89,7 @@ public class WhatsappBackupParser implements IParser {
 		try {
 			String url = String.format("jdbc:sqlite:%s", msgstoreDBPath);
 			connection = DriverManager.getConnection(url);
-
+			
 			String query = "select messageid, chatname, sendername, type_description, text, timestamp from v_messages where chatname=? order by timestamp";
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setString(1, chatName);

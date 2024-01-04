@@ -36,6 +36,15 @@
 			<chatname>chatname</chatname>
 		</parserconfiguration>
 	</parser>
+	<parser>
+		<name>messageparser.WhatsappBackupParser</name>
+		<parserconfiguration>
+			<cryptfile>path/to/msgstore.db.crypt15</cryptfile>
+			<passphrase>1234567812345678123456781234567812345678123456781234567812345678</passphrase>
+			<chatname>Either contact name or group name</chatname>
+			<whatsappdir>Path to the Whatsapp directory where one subdirectory's name is Media</whatsappdir>
+		</parserconfiguration>
+	</parser>
 	<writers>
 		<writer>
 			<name>texcreator.TexWriterPlugin</name>

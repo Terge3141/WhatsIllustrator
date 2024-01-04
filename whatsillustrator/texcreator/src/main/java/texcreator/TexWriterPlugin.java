@@ -145,6 +145,14 @@ public class TexWriterPlugin implements IWriterPlugin {
 	public void appendImageStackMessage(ImageStackMessage msg) throws WriterException {
 		tsb.appendln("%s\\\\", formatSenderAndTime(msg));
 		
+		// check if all images exist
+		for(Path p : msg.getFilepaths()) {
+			if(!Files.exists(p) ) {
+				logger.warn("File '{}' does not exist, skipping message", p);
+				return;
+			}
+		}
+		
 		String latexSizeInfo = "height=0.1\\textheight";
 		tsb.appendln("\\begin{center}");
 		tsb.append(createLatexImageStack(msg.getFilepaths(), latexSizeInfo, msg.getSubscription()));

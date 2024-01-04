@@ -34,9 +34,10 @@ public class ImageMessageConcatenator {
 				imList.add(im);
 			} else {
 				ImageMessage ref = imList.get(0);
+				
 				if(timeDifferenceOkay(ref.getTimepoint(), im.getTimepoint())
 						&& ref.getSender().equals(im.getSender())
-						&& ref.getSubscription().equals(im.getSubscription())) {
+						&& (ref.getSubscription()==null || ref.getSubscription().equals(im.getSubscription()))) {
 					imList.add(im);
 				} else {
 					list = stackImages();
