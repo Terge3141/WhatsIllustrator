@@ -9,5 +9,6 @@ module messageparser {
 	requires org.apache.commons.text;
 	requires org.apache.logging.log4j;
 	requires signalbackupreader;
+	requires whatsappbackupreader;
 	requires java.xml;
 }

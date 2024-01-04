@@ -75,11 +75,17 @@
 
 		<!--<dependency>
 			<groupId>com.terge</groupId>
-			<artifactId>SignalBackupReader</artifactId> 
+			<artifactId>whatsappbackupreader</artifactId> 
 			<version>0.0.1-SNAPSHOT</version>
 			<scope>system</scope>
-			<systemPath>${basedir}/lib/signalbackupreader-0.0.1-SNAPSHOT-jar-with-dependencies.jar</systemPath> 
+			<systemPath>${basedir}/lib/whatsappbackupreader-0.0.1-SNAPSHOT-jar-with-dependencies.jar</systemPath>
 		</dependency>-->
+		
+		<dependency>
+			<groupId>com.github.Terge3141</groupId>
+			<artifactId>whatsappbackupreader</artifactId>
+			<version>12c71be367</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.github.Terge3141</groupId>

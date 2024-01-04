@@ -163,7 +163,7 @@ public class WhatsappBackupParserTest {
 		createMessagesEntry(con, msgid, zdt, sender, chatname, text, "TEXT");
 	}
 
-	private void createMultiMediaMessage(Connection con, Path whatsappDir, int msgid, ZonedDateTime zdt, String sender, String chatname, String text, String relFilePath, String type) throws SQLException, IOException {
+	private void createMultiMediaMessage(Connection con, Path mediaDir, int msgid, ZonedDateTime zdt, String sender, String chatname, String text, String relFilePath, String type) throws SQLException, IOException {
 		createMessagesEntry(con, msgid, zdt, sender, chatname, text, type);
 		
 		String sql = "INSERT INTO message_media (message_row_id, file_path) VALUES (?, ?);";
@@ -173,7 +173,7 @@ public class WhatsappBackupParserTest {
 		
 		pstmt.execute();
 		
-		Path filePath = whatsappDir.resolve(relFilePath);
+		Path filePath = mediaDir.resolve(relFilePath);
 		createFilePath(filePath);
 	}
 	
@@ -195,9 +195,9 @@ public class WhatsappBackupParserTest {
 	}
 
 	private WhatsappBackupParser createWhatsappBackupParser(Path tmpDir, Path sqliteDBPath, String chatName)  {
-		String xmlConfig = createXmlConfig(sqliteDBPath, chatName);
+		String xmlConfig = createXmlConfig(sqliteDBPath, getWhatsappDir(tmpDir), chatName);
 		
-		Path workDir = tmpDir.resolve("workdir");
+		Path workDir = getWorkDir(tmpDir);
 		Global global = null;
 		try {
 			global = Global.fromXmlString("<global>"
@@ -226,13 +226,14 @@ public class WhatsappBackupParserTest {
 		return ZonedDateTime.of(ldt, ZoneId.systemDefault());
 	}
 
-	private String createXmlConfig(Path sqliteDBPath, String chatName) {
+	private String createXmlConfig(Path sqliteDBPath, Path whatsappDir, String chatName) {
 		String xml = ""
 				+ "<parserconfiguration>\n"
 				+ "<backupfile>/tmp/msgstore.db.crypt15</backupfile>\n"
 				+ "<passphrase>12345678 12345678 12345678 12345678"
 				+ " 12345678 12345678 12345678 12345678</passphrase>\n"
 				+ "<sqlitedbpath>" + sqliteDBPath + "</sqlitedbpath>"
+				+ "<whatsappdir>" + whatsappDir + "</whatsappdir>"
 				+ "<chatname>" + chatName + "</chatname>"
 				+ "</parserconfiguration>\n";
 		return xml;
@@ -244,9 +245,17 @@ public class WhatsappBackupParserTest {
 		f.createNewFile();
 	}
 	
-	void checkBaseMessage(IMessage msg, String sender, ZonedDateTime zdt) {
+	private void checkBaseMessage(IMessage msg, String sender, ZonedDateTime zdt) {
 		assertNotNull(msg);
 		assertEquals(sender, msg.getSender());
 		assertEquals(zdt, msg.getTimepoint().atZone(ZoneId.systemDefault()));
+	}
+	
+	private Path getWorkDir(Path tmpDir) {
+		return tmpDir.resolve("workdir");
+	}
+	
+	private Path getWhatsappDir(Path tmpDir) {
+		return getWorkDir(tmpDir).resolve("media");
 	}
 }
