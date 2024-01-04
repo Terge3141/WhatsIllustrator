@@ -43,9 +43,12 @@
 			<passphrase>1234567812345678123456781234567812345678123456781234567812345678</passphrase>
 			<chatname>Either contact name or group name</chatname>
 			<whatsappdir>Path to the Whatsapp directory where one subdirectory's name is Media</whatsappdir>
-			<!-- path to the csv file that contains a mapping between the phone number and the actual name.
+			<!-- 
+				path to the csv file that contains a mapping between the phone number and the actual name.
 				The columns are separated by ';'
 				Example: 49151123456;Marty McFly
+				The id for yourself is -1. If not set, a default value will be used. Example how to set it:
+				-1;Me
 			-->
 			<contactscsvpath>path/to/csvfile</contactscsvpath>
 		</parserconfiguration>

@@ -84,7 +84,7 @@
 		<dependency>
 			<groupId>com.github.Terge3141</groupId>
 			<artifactId>whatsappbackupreader</artifactId>
-			<version>12c71be367</version>
+			<version>eebfb3fc2d</version>
 		</dependency>
 
 		<dependency>
