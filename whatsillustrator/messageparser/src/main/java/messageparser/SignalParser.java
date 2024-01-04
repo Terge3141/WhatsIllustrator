@@ -112,10 +112,6 @@ public class SignalParser implements IParser {
 			String text = resultSet.getString("text");
 			long messageId = resultSet.getLong("msgid");
 			
-			//text = messageId + ": " + text;	
-			
-			logger.info(timepoint);
-
 			String type = resultSet.getString("type");
 			if (type.equals(TYPE_SMS)) {
 				messages.add(new TextMessage(timepoint, sender, text));
@@ -137,7 +133,7 @@ public class SignalParser implements IParser {
 			long stickerId = rs.getLong("sticker_id");
 			
 			if(contentType.equalsIgnoreCase("image/webp")) {
-				logger.warn("Contenttype '{}' not implemented yet");
+				logger.warn("Contenttype '{}' not implemented yet", contentType);
 			}
 			else if(contentType.equalsIgnoreCase("image/jpeg")) {
 				Path dst = copyAttachment("image", "jpg", uniqueId);
@@ -150,7 +146,7 @@ public class SignalParser implements IParser {
 				messages.add(vm);
 			}
 			else {
-				logger.warn("Contenttype {} not supported");
+				logger.warn("Contenttype {} not supported", contentType);
 			}
 		}
 	}
