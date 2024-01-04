@@ -41,6 +41,7 @@
 		<parserconfiguration>
 			<cryptfile>path/to/msgstore.db.crypt15</cryptfile>
 			<passphrase>1234567812345678123456781234567812345678123456781234567812345678</passphrase>
+			<!-- if you don't know the chatname, leave it empty. A list of chats is written outputdir/whatsappparser/chats.txt -->
 			<chatname>Either contact name or group name</chatname>
 			<whatsappdir>Path to the Whatsapp directory where one subdirectory's name is Media</whatsappdir>
 			<!-- 

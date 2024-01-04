@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
@@ -29,7 +30,7 @@ import configurator.Global;
 
 public class WhatsappBackupParserTest {
 	@Test
-	void testNextMessageMultipleTexts(@TempDir Path tmpDir) throws SQLException, IOException {
+	void testNextMessageMultipleTexts(@TempDir Path tmpDir) throws SQLException, IOException, ParserException {
 		Path inputDir = tmpDir.resolve("input");
 		WhatsappBackupParserSQLMocker sm = new WhatsappBackupParserSQLMocker(inputDir);
 		Connection con = sm.getConnection();
@@ -62,7 +63,7 @@ public class WhatsappBackupParserTest {
 	}
 	
 	@Test
-	void testNextMessageMultipleChats(@TempDir Path tmpDir) throws IOException, SQLException {
+	void testNextMessageMultipleChats(@TempDir Path tmpDir) throws IOException, SQLException, ParserException {
 		Path inputDir = tmpDir.resolve("input");
 		WhatsappBackupParserSQLMocker sm = new WhatsappBackupParserSQLMocker(inputDir);
 		Connection con = sm.getConnection();
@@ -89,7 +90,7 @@ public class WhatsappBackupParserTest {
 	}
 	
 	@Test
-	void testNextMessageImage(@TempDir Path tmpDir) throws SQLException, IOException {
+	void testNextMessageImage(@TempDir Path tmpDir) throws SQLException, IOException, ParserException {
 		Path inputDir = tmpDir.resolve("input");
 		WhatsappBackupParserSQLMocker sm = new WhatsappBackupParserSQLMocker(inputDir);
 		Connection con = sm.getConnection();
@@ -116,7 +117,7 @@ public class WhatsappBackupParserTest {
 	}
 	
 	@Test
-	void testNextMessageVideo(@TempDir Path tmpDir) throws SQLException, IOException {
+	void testNextMessageVideo(@TempDir Path tmpDir) throws SQLException, IOException, ParserException {
 		Path inputDir = tmpDir.resolve("input");
 		WhatsappBackupParserSQLMocker sm = new WhatsappBackupParserSQLMocker(inputDir);
 		Connection con = sm.getConnection();
@@ -143,7 +144,7 @@ public class WhatsappBackupParserTest {
 	}
 	
 	@Test
-	void testNextMessageUnknownContentType(@TempDir Path tmpDir) throws SQLException, IOException {
+	void testNextMessageUnknownContentType(@TempDir Path tmpDir) throws SQLException, IOException, ParserException {
 		Path inputDir = tmpDir.resolve("input");
 		WhatsappBackupParserSQLMocker sm = new WhatsappBackupParserSQLMocker(inputDir);
 		Connection con = sm.getConnection();
@@ -152,10 +153,40 @@ public class WhatsappBackupParserTest {
 		Path whatsappDir = getWhatsappDir(tmpDir);
 		Files.createDirectories(whatsappDir);
 		createMultiMediaMessage(con, whatsappDir, 123, zdt, "From", "Mychat", "Text", "bla/mydoc.dat", "DAT");
+		createTextMessage(con, 124, zdt, "Frpm", "Mychat", ",mymessage");
 	
 		WhatsappBackupParser wbp = createWhatsappBackupParser(tmpDir, sm.getSqliteDBPath(), "Mychat");
 		
+		assertNotNull(wbp.nextMessage());
 		assertNull(wbp.nextMessage());
+	}
+	
+	@Test
+	void testNoMessagesInChat(@TempDir Path tmpDir) throws SQLException, IOException {
+		Path inputDir = tmpDir.resolve("input");
+		WhatsappBackupParserSQLMocker sm = new WhatsappBackupParserSQLMocker(inputDir);
+		Connection con = sm.getConnection();
+		
+		ZonedDateTime zdt1 = createZonedDT(2023, 1, 21, 23, 23, 40);
+		ZonedDateTime zdt2 = createZonedDT(2023, 1, 21, 23, 24, 41);
+		createTextMessage(con, 1, zdt1, "From1", "Mychat1", "Content1");
+		createTextMessage(con, 2, zdt2, "From2", "Mychat2", "Content2");
+		createTextMessage(con, 2, zdt2, "From2", "Mychat2", "Content3");
+		
+		con.close();
+
+		try {
+			createWhatsappBackupParser(tmpDir, sm.getSqliteDBPath(), "Mychat3");
+			fail("ParserException expected");
+		} catch (ParserException e) {
+		}
+		
+		Path chatsPath = getWorkDir(tmpDir).resolve("whatsappparser").resolve("chats.txt");
+		assertTrue(Files.exists(chatsPath));
+		
+		List<String> lines = Files.readAllLines(chatsPath);
+		assertEquals("Mychat1", lines.get(0));
+		assertEquals("Mychat2", lines.get(1));
 	}
 	
 	private void createTextMessage(Connection con, int msgid, ZonedDateTime zdt, String sender, String chatname, String text) throws SQLException {
@@ -193,7 +224,7 @@ public class WhatsappBackupParserTest {
 		pstmt.execute();
 	}
 
-	private WhatsappBackupParser createWhatsappBackupParser(Path tmpDir, Path sqliteDBPath, String chatName)  {
+	private WhatsappBackupParser createWhatsappBackupParser(Path tmpDir, Path sqliteDBPath, String chatName) throws ParserException  {
 		String xmlConfig = createXmlConfig(sqliteDBPath, getWhatsappDir(tmpDir), chatName);
 		
 		Path workDir = getWorkDir(tmpDir);
@@ -211,11 +242,7 @@ public class WhatsappBackupParserTest {
 		}
 		
 		WhatsappBackupParser wbp = new WhatsappBackupParser();
-		try {
-			wbp.init(xmlConfig, global);
-		} catch (ParserException e) {
-			fail(e);
-		}
+		wbp.init(xmlConfig, global);
 		
 		return wbp;
 	}

@@ -1,5 +1,6 @@
 package messageparser;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -134,6 +136,26 @@ public class WhatsappBackupParser implements IParser {
 			} else {
 				parseMediaMessage(timepoint, sender, type, text, messageId);
 			}
+		}
+		
+		if(messages.size()==0) {
+			String sql = "SELECT DISTINCT(chatname) cn FROM v_messages WHERE cn NOT NULL ORDER BY cn ASC";
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			
+			Path chatNamesPath = this.workdir.resolve("chats.txt");
+			FileWriter writer;
+			try {
+				writer = new FileWriter(chatNamesPath.toFile());
+				while(rs.next()) {
+					writer.append(rs.getString("cn") + "\n");
+				}
+				writer.close();
+			} catch (IOException e) {
+				throw new ParserException("No messages for chat found. Could not write chats to " + chatNamesPath);
+			}
+			
+			throw new ParserException("No messages for chat found. Available chats written to " + chatNamesPath);
 		}
 	}
 
