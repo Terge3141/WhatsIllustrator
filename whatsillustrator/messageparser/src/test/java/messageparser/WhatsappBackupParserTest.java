@@ -95,7 +95,7 @@ public class WhatsappBackupParserTest {
 		Connection con = sm.getConnection();
 		
 		ZonedDateTime zdt = createZonedDT(2023, 1, 21, 23, 23, 40);
-		Path whatsappDir = tmpDir.resolve("workdir").resolve("whatsapp");
+		Path whatsappDir = getWhatsappDir(tmpDir);
 		Files.createDirectories(whatsappDir);
 		createMultiMediaMessage(con, whatsappDir, 123, zdt, "From", "Mychat", "Text", "images/myimage.jpg", "PICTURE");
 		
@@ -109,7 +109,7 @@ public class WhatsappBackupParserTest {
 		ImageMessage im = (ImageMessage)msg;
 		
 		assertEquals("Text", im.getSubscription());
-		Path expImagePath = whatsappDir.resolve("image_123456.jpg");
+		Path expImagePath = whatsappDir.resolve("images/myimage.jpg");
 		assertEquals(expImagePath, im.getFilepath());
 		
 		assertNull(wbp.nextMessage());
@@ -122,7 +122,7 @@ public class WhatsappBackupParserTest {
 		Connection con = sm.getConnection();
 		
 		ZonedDateTime zdt = createZonedDT(2023, 1, 21, 23, 23, 40);
-		Path whatsappDir = tmpDir.resolve("workdir").resolve("whatsapp");
+		Path whatsappDir = getWhatsappDir(tmpDir);
 		Files.createDirectories(whatsappDir);
 		createMultiMediaMessage(con, whatsappDir, 123, zdt, "From", "Mychat", "Text", "videos/myvideo.mpg", "VIDEO");
 		
@@ -136,7 +136,7 @@ public class WhatsappBackupParserTest {
 		VideoMessage vm = (VideoMessage)msg;
 		
 		assertEquals("Text", vm.getSubscription());
-		Path expImagePath = whatsappDir.resolve("video_123456.mp4");
+		Path expImagePath = whatsappDir.resolve("videos/myvideo.mpg");
 		assertEquals(expImagePath, vm.getFilepath());
 		
 		assertNull(wbp.nextMessage());
@@ -144,19 +144,18 @@ public class WhatsappBackupParserTest {
 	
 	@Test
 	void testNextMessageUnknownContentType(@TempDir Path tmpDir) throws SQLException, IOException {
-		/*Path inputDir = tmpDir.resolve("input");
-		SignalParserSQLMocker sm = new SignalParserSQLMocker(inputDir);
+		Path inputDir = tmpDir.resolve("input");
+		WhatsappBackupParserSQLMocker sm = new WhatsappBackupParserSQLMocker(inputDir);
 		Connection con = sm.getConnection();
 		
 		ZonedDateTime zdt = createZonedDT(2023, 1, 21, 23, 23, 40);
-		Path signalDir = tmpDir.resolve("workdir").resolve("signalparser");
-		Files.createDirectories(signalDir);
-		createMultiMediaMessage(con, signalDir, 123, zdt, "From", "Mychat", "Text", "image/webp", 123456, 2345);
+		Path whatsappDir = getWhatsappDir(tmpDir);
+		Files.createDirectories(whatsappDir);
+		createMultiMediaMessage(con, whatsappDir, 123, zdt, "From", "Mychat", "Text", "bla/mydoc.dat", "DAT");
 	
-		WhatsappBackupParser wbp = createSignalParser(tmpDir, sm.getSqliteDBPath(), "Mychat");
+		WhatsappBackupParser wbp = createWhatsappBackupParser(tmpDir, sm.getSqliteDBPath(), "Mychat");
 		
-		assertNull(wbp.nextMessage());*/
-		fail("To be implemented");
+		assertNull(wbp.nextMessage());
 	}
 	
 	private void createTextMessage(Connection con, int msgid, ZonedDateTime zdt, String sender, String chatname, String text) throws SQLException {
@@ -227,12 +226,13 @@ public class WhatsappBackupParserTest {
 	}
 
 	private String createXmlConfig(Path sqliteDBPath, Path whatsappDir, String chatName) {
+System.out.println("createXmlConfig: " + sqliteDBPath);
 		String xml = ""
 				+ "<parserconfiguration>\n"
 				+ "<backupfile>/tmp/msgstore.db.crypt15</backupfile>\n"
 				+ "<passphrase>12345678 12345678 12345678 12345678"
 				+ " 12345678 12345678 12345678 12345678</passphrase>\n"
-				+ "<sqlitedbpath>" + sqliteDBPath + "</sqlitedbpath>"
+				+ "<msgstoredbpath>" + sqliteDBPath + "</msgstoredbpath>"
 				+ "<whatsappdir>" + whatsappDir + "</whatsappdir>"
 				+ "<chatname>" + chatName + "</chatname>"
 				+ "</parserconfiguration>\n";
@@ -255,7 +255,8 @@ public class WhatsappBackupParserTest {
 		return tmpDir.resolve("workdir");
 	}
 	
+	// Directory where one of the subdirectories is "Media"
 	private Path getWhatsappDir(Path tmpDir) {
-		return getWorkDir(tmpDir).resolve("media");
+		return getWorkDir(tmpDir).resolve("whatsapp");
 	}
 }

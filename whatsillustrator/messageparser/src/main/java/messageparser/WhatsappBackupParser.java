@@ -60,16 +60,17 @@ public class WhatsappBackupParser implements IParser {
 			key = keyStr.getBytes();
 			
 			this.chatName = Xml.getTextFromNode(document, "//chatname");
-			this.whatsappdir = Xml.getPathFromNode(document, "//whatsappsdir");
+			this.whatsappdir = Xml.getPathFromNode(document, "//whatsappdir");
 			this.msgstoreDBPath = Xml.getPathFromNode(document, "//msgstoredbpath");
 		} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
 			throw new ParserException("Could not read xml configuration", e);
 		}
 		
 		this.workdir = this.globalConfig.getOutputDir().resolve("whatsappparser");
-		this.msgstoreDBPath = this.workdir.resolve("msgstore.db");
 		
 		if(this.msgstoreDBPath==null) {
+			this.msgstoreDBPath = this.workdir.resolve("msgstore.db");
+			
 			DatabaseDumper dumper;
 			try {
 				dumper = DatabaseDumper.of(cryptFilePath, key, this.workdir);
@@ -100,27 +101,29 @@ public class WhatsappBackupParser implements IParser {
 
 	@Override
 	public IMessage nextMessage() {
-		// TODO Auto-generated method stub
-		return null;
+		if(messageIndex>=messages.size()) {
+			return null;
+		}
+		
+		IMessage msg = messages.get(messageIndex);
+		messageIndex++;
+		return msg;
 	}
 
 	@Override
 	public String getNameSuggestion() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Whatsapp " + this.chatName;
 	}
 	
 	private void parseMessages() throws SQLException, ParserException {
 		while (resultSet.next()) {
-			long unixtime = resultSet.getLong("date");
+			long unixtime = resultSet.getLong("timestamp");
 			LocalDateTime timepoint = Instant.ofEpochMilli(unixtime).atZone(ZoneId.systemDefault()).toLocalDateTime();
-			String sender = resultSet.getString("sender");
+			String sender = resultSet.getString("sendername");
 			String text = resultSet.getString("text");
-			long messageId = resultSet.getLong("msgid");
+			long messageId = resultSet.getLong("messageid");
 			
-			logger.info(timepoint);
-
-			String type = resultSet.getString("type");
+			String type = resultSet.getString("type_description");
 			if (type.equals(TYPE_TEXT)) {
 				messages.add(new TextMessage(timepoint, sender, text));
 			} else {
@@ -142,7 +145,8 @@ public class WhatsappBackupParser implements IParser {
 				this.messages.add(im);
 			}
 			else if(type.equalsIgnoreCase(TYPE_VIDEO)) {
-				
+				VideoMessage vm = new VideoMessage(timepoint, sender, this.whatsappdir.resolve(filePath), text);
+				this.messages.add(vm);
 			}
 			else {
 				logger.warn("Type '{}' not supported", type);
