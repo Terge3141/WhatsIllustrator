@@ -9,7 +9,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-	import java.nio.file.Path;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -210,6 +211,51 @@ public class WhatsappBackupParserTest {
 		assertTrue(msg instanceof TextMessage);
 	}
 	
+	@Test
+	void testTwoMediaDirs(@TempDir Path tmpDir) throws SQLException, IOException, ParserException {
+		Path inputDir = tmpDir.resolve("input");
+		WhatsappBackupParserSQLMocker sm = new WhatsappBackupParserSQLMocker(inputDir);
+		Connection con = sm.getConnection();
+		
+		String chatName = "MyChat";
+		
+		Path whatsappDir1 = tmpDir.resolve("wa1");
+		Path whatsappDir2 = tmpDir.resolve("wa2");
+		
+		Files.createDirectories(whatsappDir1);
+		Files.createDirectories(whatsappDir2);
+		
+		String additionalTag = "<whatsappdir>" + whatsappDir2 + "</whatsappdir>";
+		String xmlConfig = createXmlConfig(sm.getSqliteDBPath(), whatsappDir1, chatName, additionalTag);
+		
+		ZonedDateTime zdt = createZonedDT(2023, 1, 21, 23, 23, 40);
+		createMultiMediaMessage(con, whatsappDir1, 123, zdt, "From", chatName, "Text", "images/myimage1.jpg", "PICTURE");
+		createMultiMediaMessage(con, whatsappDir2, 123, zdt, "From", chatName, "Text", "images/myimage2.jpg", "PICTURE");
+		
+		con.close();
+		
+		Path workDir = getWorkDir(tmpDir);
+		Global global = initGlobal(workDir);
+		
+		WhatsappBackupParser wbp = new WhatsappBackupParser();
+		wbp.init(xmlConfig, global);
+		
+		IMessage msg;
+		ImageMessage im;
+		
+		msg = wbp.nextMessage();
+		checkBaseMessage(msg, "From", zdt);
+		assertTrue(msg instanceof ImageMessage);
+		im = (ImageMessage)msg;
+		assertEquals(whatsappDir1.resolve("images/myimage1.jpg"), im.getFilepath());
+		
+		msg = wbp.nextMessage();
+		checkBaseMessage(msg, "From", zdt);
+		assertTrue(msg instanceof ImageMessage);
+		im = (ImageMessage)msg;
+		assertEquals(whatsappDir2.resolve("images/myimage2.jpg"), im.getFilepath());
+	}
+	
 	private void createTextMessage(Connection con, int msgid, ZonedDateTime zdt, String sender, String chatname, String text) throws SQLException {
 		createMessagesEntry(con, msgid, zdt, sender, chatname, text, "TEXT");
 	}
@@ -251,11 +297,19 @@ public class WhatsappBackupParserTest {
 		String xmlConfig = createXmlConfig(sqliteDBPath, getWhatsappDir(tmpDir), chatName);
 		
 		Path workDir = getWorkDir(tmpDir);
-		Global global = null;
+		Global global = initGlobal(workDir);
+		
+		WhatsappBackupParser wbp = new WhatsappBackupParser();
+		wbp.init(xmlConfig, global);
+		
+		return wbp;
+	}
+
+	private Global initGlobal(Path outputDir) {
 		try {
-			global = Global.fromXmlString("<global>"
+			return Global.fromXmlString("<global>"
 					+ "<outputdir>"
-					+ workDir
+					+ outputDir
 					+ "</outputdir>"
 					+ "<locale>en</locale>"
 					+ "</global>");
@@ -264,10 +318,8 @@ public class WhatsappBackupParserTest {
 			fail(e);
 		}
 		
-		WhatsappBackupParser wbp = new WhatsappBackupParser();
-		wbp.init(xmlConfig, global);
-		
-		return wbp;
+		// this should not happen due to fail(e) in catch
+		return null;
 	}
 	
 	private ZonedDateTime createZonedDT(int year, int month, int dayOfMonth, int hour, int minute, int second) {
@@ -275,7 +327,7 @@ public class WhatsappBackupParserTest {
 		return ZonedDateTime.of(ldt, ZoneId.systemDefault());
 	}
 
-	private String createXmlConfig(Path sqliteDBPath, Path whatsappDir, String chatName) {
+	private String createXmlConfig(Path sqliteDBPath, Path whatsappDir, String chatName, String additionalTags) {
 		String xml = ""
 				+ "<parserconfiguration>"
 				+ "<backupfile>/tmp/msgstore.db.crypt15</backupfile>"
@@ -283,9 +335,18 @@ public class WhatsappBackupParserTest {
 				+ " 12345678 12345678 12345678 12345678</passphrase>"
 				+ "<msgstoredbpath>" + sqliteDBPath + "</msgstoredbpath>"
 				+ "<whatsappdir>" + whatsappDir + "</whatsappdir>"
-				+ "<chatname>" + chatName + "</chatname>"
-				+ "</parserconfiguration>";
+				+ "<chatname>" + chatName + "</chatname>";
+		
+		if(additionalTags != null) {
+			xml += additionalTags;
+		}
+		
+		xml += "</parserconfiguration>";
 		return xml;
+	}
+	
+	private String createXmlConfig(Path sqliteDBPath, Path whatsappDir, String chatName) {
+		return createXmlConfig(sqliteDBPath, whatsappDir, chatName, null);
 	}
 	
 	private void createFilePath(Path filePath) throws IOException {

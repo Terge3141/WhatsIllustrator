@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -22,6 +23,8 @@ import javax.xml.xpath.XPathExpressionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import configurator.Global;
@@ -43,7 +46,7 @@ public class WhatsappBackupParser implements IParser {
 	private Path contactsCsvPath;
 	private Path workdir;
 	// Directory where one of the subdirectories is "Media"
-	private Path whatsappdir;
+	private List<Path> whatsappdirs;
 	
 	private Connection connection;
 	private ResultSet resultSet;
@@ -64,9 +67,19 @@ public class WhatsappBackupParser implements IParser {
 			key = keyStr.getBytes();
 			
 			this.chatName = Xml.getTextFromNode(document, "//chatname");
-			this.whatsappdir = Xml.getPathFromNode(document, "//whatsappdir");
 			this.msgstoreDBPath = Xml.getPathFromNode(document, "//msgstoredbpath");
 			this.contactsCsvPath = Xml.getPathFromNode(document, "//contactscsvpath");
+			
+			this.whatsappdirs = new ArrayList<Path>();
+			NodeList nodes = Xml.selectNodes(document, "//whatsappdir");
+			for(int i=0; i<nodes.getLength(); i++) {
+				Node node = nodes.item(i);
+				String str = node.getTextContent();
+				
+				if(str!=null) {
+					this.whatsappdirs.add(Paths.get(str));
+				}
+			}
 			
 			this.workdir = this.globalConfig.getOutputDir().resolve("whatsappparser");
 			Files.createDirectories(this.workdir);
@@ -168,21 +181,40 @@ public class WhatsappBackupParser implements IParser {
 		while(rs.next()) {
 			String filePath = rs.getString("file_path");
 			if(filePath==null) {
-				logger.warn("No filepath for messageId '{}' specified, skipping message", messageId);
+				logger.warn("No file_path for messageId '{}' specified, skipping message", messageId);
+				continue;
+			}
+			
+			Path absFilePath = searchFile(filePath);
+			if(absFilePath==null) {
+				logger.warn("Relative file_path '{}' not found in the whatsapp directories, skipping message", filePath);
 				continue;
 			}
 			
 			if(type.equalsIgnoreCase(TYPE_PICTURE)) {
-				ImageMessage im = new ImageMessage(timepoint, sender, this.whatsappdir.resolve(filePath), text);
+				ImageMessage im = new ImageMessage(timepoint, sender, absFilePath, text);
 				this.messages.add(im);
 			}
 			else if(type.equalsIgnoreCase(TYPE_VIDEO)) {
-				VideoMessage vm = new VideoMessage(timepoint, sender, this.whatsappdir.resolve(filePath), text);
+				VideoMessage vm = new VideoMessage(timepoint, sender, absFilePath, text);
 				this.messages.add(vm);
 			}
 			else {
 				logger.warn("Type '{}' not supported", type);
 			}
 		}
+	}
+	
+	// searches for a file with a given relPath in whatsappdirs-list
+	// returns the absolute path if file is found, null if not found
+	private Path searchFile(String relPath) {
+		for(Path wadir : this.whatsappdirs) {
+			Path p = wadir.resolve(relPath);
+			if(Files.exists(p)) {
+				return p;
+			}
+		}
+		
+		return null;
 	}
 }
