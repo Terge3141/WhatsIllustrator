@@ -48,6 +48,9 @@ public class WhatsappBackupParser implements IParser {
 	// Directory where one of the subdirectories is "Media"
 	private List<Path> whatsappdirs;
 	
+	private LocalDateTime dtmin;
+	private LocalDateTime dtmax;
+	
 	private Connection connection;
 	private ResultSet resultSet;
 	private List<IMessage> messages;
@@ -69,6 +72,9 @@ public class WhatsappBackupParser implements IParser {
 			this.chatName = Xml.getTextFromNode(document, "//chatname");
 			this.msgstoreDBPath = Xml.getPathFromNode(document, "//msgstoredbpath");
 			this.contactsCsvPath = Xml.getPathFromNode(document, "//contactscsvpath");
+			
+			this.dtmin = str2Dt(Xml.getTextFromNode(document, "//mindate"));
+			this.dtmax = str2Dt(Xml.getTextFromNode(document, "//maxdate"));
 			
 			this.whatsappdirs = new ArrayList<Path>();
 			NodeList nodes = Xml.selectNodes(document, "//whatsappdir");
@@ -143,6 +149,14 @@ public class WhatsappBackupParser implements IParser {
 			String text = resultSet.getString("text");
 			long messageId = resultSet.getLong("messageid");
 			
+			if(dtmin!=null && timepoint.isBefore(dtmin)) {
+				continue;
+			}
+			
+			if(dtmax!=null && timepoint.isAfter(dtmax)) {
+				continue;
+			}
+			
 			String type = resultSet.getString("type_description");
 			if (type.equals(TYPE_TEXT)) {
 				messages.add(new TextMessage(timepoint, sender, text));
@@ -165,10 +179,10 @@ public class WhatsappBackupParser implements IParser {
 				}
 				writer.close();
 			} catch (IOException e) {
-				throw new ParserException("No messages for chat found. Could not write chats to " + chatNamesPath);
+				throw new ParserException("No messages for chat and criteria found. Could not write chats to " + chatNamesPath);
 			}
 			
-			throw new ParserException("No messages for chat found. Available chats written to " + chatNamesPath);
+			throw new ParserException("No messages for chat and criteria found. Available chats written to " + chatNamesPath);
 		}
 	}
 
@@ -200,9 +214,17 @@ public class WhatsappBackupParser implements IParser {
 				this.messages.add(vm);
 			}
 			else {
-				logger.warn("Type '{}' not supported", type);
+				logger.warn("Type '{}' not supported, messageId '{}'", type, messageId);
 			}
 		}
+	}
+	
+	private LocalDateTime str2Dt(String dateStr) {
+		if(dateStr==null) {
+			return null;
+		}
+		
+		return LocalDateTime.parse(dateStr);
 	}
 	
 	// searches for a file with a given relPath in whatsappdirs-list

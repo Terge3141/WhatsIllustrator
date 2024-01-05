@@ -4,13 +4,11 @@
 		<debugdir>debugdirectory</debugdir>
 		<locale>en</locale>
 	</global>
-	<!-- comment one of the parsers -->
-	<!-- For Telegramparser: Leave the chatname empty to get a list of all available 
-		chats -->
 	<parser>
 		<name>messageparser.TelegramParser</name>
 		<parserconfiguration>
 			<messagepath>path to json file</messagepath>
+			<!-- Leave the chatname empty to get a list of all available chats -->
 			<chatname></chatname>
 			<!-- Set this to true if the json file contains the chat only. Used mainly 
 				for debugging. If unsure set to false -->
@@ -52,6 +50,9 @@
 				-1;Me
 			-->
 			<contactscsvpath>path/to/csvfile</contactscsvpath>
+			<!-- Uncomment the next lines if you only want messages with a minimal or maximal date, respectively -->
+			<!-- <mindate>YYYY-MM-DDThh:mm:ss</mindate> -->
+			<!-- <maxdate>YYYY-MM-DDThh:mm:ss</maxdate> -->
 		</parserconfiguration>
 	</parser>
 	<writers>
