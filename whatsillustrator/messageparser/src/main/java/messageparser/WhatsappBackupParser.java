@@ -167,6 +167,11 @@ public class WhatsappBackupParser implements IParser {
 		
 		while(rs.next()) {
 			String filePath = rs.getString("file_path");
+			if(filePath==null) {
+				logger.warn("No filepath for messageId '{}' specified, skipping message", messageId);
+				continue;
+			}
+			
 			if(type.equalsIgnoreCase(TYPE_PICTURE)) {
 				ImageMessage im = new ImageMessage(timepoint, sender, this.whatsappdir.resolve(filePath), text);
 				this.messages.add(im);

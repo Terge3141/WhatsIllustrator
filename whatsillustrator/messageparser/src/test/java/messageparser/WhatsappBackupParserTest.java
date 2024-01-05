@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
+	import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -189,6 +189,27 @@ public class WhatsappBackupParserTest {
 		assertEquals("Mychat2", lines.get(1));
 	}
 	
+	@Test
+	void testFilePathNull(@TempDir Path tmpDir) throws SQLException, IOException, ParserException {
+		Path inputDir = tmpDir.resolve("input");
+		WhatsappBackupParserSQLMocker sm = new WhatsappBackupParserSQLMocker(inputDir);
+		Connection con = sm.getConnection();
+		
+		ZonedDateTime zdt = createZonedDT(2023, 1, 21, 23, 23, 40);
+		Path whatsappDir = getWhatsappDir(tmpDir);
+		Files.createDirectories(whatsappDir);
+		createTextMessage(con, 122, zdt, "From", "Mychat", "MyMessage");
+		createMultiMediaMessage(con, whatsappDir, 123, zdt, "From", "Mychat", "Text", null, "VIDEO");
+		
+		con.close();
+		
+		WhatsappBackupParser wbp = createWhatsappBackupParser(tmpDir, sm.getSqliteDBPath(), "Mychat");
+		
+		IMessage msg = wbp.nextMessage();
+		checkBaseMessage(msg, "From", zdt);
+		assertTrue(msg instanceof TextMessage);
+	}
+	
 	private void createTextMessage(Connection con, int msgid, ZonedDateTime zdt, String sender, String chatname, String text) throws SQLException {
 		createMessagesEntry(con, msgid, zdt, sender, chatname, text, "TEXT");
 	}
@@ -203,8 +224,10 @@ public class WhatsappBackupParserTest {
 		
 		pstmt.execute();
 		
-		Path filePath = mediaDir.resolve(relFilePath);
-		createFilePath(filePath);
+		if(relFilePath != null) {
+			Path filePath = mediaDir.resolve(relFilePath);
+			createFilePath(filePath);
+		}
 	}
 	
 	private void createMessagesEntry(Connection con, int msgid, ZonedDateTime zdt, String sender, String chatname, String text,
