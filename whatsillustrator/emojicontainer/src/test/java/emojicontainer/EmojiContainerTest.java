@@ -40,7 +40,7 @@ class EmojiContainerTest {
 	}
 	
 	@Test
-	void testEmojiNotInDB() throws IOException {
+	void testEmojiNotInDB() {
 		String in = uc(0x2f466);
 		check(in, in);
 	}
@@ -61,6 +61,12 @@ class EmojiContainerTest {
 		
 		String actual = ec.replaceEmojis(in, x -> bracket(x));
 		assertEquals(expected, actual);
+	}
+	
+	@Test
+	void develop() throws IOException {
+		EmojiContainerV2 ec = new EmojiContainerV2();
+		fail();
 	}
 	
 	private String bracket(String str) {
