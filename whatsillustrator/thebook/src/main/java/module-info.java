@@ -8,4 +8,5 @@ module thebook {
 	requires messageparser;
 	requires org.apache.logging.log4j;
 	requires java.xml;
+	requires java.scripting;
 }
