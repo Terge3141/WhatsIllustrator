@@ -1,8 +1,8 @@
 package imagematcher;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -31,7 +31,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import helper.FileHandler;
@@ -71,7 +70,7 @@ public class ImageMatcher {
 	}
 	
 	public static ImageMatcher fromXmlFile(Path path) throws IOException {
-		return fromXmlString(Misc.readAllText(path));
+		return fromXmlString(Files.readString(path));
 	}
 
 	public String toXmlString() throws IOException, ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException {

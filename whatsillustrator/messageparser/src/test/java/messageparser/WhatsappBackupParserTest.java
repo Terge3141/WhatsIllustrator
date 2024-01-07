@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -439,10 +438,6 @@ public class WhatsappBackupParserTest {
 		
 		xml += "</parserconfiguration>";
 		return xml;
-	}
-	
-	private String createXmlConfig(Path sqliteDBPath, Path whatsappDir, String chatName) {
-		return createXmlConfig(sqliteDBPath, whatsappDir, chatName, null);
 	}
 	
 	private void createFilePath(Path filePath) throws IOException {

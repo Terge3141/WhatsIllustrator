@@ -118,7 +118,7 @@ class TexWriterPluginTest {
 	
 	private void checkFile(Path filePath, String contentExp) throws IOException {
 		assertTrue(filePath.toFile().exists());
-		String contentActual = Misc.readAllText(filePath);
+		String contentActual = Files.readString(filePath);
 		assertEquals(contentExp, contentActual.trim());
 	}
 

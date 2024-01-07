@@ -19,22 +19,6 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 public class Misc {
 
 	/**
-	 * Return the content of a given file to a string.
-	 * @param path The path of the file
-	 * @return The content of the file
-	 * @throws IOException
-	 */
-	public static String readAllText(Path path) throws IOException {
-		TextStringBuilder tsb = new TextStringBuilder();
-		List<String> lines = Files.readAllLines(path);
-		for (String line : lines) {
-			tsb.appendln(line);
-		}
-
-		return tsb.toString();
-	}
-
-	/**
 	 * Writes as string to a given file
 	 * @param path Path of the file
 	 * @param text Text to be written

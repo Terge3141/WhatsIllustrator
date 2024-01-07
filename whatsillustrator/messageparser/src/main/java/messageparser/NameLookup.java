@@ -1,6 +1,7 @@
 package messageparser;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Hashtable;
 
@@ -44,7 +45,7 @@ public class NameLookup {
 	}
 
 	public static NameLookup fromXmlFile(Path path) throws IOException   {
-		return fromXmlString(Misc.readAllText(path));
+		return fromXmlString(Files.readString(path));
 	}
 
 	public void add(String oldName, String newName) {

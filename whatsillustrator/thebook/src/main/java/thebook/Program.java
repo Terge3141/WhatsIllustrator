@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -131,7 +132,7 @@ public class Program {
 			return;
 		}
 		
-		String xml = Misc.readAllText(Paths.get(xmlConfigFile));
+		String xml = Files.readString(Paths.get(xmlConfigFile));
 
 		
 		long start = System.currentTimeMillis();
