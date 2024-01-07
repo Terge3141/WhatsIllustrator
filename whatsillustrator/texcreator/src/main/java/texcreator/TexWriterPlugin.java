@@ -153,7 +153,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 			}
 		}
 		
-		String latexSizeInfo = "height=0.1\\textheight";
+		String latexSizeInfo = "height=\\imageheight";
 		tsb.appendln("\\begin{center}");
 		tsb.append(createLatexImageStack(msg.getFilepaths(), latexSizeInfo, msg.getSubscription()));
 		tsb.appendln("\\end{center}");
@@ -274,7 +274,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 		}
 		
 		TextStringBuilder tsb = new TextStringBuilder();
-		tsb.appendln("\\includegraphics[height=0.1\\textheight]{%s}\\\\", relDst);
+		tsb.appendln("\\includegraphics[height=\\imageheight]{%s}\\\\", relDst);
 		
 		if(subscription==null) {
 			subscription="";
