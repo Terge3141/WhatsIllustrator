@@ -80,6 +80,8 @@ libraries/Log4j-events.xsd
 libraries/Log4j-levels.xsd
 
 .settings
+.classpath
+.project
 
 .ownconfig
 
