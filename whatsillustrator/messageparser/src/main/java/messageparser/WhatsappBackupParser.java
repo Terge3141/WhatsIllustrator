@@ -65,7 +65,6 @@ public class WhatsappBackupParser implements IParser {
 			this.globalConfig = globalConfig;
 			this.cryptFilePath = Xml.getPathFromNode(document, "//cryptfile");
 			
-			// TODO trim keyStr
 			String keyStr = Xml.getTextFromNode(document, "//passphrase");
 			key = keyStr.getBytes();
 			

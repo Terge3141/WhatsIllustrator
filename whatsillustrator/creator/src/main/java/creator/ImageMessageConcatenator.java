@@ -69,11 +69,7 @@ public class ImageMessageConcatenator {
 			String sender = imList.get(0).getSender();
 			String subscription = imList.get(0).getSubscription();
 			
-			// TODO use streams?
-			List<Path> filepaths = new ArrayList<Path>();
-			for (ImageMessage im : imList) {
-				filepaths.add(im.getFilepath());
-			}
+			List<Path> filepaths = imList.stream().map(x -> x.getFilepath()).toList();
 			
 			ImageStackMessage ism = new ImageStackMessage(tp, sender, filepaths, subscription);
 			list.add(ism);
