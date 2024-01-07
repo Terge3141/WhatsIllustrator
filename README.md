@@ -11,7 +11,7 @@ First, clone the repository using git (recommended):
 git clone --recurse-submodules https://github.com/Terge3141/WhatsIllustrator.git
 ``` 
 
-Make sure that *Java 11* and *maven* is installed
+Make sure that *Java 17* and *maven* is installed
 
 Build the package:
 ```bash
