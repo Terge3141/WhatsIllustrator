@@ -45,9 +45,9 @@ public class EmojiContainer {
 	 * Replaces The emojis for a given string.
 	 * 
 	 * @param str The string to replaced
-	 * @param emojiFormatFunction The lambda function that is when an emoji is
+	 * @param emojiFormatFunction The lambda function that is called when an emoji is
 	 * found. The unicode(s) are passed to the function
-	 * and the formatted code is returned.
+	 * and the formatted code should be returned.
 	 * @return The replaced string
 	 */
 	public String replaceEmojis(String str, Function<String, String> emojiFormatFunction) {
