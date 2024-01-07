@@ -3,6 +3,7 @@ package messageparser;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
@@ -64,7 +65,7 @@ class TelegramParserTest {
 		
 		json = "{" + json + "}";
 		
-		Misc.writeAllText(jsonPath, json);
+		Files.writeString(jsonPath, json);
 		
 		TelegramParser tp = TelegramMessageMocker.createTelegramParser(jsonPath, "chat2");
 		

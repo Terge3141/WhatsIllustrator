@@ -65,6 +65,7 @@ public class WhatsappBackupParser implements IParser {
 			this.globalConfig = globalConfig;
 			this.cryptFilePath = Xml.getPathFromNode(document, "//cryptfile");
 			
+			// passphrase my contain white spaces, those will be deleted by whatsappbackupreader
 			String keyStr = Xml.getTextFromNode(document, "//passphrase");
 			key = keyStr.getBytes();
 			

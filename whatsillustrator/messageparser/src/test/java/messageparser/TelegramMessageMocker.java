@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -38,7 +39,7 @@ public class TelegramMessageMocker {
 	
 	public TelegramParser createTelegramParser(String chatName) throws IOException {
 		String wrappedJson = wrapAll(chatName, json);
-		Misc.writeAllText(getJsonPath(), wrappedJson);
+		Files.writeString(getJsonPath(), wrappedJson);
 		
 		this.xmlConfig = createXmlConfig(chatName);
 		
@@ -47,7 +48,7 @@ public class TelegramMessageMocker {
 	
 	public TelegramParser createTelegramParser(String chatName, LocalDateTime dtmin, LocalDateTime dtmax) throws IOException {
 		String wrappedJson = wrapAll(chatName, json);
-		Misc.writeAllText(getJsonPath(), wrappedJson);
+		Files.writeString(getJsonPath(), wrappedJson);
 		
 		this.xmlConfig = createXmlConfig(getJsonPath(), chatName, dtmin, dtmax);
 		

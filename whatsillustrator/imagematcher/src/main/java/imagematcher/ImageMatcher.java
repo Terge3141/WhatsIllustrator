@@ -97,7 +97,7 @@ public class ImageMatcher {
 
 	public void toXmlFile(Path path) throws IOException, ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException {
 		logger.info("Writing match file to '{}'", path);
-		Misc.writeAllText(path, toXmlString());
+		Files.writeString(path, toXmlString());
 	}
 	
 	public void toXmlFile() throws IOException, ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException {

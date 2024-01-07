@@ -1,12 +1,7 @@
 package helper;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
-import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
@@ -18,17 +13,6 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
 public class Misc {
 
-	/**
-	 * Writes as string to a given file
-	 * @param path Path of the file
-	 * @param text Text to be written
-	 * @throws IOException
-	 */
-	public static void writeAllText(Path path, String text) throws IOException {
-		PrintWriter writer = new PrintWriter(path.toFile());
-		writer.print(text);
-		writer.close();
-	}
 
 	public static boolean isNullOrEmpty(String str) {
 		if (str == null) {

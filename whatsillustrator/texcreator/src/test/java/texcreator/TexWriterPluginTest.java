@@ -66,7 +66,7 @@ class TexWriterPluginTest {
 	void testImage(@TempDir Path tmpDir) throws IOException {
 		TexWriterPluginDirMocker dm = new TexWriterPluginDirMocker(tmpDir);
 		Path imagePath = dm.getInputDir().resolve("image.jpg");
-		Misc.writeAllText(imagePath, "DUMMYIMAGETEXT12345");
+		Files.writeString(imagePath, "DUMMYIMAGETEXT12345");
 
 		String text = "This is an image";
 		

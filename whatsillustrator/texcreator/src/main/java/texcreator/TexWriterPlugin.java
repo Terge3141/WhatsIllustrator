@@ -101,7 +101,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 
 		logger.info("Writing tex file to '{}'", texOutputPath.toAbsolutePath());
 		try {
-			Misc.writeAllText(texOutputPath, tsb.toString());
+			Files.writeString(texOutputPath, tsb.toString());
 		} catch (IOException ioe) {
 			throw new WriterException(ioe);
 		}

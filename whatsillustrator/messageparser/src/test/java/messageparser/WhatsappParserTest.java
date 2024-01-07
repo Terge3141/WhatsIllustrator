@@ -132,7 +132,7 @@ class WhatsappParserTest {
 		Path chatDir = createChatDir(tmpDir);
 		createChatMessage(chatDir, msgTxt);
 		Path configDir = createConfigDir(tmpDir);
-		Misc.writeAllText(configDir.resolve("namelookup.xml"), xmlNameLookup);
+		Files.writeString(configDir.resolve("namelookup.xml"), xmlNameLookup);
 		
 		String xmlConfig = getXmlConfig(tmpDir);
 		WhatsappParser wap = new WhatsappParser();
@@ -186,7 +186,7 @@ class WhatsappParserTest {
 
 	private Path createChatMessage(Path chatDir, String msg) throws IOException {
 		Path chatFile = chatDir.resolve("WhatsApp Chat with Terge.txt");
-		Misc.writeAllText(chatFile, msg);
+		Files.writeString(chatFile, msg);
 		
 		return chatFile;
 	}
