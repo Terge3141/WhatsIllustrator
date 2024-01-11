@@ -82,11 +82,11 @@ public class TexWriterPlugin implements IWriterPlugin {
 
 		try {
 			if (this.header == null) {
-				this.header = getRessourceAsString("header.tex.tmpl");
+				this.header = getRessourceAsString("/texcreator/header.tex.tmpl");
 			}
 
 			if (this.footer == null) {
-				this.footer = getRessourceAsString("footer.tex.tmpl");
+				this.footer = getRessourceAsString("/texcreator/footer.tex.tmpl");
 			}
 		} catch (IOException ioe) {
 			throw new WriterException(ioe);

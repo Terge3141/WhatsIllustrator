@@ -8,37 +8,31 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import helper.Misc;
+import net.fellbaum.jemoji.Emoji;
+import net.fellbaum.jemoji.EmojiManager;
+import net.fellbaum.jemoji.IndexedEmoji;
 
 public class EmojiContainer {
-	private List<String> emojiList;
 	
 	private static final String SEPERATOR = "_";
 	private final String EMOJIPREFIX = "emoji_u";
 	private static Logger logger = LogManager.getLogger(EmojiContainer.class);
-	
-	private int tokenMax;
+
+	private Map<Integer, String> softbankMap;
 	
 	public EmojiContainer() throws IOException {
-		this.emojiList = readEmojiList();
-		
-		Iterator<String> it = this.emojiList.iterator();
-
-		this.tokenMax = 0;
-		while (it.hasNext()) {
-			String str = it.next();
-			this.tokenMax = Math.max(this.tokenMax, str.split(SEPERATOR).length);
-		}
-
-		this.tokenMax++;
+		this.softbankMap = readSoftBankList();
 	}
 	
 	/**
@@ -51,154 +45,114 @@ public class EmojiContainer {
 	 * @return The replaced string
 	 */
 	public String replaceEmojis(String str, Function<String, String> emojiFormatFunction) {
-		List<Token> tokens = getTokens(str);
-
-		TextStringBuilder tsb = new TextStringBuilder();
-		for (Token token : tokens) {
-			if (token.isEmoji()) {
-				tsb.append(emojiFormatFunction.apply(token.getString()));
-			} else {
-				tsb.append(token.getString());
-			}
-		}
-
-		return tsb.toString();
+		String buf = str;
+		buf = replaceSoftBankChars(buf);
+		buf = EmojiManager.replaceAllEmojis(buf, x -> replaceEmoji(x, emojiFormatFunction));
+		return buf;
 	}
 	
 	public List<Token> getTokens(String str) {
+		List<IndexedEmoji> emojis = EmojiManager.extractEmojisInOrderWithIndex(str);
+		
 		List<Token> tokens = new ArrayList<Token>();
-		
-		if(str==null) {
-			return tokens;
+		int start = 0;
+		for (IndexedEmoji indexedEmoji : emojis) {
+			int index = indexedEmoji.getCharIndex();
+			// normal string
+			if(index > start) {
+				tokens.add(new Token(str.substring(start, index), false));
+			}
+			
+			String emojiCode = replaceEmoji(indexedEmoji.getEmoji(), x -> x);
+			
+			tokens.add(new Token(emojiCode, true));
+			
+			start = index + indexedEmoji.getEmoji().getEmoji().length();
 		}
 		
-		int index = 0;
-		while (index < str.length()) {
-			index = parseChars(str, index, tokens);
+		if(start < str.length()) {
+			tokens.add(new Token(str.substring(start), false));
 		}
-
+		
 		return tokens;
 	}
 	
 	public Path copyEmoji(String id, Path dst) throws IOException {
-		String filename = this.EMOJIPREFIX + id + ".png";
+		String filename = getFilename(id);
 		if(Files.isDirectory(dst)) {
 			dst = dst.resolve(filename);
 		}
 		
+		System.out.println(filename);
+		String str = filename.substring(7, filename.length() - 4);
+		StringTokenizer st = new StringTokenizer(str, "_");
+		String emoji = "";
+		while(st.hasMoreTokens()) {
+			emoji = emoji + fromUtf32toString(Integer.parseInt(st.nextToken(), 16));
+		}
+				
+		System.out.println(emoji);
+		
 		InputStream in = this.getClass().getResourceAsStream("/" + filename);
+		// emoji does not exist, use question mark instead
+		if(in==null) {
+			in = this.getClass().getResourceAsStream("/" + getFilename("2753"));
+		}
+		
 		Files.copy(in, dst, StandardCopyOption.REPLACE_EXISTING);
 		
 		return dst;
 	}
-
-	private int parseChars(String str, int index, List<Token> tokens) {
-		return parseChars(str, index, tokens, null, 0);
+	
+	private String getFilename(String id) {
+		return this.EMOJIPREFIX + id + ".png";
 	}
-
-	/**
-	 * Recursively parses one or more unicode characters starting at index
-	 * 
-	 * @param str   String to be parsed
-	 * @param index start index
-	 * @param tsb   StringBuilder were the result is written to
-	 * @param last  Unicode from last character, null for iteration cnt 0
-	 * @param cnt   Iteration cnt, starting at 0
-	 * @return index of the next character to be parsed, -1 if unicode chain was not
-	 *         found or end of string was reached
-	 */
-	private int parseChars(String str, int index, List<Token> tokens, String last, int cnt) {
-		if (cnt == tokenMax) {
-			return -1;
-		}
-
-		if (index == str.length()) {
-			return -1;
-		}
-
-		int codePoint = Character.codePointAt(str, index);
-		int charCnt = Character.charCount(codePoint);
-		String strHex = String.format("%04x", codePoint);
-
-		String suggestion = strHex;
-		if (last != null) {
-			suggestion = last + SEPERATOR + suggestion;
-		}
-
-		int result = parseChars(str, index + charCnt, tokens, suggestion, cnt + 1);
-		if (result == -1) {
-			if (Misc.listContains(emojiList, suggestion)) {
-				tokens.add(new Token(suggestion, true));
-				return index + charCnt;
-			} else {
-				if (cnt == 0) {
-					String replacement = fromUtf32toString(codePoint);
-					boolean emoji = false;
-
-					// See if it is an SoftBank encoded character
-					String alternative = SoftBankConverter.getNewUnicode(suggestion);
-					if (alternative != null) {
-						if (Misc.listContains(emojiList, alternative)) {
-							replacement = alternative;
-							emoji = true;
-						}
-					}
-
-					if (emoji) {
-						tokens.add(new Token(replacement, true));
-					} else {
-						Token lastToken = null;
-						if (tokens.size() > 0) {
-							lastToken = tokens.get(tokens.size() - 1);
-						}
-
-						if (lastToken == null) {
-							tokens.add(new Token(replacement, false));
-						} else {
-							if (lastToken.isEmoji()) {
-								tokens.add(new Token(replacement, false));
-							} else {
-								lastToken.append(replacement);
-							}
-						}
-					}
-
-					logger.trace("{} {}", codePoint, alternative);
-
-					return index + charCnt;
-				}
-			}
-
-			return -1;
+	
+	private String replaceEmoji(Emoji emoji, Function<String, String> emojiFormatFunction) {
+		String str = emoji.getEmoji().codePoints().mapToObj(operand -> Integer.toHexString(operand)).collect(Collectors.joining(SEPERATOR));
+		return emojiFormatFunction.apply(str);
+	}
+	
+	private String replaceSoftBankChar(int codePoint) {
+		if(softbankMap.containsKey(codePoint)) {
+			return softbankMap.get(codePoint);
 		} else {
-			return result;
+			return new String(Character.toChars(codePoint));
 		}
 	}
 	
-	private List<String> readEmojiList() throws IOException {
-		List<String> list = new ArrayList<>();
-		
-		InputStream in = this.getClass().getResourceAsStream("/files.txt");
+	private String replaceSoftBankChars(String str) {
+		return str.chars()
+			.mapToObj(x -> replaceSoftBankChar(x))
+			.collect(Collectors.joining());
+	}
+	
+	private Map<Integer, String> readSoftBankList() {
+		InputStream in = this.getClass().getResourceAsStream("/emojicontainer/data_softbank_map.txt");
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
-		
-		String fileName;
-		while((fileName=br.readLine())!=null) {
-			String nr = fileName.replace(EMOJIPREFIX, "").replace(".png", "");
-			list.add(nr);
-
-			String[] excludes = { "0023", "002a", "0030", "0031", "0032", "0033", "0034", "0035", "0036", "0037",
-					"0038", "0039" };
-
-			for (String str : excludes) {
-				list.remove(str);
-			}
-		}
-
-		logger.info("Loaded {} entries", list.size());
-
-		return list;
+		return 
+			br.lines()
+			.map(x -> {return x.trim();}) // remove white spaces
+			.filter(x -> !x.startsWith("#") && (x.length() > 0)) // no comments and empty lines
+			.map(x -> {return getPair(x);}) // convert to two columns
+			.collect(Collectors.toMap(x -> Integer.parseInt(x[0], 16), x -> convertCodePoints(x[1])));
 	}
 	
+	private String[] getPair(String line){
+		StringTokenizer st = new StringTokenizer(line, " ");
+		return new String[] {st.nextToken(), st.nextToken()};
+	}
+	
+	// converts one or more unicode hex values to a utf16-string
+	// input example "1f466-1f3ff"
+	private String convertCodePoints(String codesPointsStr) {
+		return Collections.list(new StringTokenizer(codesPointsStr, "-")).stream()
+			.map(token -> (String)token) // convert to String
+			.map(x -> Integer.parseInt(x, 16)) // to hex value
+			.map(x -> new String(Character.toChars(x))) // string unicode hex value
+			.collect(Collectors.joining());
+	}
+
 	private static String fromUtf32toString(int codePoint) {
 		return new String(Character.toChars(codePoint));
 	}
