@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -33,6 +34,33 @@ public class EmojiContainer {
 	
 	public EmojiContainer() throws IOException {
 		this.softbankMap = readSoftBankList();
+	}
+	
+	public boolean allEmojisHaveFile() {
+		Set<Emoji> emojis = EmojiManager.getAllEmojis();
+		
+		boolean allexist = true;
+		for (Emoji emoji : emojis) {
+			String filename = replaceEmoji(emoji, x -> getFilename(x));
+			InputStream stream = this.getClass().getResourceAsStream(EMOJIPREFIX);
+			boolean exists = false;
+			if(stream != null) {
+				exists = true;
+				try {
+					stream.close();
+				} catch (IOException e) {
+					logger.warn("Could not close test stream: '{}'", e);
+				}
+			}
+			
+			if(!exists) {
+				logger.warn("Ressource '{}' does not exist", filename);
+			}
+			
+			allexist = allexist && exists;
+		} 
+		
+		return allexist;
 	}
 	
 	/**
@@ -85,11 +113,9 @@ public class EmojiContainer {
 
 		InputStream in = this.getClass().getResourceAsStream(filename);
 		// emoji does not exist, use question mark instead
-		/*if(in==null) {
-			in = this.getClass().getResourceAsStream("getFilename("2753"));
-		}*/
-		
-		System.out.println(filename);
+		if(in==null) {
+			in = this.getClass().getResourceAsStream(getFilename("2753"));
+		}
 		
 		Files.copy(in, dst, StandardCopyOption.REPLACE_EXISTING);
 		

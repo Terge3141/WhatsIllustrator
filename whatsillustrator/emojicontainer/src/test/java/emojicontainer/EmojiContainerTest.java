@@ -15,7 +15,7 @@ class EmojiContainerTest {
 	void testEmoji() throws IOException {
 		// smiley
 		String in = uc(0x1f600);
-		check("(1f600)", in);
+		check("(1F600)", in);
 	}
 	
 	@Test
@@ -27,19 +27,19 @@ class EmojiContainerTest {
 	@Test
 	void testTextAndEmoji() throws IOException {
 		String in = "Hi " + uc(0x1f471) + ", how are you?";
-		check("Hi (1f471), how are you?", in);
+		check("Hi (1F471), how are you?", in);
 	}
 	
 	@Test
 	void testEmojiSequence() throws IOException {
 		String in = "Here is a boy: " + uc(0x1f466) + uc(0x1f3ff);
-		check("Here is a boy: (1f466_1f3ff)", in);
+		check("Here is a boy: (1F466-1F3FF)", in);
 	}
 	
 	@Test
 	void testEmojiSequenceNotInDB() throws IOException {
 		String in = "Does not exist: " + uc(0x1f386) + uc(0x1f3ff);
-		check("Does not exist: (1f386)(1f3ff)", in);
+		check("Does not exist: (1F386)(1F3FF)", in);
 	}
 	
 	@Test
@@ -51,7 +51,7 @@ class EmojiContainerTest {
 	@Test
 	void testSoftbank() {
 		String in = "Hi " + uc(0xe404) + ", how are you?";
-		check("Hi (1f601), how are you?", in);
+		check("Hi (1F601), how are you?", in);
 	}
 	
 	@Test
@@ -72,7 +72,7 @@ class EmojiContainerTest {
 		List<Token> tokens = ec.getTokens(in);
 		
 		assertEquals(1, tokens.size());
-		assertEquals("1f471", tokens.get(0).getString());
+		assertEquals("1F471", tokens.get(0).getString());
 		assertTrue(tokens.get(0).isEmoji());
 	}
 	
@@ -87,7 +87,7 @@ class EmojiContainerTest {
 		assertEquals("Hi ", tokens.get(0).getString());
 		assertFalse(tokens.get(0).isEmoji());
 		
-		assertEquals("1f471", tokens.get(1).getString());
+		assertEquals("1F471", tokens.get(1).getString());
 		assertTrue(tokens.get(1).isEmoji());
 	}
 	
@@ -102,11 +102,17 @@ class EmojiContainerTest {
 		assertEquals("Hi ", tokens.get(0).getString());
 		assertFalse(tokens.get(0).isEmoji());
 		
-		assertEquals("1f471", tokens.get(1).getString());
+		assertEquals("1F471", tokens.get(1).getString());
 		assertTrue(tokens.get(1).isEmoji());
 		
 		assertEquals(", how are you?", tokens.get(2).getString());
 		assertFalse(tokens.get(2).isEmoji());
+	}
+	
+	@Test
+	void testAllEmojisHaveFile() throws IOException {
+		EmojiContainer ec = new EmojiContainer();
+		assertTrue(ec.allEmojisHaveFile());
 	}
 	
 	private void check(String expected, String in) {
