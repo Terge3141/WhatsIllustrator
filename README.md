@@ -40,7 +40,6 @@ java -cp thebook/target/thebook-0.0.1-SNAPSHOT-jar-with-dependencies.jar\
 ```
 
 The reults will be written to *outputdir* (defined in config.xml). Each chat contains the following subdirectories (if writers are activated):
-* **fo**: Contains the generated **pdf** file.
 * **odf**: Contains the generated **odt** file. It can be opened for example with *libre office*.
 * **tex** Contains the generated **tex** file and some files the tex document references. The file can be processed for example with *pdflatex*
 
@@ -51,10 +50,14 @@ The match file is written to chat output directory. This can be edited and writt
 
 The image pool directory should contain *all* images and configured as *imagepooldir* in the config.xml file (parserconfiguration).
 
-# Contributions
-Contributions (new features, bug fixes, changes) are very welcome. Just send send me the pull requests or patches. Also, if you find any bugs let me know.
+## Emojis
+The emojis are from OpenMoji (https://openmoji.org/) and are under Creative Commons Share Alike License 4.0 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/#).
 
 ## Eclipse
 * Select Workspace WhatsIllustrator (the main directory)
 * File --> Import --> Maven --> Existing Maven Projects
 	* Choose WhatsIllustrator/whatsillustrator
+
+# Contributions
+Contributions (new features, bug fixes, changes) are very welcome. Just send send me the pull requests or patches. Also, if you find any bugs let me know.
+

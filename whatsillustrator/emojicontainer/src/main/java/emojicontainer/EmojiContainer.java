@@ -25,8 +25,8 @@ import net.fellbaum.jemoji.IndexedEmoji;
 
 public class EmojiContainer {
 	
-	private static final String SEPERATOR = "_";
-	private final String EMOJIPREFIX = "emoji_u";
+	private static final String SEPERATOR = "-";
+	private final String EMOJIPREFIX = "";
 	private static Logger logger = LogManager.getLogger(EmojiContainer.class);
 
 	private Map<Integer, String> softbankMap;
@@ -82,22 +82,14 @@ public class EmojiContainer {
 		if(Files.isDirectory(dst)) {
 			dst = dst.resolve(filename);
 		}
+
+		InputStream in = this.getClass().getResourceAsStream(filename);
+		// emoji does not exist, use question mark instead
+		/*if(in==null) {
+			in = this.getClass().getResourceAsStream("getFilename("2753"));
+		}*/
 		
 		System.out.println(filename);
-		String str = filename.substring(7, filename.length() - 4);
-		StringTokenizer st = new StringTokenizer(str, "_");
-		String emoji = "";
-		while(st.hasMoreTokens()) {
-			emoji = emoji + fromUtf32toString(Integer.parseInt(st.nextToken(), 16));
-		}
-				
-		System.out.println(emoji);
-		
-		InputStream in = this.getClass().getResourceAsStream("/" + filename);
-		// emoji does not exist, use question mark instead
-		if(in==null) {
-			in = this.getClass().getResourceAsStream("/" + getFilename("2753"));
-		}
 		
 		Files.copy(in, dst, StandardCopyOption.REPLACE_EXISTING);
 		
@@ -105,11 +97,11 @@ public class EmojiContainer {
 	}
 	
 	private String getFilename(String id) {
-		return this.EMOJIPREFIX + id + ".png";
+		return "/emojicontainer/emojis/" + this.EMOJIPREFIX + id + ".png";
 	}
 	
 	private String replaceEmoji(Emoji emoji, Function<String, String> emojiFormatFunction) {
-		String str = emoji.getEmoji().codePoints().mapToObj(operand -> Integer.toHexString(operand)).collect(Collectors.joining(SEPERATOR));
+		String str = emoji.getEmoji().codePoints().mapToObj(operand -> Integer.toHexString(operand).toUpperCase()).collect(Collectors.joining(SEPERATOR));
 		return emojiFormatFunction.apply(str);
 	}
 	

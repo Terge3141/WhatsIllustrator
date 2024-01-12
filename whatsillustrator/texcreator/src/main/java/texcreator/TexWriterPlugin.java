@@ -223,7 +223,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 		
 		this.copyList.add(new CopyItem(str, dst));
 
-		return String.format("\\includegraphics[scale=0.075]{%s}", rel);
+		return String.format("\\raisebox{-0.25\\totalheight}{\\includegraphics[scale=0.2]{%s}}", rel);
 	}
 
 	private void copyList() throws IOException {
