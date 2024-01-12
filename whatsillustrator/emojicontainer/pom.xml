@@ -17,9 +17,6 @@
 			<resource>
 				<directory>src/main/resources</directory>
 			</resource>
-			<resource>
-				<directory>../noto-emoji/png/128</directory>
-			</resource>
 		</resources>
 	</build>
 	<dependencies>
