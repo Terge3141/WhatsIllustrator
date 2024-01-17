@@ -79,6 +79,13 @@ public class EmojiContainer {
 		return buf;
 	}
 	
+	public String wrapEmojis(String str, Function<String, String> emojiWrapFunction) {
+		String buf = str;
+		buf = replaceSoftBankChars(buf);
+		buf = EmojiManager.replaceAllEmojis(buf, x -> emojiWrapFunction.apply(x.getEmoji()));
+		return buf;
+	}
+	
 	public List<Token> getTokens(String str) {
 		List<IndexedEmoji> emojis = EmojiManager.extractEmojisInOrderWithIndex(str);
 		

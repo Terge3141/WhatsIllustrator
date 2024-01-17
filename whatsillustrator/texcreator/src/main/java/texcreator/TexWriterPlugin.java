@@ -251,7 +251,8 @@ public class TexWriterPlugin implements IWriterPlugin {
 	private String encode(String str) {
 		str = Latex.encodeLatex(str);
 		str = Latex.replaceURL(str);
-		str = this.emojis.replaceEmojis(str, x -> getEmojiPath(x));
+		str = this.emojis.wrapEmojis(str,
+				x -> String.format("{\\fontspec{Noto Color Emoji}[Renderer=Harfbuzz]%s}", x));
 		return str;
 	}
 

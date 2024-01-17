@@ -15,43 +15,43 @@ class EmojiContainerTest {
 	void testEmoji() throws IOException {
 		// smiley
 		String in = uc(0x1f600);
-		check("(1F600)", in);
+		checkReplaceEmojis("(1F600)", in);
 	}
 	
 	@Test
 	void testNoEmoji() throws IOException {
 		String in = "Hi there";
-		check(in, in);
+		checkReplaceEmojis(in, in);
 	}
 	
 	@Test
 	void testTextAndEmoji() throws IOException {
 		String in = "Hi " + uc(0x1f471) + ", how are you?";
-		check("Hi (1F471), how are you?", in);
+		checkReplaceEmojis("Hi (1F471), how are you?", in);
 	}
 	
 	@Test
 	void testEmojiSequence() throws IOException {
 		String in = "Here is a boy: " + uc(0x1f466) + uc(0x1f3ff);
-		check("Here is a boy: (1F466-1F3FF)", in);
+		checkReplaceEmojis("Here is a boy: (1F466-1F3FF)", in);
 	}
 	
 	@Test
 	void testEmojiSequenceNotInDB() throws IOException {
 		String in = "Does not exist: " + uc(0x1f386) + uc(0x1f3ff);
-		check("Does not exist: (1F386)(1F3FF)", in);
+		checkReplaceEmojis("Does not exist: (1F386)(1F3FF)", in);
 	}
 	
 	@Test
 	void testEmojiNotInDB() {
 		String in = uc(0x2f466);
-		check(in, in);
+		checkReplaceEmojis(in, in);
 	}
 	
 	@Test
 	void testSoftbank() {
 		String in = "Hi " + uc(0xe404) + ", how are you?";
-		check("Hi (1F601), how are you?", in);
+		checkReplaceEmojis("Hi (1F601), how are you?", in);
 	}
 	
 	@Test
@@ -115,7 +115,37 @@ class EmojiContainerTest {
 		assertTrue(ec.allEmojisHaveFile());
 	}
 	
-	private void check(String expected, String in) {
+	@Test
+	void testWrapEmojis_EmojiOnly() {
+		String in = uc(0x1f471);
+		checkWrapEmojis("(" + in + ")", in);
+	}
+	
+	@Test
+	void testWrapEmojis_EmojiAndText() {
+		String in = "This is a " + uc(0x1f471) + " with text";
+		checkWrapEmojis("This is a (" + uc(0x1f471) + ") with text", in);
+	}
+	
+	@Test
+	void testWrapEmojis_TextOnly() {
+		String in = "Text only";
+		checkWrapEmojis(in, in);
+	}
+	
+	private void checkWrapEmojis(String expected, String in) {
+		EmojiContainer ec = null;
+		try {
+			ec = new EmojiContainer();
+		} catch (IOException e) {
+			fail(e);
+		}
+		
+		String actual = ec.wrapEmojis(in, x -> bracket(x));
+		assertEquals(expected, actual);
+	}
+	
+	private void checkReplaceEmojis(String expected, String in) {
 		EmojiContainer ec = null;
 		try {
 			ec = new EmojiContainer();
