@@ -12,44 +12,44 @@ import emojicontainer.EmojiContainer.Token;
 class EmojiContainerTest {
 	
 	@Test
-	void testEmoji() throws IOException {
+	void replaceEmojis_testEmoji() throws IOException {
 		// smiley
 		String in = uc(0x1f600);
 		checkReplaceEmojis("(1F600)", in);
 	}
 	
 	@Test
-	void testNoEmoji() throws IOException {
+	void replaceEmojis_testNoEmoji() throws IOException {
 		String in = "Hi there";
 		checkReplaceEmojis(in, in);
 	}
 	
 	@Test
-	void testTextAndEmoji() throws IOException {
+	void replaceEmojis_testTextAndEmoji() throws IOException {
 		String in = "Hi " + uc(0x1f471) + ", how are you?";
 		checkReplaceEmojis("Hi (1F471), how are you?", in);
 	}
 	
 	@Test
-	void testEmojiSequence() throws IOException {
+	void replaceEmojis_testEmojiSequence() throws IOException {
 		String in = "Here is a boy: " + uc(0x1f466) + uc(0x1f3ff);
 		checkReplaceEmojis("Here is a boy: (1F466-1F3FF)", in);
 	}
 	
 	@Test
-	void testEmojiSequenceNotInDB() throws IOException {
+	void replaceEmojis_testEmojiSequenceNotInDB() throws IOException {
 		String in = "Does not exist: " + uc(0x1f386) + uc(0x1f3ff);
 		checkReplaceEmojis("Does not exist: (1F386)(1F3FF)", in);
 	}
 	
 	@Test
-	void testEmojiNotInDB() {
+	void replaceEmojis_testEmojiNotInDB() {
 		String in = uc(0x2f466);
 		checkReplaceEmojis(in, in);
 	}
 	
 	@Test
-	void testSoftbank() {
+	void replaceEmojis_testSoftbank() {
 		String in = "Hi " + uc(0xe404) + ", how are you?";
 		checkReplaceEmojis("Hi (1F601), how are you?", in);
 	}
@@ -131,6 +131,12 @@ class EmojiContainerTest {
 	void testWrapEmojis_TextOnly() {
 		String in = "Text only";
 		checkWrapEmojis(in, in);
+	}
+	
+	@Test
+	void testWrapEmojis_testSoftbank() {
+		String in = "Hi " + uc(0xe404) + ", how are you?";
+		checkWrapEmojis("Hi (" + uc(0x1f601) + "), how are you?", in);
 	}
 	
 	private void checkWrapEmojis(String expected, String in) {
