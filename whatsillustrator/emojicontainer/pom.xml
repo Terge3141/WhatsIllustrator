@@ -12,6 +12,14 @@
 	<artifactId>emojicontainer</artifactId>
 	<name>Emoji container</name>
 	<description>Class that contains all emojis as pngs</description>
+	
+	<repositories>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+	
 	<build>
 		<resources>
 			<resource>
@@ -46,12 +54,20 @@
 			<version>5.9.1</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.github.Terge3141</groupId>
+			<artifactId>JEmoji</artifactId>
+			<version>4b28b1e02b</version>
+		</dependency>
+		<!-- The following source can be used once pull request #45 at
+		https://github.com/felldo/JEmoji/pulls has been merged and a
+		a new version has been made -->
 		<!-- <dependency>
 		    <groupId>net.fellbaum</groupId>
 		    <artifactId>jemoji</artifactId>
 		    <version>1.3.3</version>
 		</dependency>-->
-		<dependency>
+		<!--<dependency>
 			<groupId>net.fellbaum</groupId>
 			<artifactId>jemoji</artifactId>
 			<version>1.3.3</version>
@@ -62,6 +78,6 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>2.16.0</version>
-		</dependency>
+		</dependency>-->
 	</dependencies>
 </project>
