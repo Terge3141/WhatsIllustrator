@@ -105,13 +105,6 @@ public class TexWriterPlugin implements IWriterPlugin {
 		} catch (IOException ioe) {
 			throw new WriterException(ioe);
 		}
-
-		logger.info("Copy emojis to '{}'", emojiOutputDir.toAbsolutePath());
-		try {
-			copyList();
-		} catch (IOException ioe) {
-			throw new WriterException(ioe);
-		}
 	}
 
 	@Override
@@ -224,12 +217,6 @@ public class TexWriterPlugin implements IWriterPlugin {
 		this.copyList.add(new CopyItem(str, dst));
 
 		return String.format("\\raisebox{-0.25\\totalheight}{\\includegraphics[scale=0.2]{%s}}", rel);
-	}
-
-	private void copyList() throws IOException {
-		for (CopyItem x : this.copyList) {
-			this.emojis.copyEmoji(x.id, x.dst);
-		}
 	}
 
 	private String getRessourceAsString(String name) throws IOException {
