@@ -89,7 +89,11 @@ public class BookCreator {
 				for (IWriterPlugin plugin : this.plugins) {
 					plugin.appendLinkMessage((LinkMessage) msg);
 				}
-			} 
+			} else if (msg instanceof StickerMessage) {
+				for (IWriterPlugin plugin : this.plugins) {
+					plugin.appendStickerMessage((StickerMessage) msg);
+				}
+			}
 		}
 	}
 }

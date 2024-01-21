@@ -7,6 +7,7 @@ import messageparser.ImageMessage;
 import messageparser.ImageStackMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
+import messageparser.StickerMessage;
 import messageparser.TextMessage;
 import messageparser.VideoMessage;
 import messageparser.LinkMessage;
@@ -79,4 +80,11 @@ public interface IWriterPlugin {
 	 * @throws WriterException
 	 */
 	void appendLinkMessage(LinkMessage linkMessage)throws WriterException;
+	
+	/**
+	 * Appends a sticker message to the document
+	 * @param stickerMessage Message to be appended
+	 * @throws WriterException
+	 */
+	void appendStickerMessage(StickerMessage stickerMessage)throws WriterException;
 }

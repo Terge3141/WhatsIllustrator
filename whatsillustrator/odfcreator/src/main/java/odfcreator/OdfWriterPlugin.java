@@ -39,6 +39,7 @@ import messageparser.ImageMessage;
 import messageparser.ImageStackMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
+import messageparser.StickerMessage;
 import messageparser.TextMessage;
 import messageparser.VideoMessage;
 import videothumbnails.ThumbnailCreator;
@@ -212,6 +213,15 @@ public class OdfWriterPlugin implements IWriterPlugin {
 	@Override
 	public void appendLinkMessage(LinkMessage msg) throws WriterException {
 		appendSenderAndDate(msg, msg.getUrl());
+	}
+	
+	@Override
+	public void appendStickerMessage(StickerMessage msg) throws WriterException {
+		appendSenderAndDate(msg, null);
+
+		Path absoluteImgPath = msg.getFilepath().toAbsolutePath();
+
+		appendImage(absoluteImgPath, "");
 	}
 
 	private Paragraph appendImage(Path path, String subscription) throws WriterException {

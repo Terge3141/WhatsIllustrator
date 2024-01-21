@@ -32,6 +32,7 @@ import messageparser.ImageStackMessage;
 import messageparser.LinkMessage;
 import messageparser.MediaMessage;
 import messageparser.MediaOmittedMessage;
+import messageparser.StickerMessage;
 import messageparser.TextMessage;
 import messageparser.VideoMessage;
 import videothumbnails.ThumbnailCreator;
@@ -210,6 +211,37 @@ public class TexWriterPlugin implements IWriterPlugin {
 		tsb.appendln(str);
 		tsb.appendln("\\\\");
 	}
+	
+	@Override
+	public void appendStickerMessage(StickerMessage msg) throws WriterException {
+		Path absoluteImgPath = msg.getFilepath();
+		
+		if(!Files.exists(absoluteImgPath) ) {
+			logger.warn("File '{}' does not exist, skipping message", absoluteImgPath);
+			return;
+		}
+		
+		String extension = FilenameUtils.getExtension(absoluteImgPath.toString());
+		
+		if(!extension.equals("webp")) {
+			logger.warn("Unknown extension '{}', skipping message", extension);
+			return;
+		}
+		
+		Path dst;
+		try {
+			dst = WebpConverter.toPng(absoluteImgPath, this.imageOutputDir);
+		} catch (IOException e) {
+			throw new WriterException("Cannot convert '" + absoluteImgPath.toString() + "' to '" + outputDir + "'");
+		}
+		
+		Path relDst = this.outputDir.relativize(dst);
+
+		tsb.appendln("%s\\\\", formatSenderAndTime(msg));
+		tsb.appendln("\\begin{center}");
+		tsb.appendln("\\includegraphics[height=\\stickerheight]{%s}\\\\", relDst);
+		tsb.appendln("\\end{center}");
+	}
 
 	private String getEmojiPath(String str) {
 		Path dst = this.emojiOutputDir.resolve(String.format("%s.png", str));
@@ -251,21 +283,11 @@ public class TexWriterPlugin implements IWriterPlugin {
 	private String createLatexImage(String path, String subscription) throws WriterException {
 		Path src = Paths.get(path);
 		Path fileName = src.getFileName();
-		Path dst;
-		if (FilenameUtils.getExtension(src.toString()).equals("webp")) {
-			try {
-				dst = WebpConverter.toPng(src, this.imageOutputDir);
-			} catch (IOException e) {
-				throw new WriterException("Cannot convert '" + src.toString() + "' to '" + outputDir + "'");
-			}
-		} else {
-			dst = this.imageOutputDir.resolve(fileName);
-			try {
-				Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException e) {
-				throw new WriterException("Cannot copy file from '" + src.toString() + "' to '" + dst.toString() + "'",
-						e);
-			}
+		Path dst = this.imageOutputDir.resolve(fileName);
+		try {
+			Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			throw new WriterException("Cannot copy file from '" + src.toString() + "' to '" + dst.toString() + "'", e);
 		}
 
 		Path relDst = this.outputDir.relativize(dst);

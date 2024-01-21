@@ -213,8 +213,8 @@ public class WhatsappBackupParser implements IParser {
 				VideoMessage vm = new VideoMessage(timepoint, sender, absFilePath, text);
 				this.messages.add(vm);
 			} else if(type.equalsIgnoreCase(TYPE_STICKER)) {
-				ImageMessage im = new ImageMessage(timepoint, sender, absFilePath, "");
-				this.messages.add(im);
+				StickerMessage sm = new StickerMessage(timepoint, sender, absFilePath);
+				this.messages.add(sm);
 			}
 			else {
 				logger.warn("Type '{}' not supported, messageId '{}'", type, messageId);
