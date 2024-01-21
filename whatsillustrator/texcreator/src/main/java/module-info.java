@@ -9,5 +9,7 @@ module texcreator {
 	requires messageparser;
 	requires org.apache.commons.text;
 	requires org.apache.logging.log4j;
+	requires org.apache.commons.io;
 	requires videothumbnails;
+	requires imageconverter;
 }

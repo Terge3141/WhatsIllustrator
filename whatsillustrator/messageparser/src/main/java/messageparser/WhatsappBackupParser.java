@@ -36,6 +36,7 @@ public class WhatsappBackupParser implements IParser {
 	private final String TYPE_TEXT = "TEXT";
 	private final String TYPE_PICTURE = "PICTURE";
 	private final String TYPE_VIDEO = "VIDEO";
+	private final String TYPE_STICKER = "STICKER";
 	
 	private static Logger logger = LogManager.getLogger(WhatsappBackupParser.class);
 	
@@ -208,10 +209,12 @@ public class WhatsappBackupParser implements IParser {
 			if(type.equalsIgnoreCase(TYPE_PICTURE)) {
 				ImageMessage im = new ImageMessage(timepoint, sender, absFilePath, text);
 				this.messages.add(im);
-			}
-			else if(type.equalsIgnoreCase(TYPE_VIDEO)) {
+			} else if(type.equalsIgnoreCase(TYPE_VIDEO)) {
 				VideoMessage vm = new VideoMessage(timepoint, sender, absFilePath, text);
 				this.messages.add(vm);
+			} else if(type.equalsIgnoreCase(TYPE_STICKER)) {
+				ImageMessage im = new ImageMessage(timepoint, sender, absFilePath, "");
+				this.messages.add(im);
 			}
 			else {
 				logger.warn("Type '{}' not supported, messageId '{}'", type, messageId);

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.text.TextStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +25,7 @@ import creator.plugins.WriterException;
 import emojicontainer.EmojiContainer;
 import helper.Latex;
 import helper.Misc;
+import imageconverter.WebpConverter;
 import messageparser.IMessage;
 import messageparser.ImageMessage;
 import messageparser.ImageStackMessage;
@@ -48,15 +50,14 @@ public class TexWriterPlugin implements IWriterPlugin {
 	// This is the directory where the used written emojis are written to.
 	// Default is OutputDir/emojis
 	private Path emojiOutputDir;
-	
+
 	private List<CopyItem> copyList;
-	
+
 	private Path imageOutputDir;
 	private int videoThumbnailCnt = 6;
 
 	private Path outputDir;
 	private Path texOutputPath;
-
 
 	@Override
 	public void preAppend(String xmlConfig, Global globalConfig) throws WriterException {
@@ -73,10 +74,10 @@ public class TexWriterPlugin implements IWriterPlugin {
 		}
 		this.emojiOutputDir = this.outputDir.resolve("emojis");
 		this.emojiOutputDir.toFile().mkdirs();
-		
+
 		this.imageOutputDir = this.outputDir.resolve("images");
 		this.imageOutputDir.toFile().mkdirs();
-		
+
 		this.copyList = new ArrayList<CopyItem>();
 		this.texOutputPath = this.outputDir.resolve(globalConfig.getNameSuggestion() + ".tex");
 
@@ -124,7 +125,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 	public void appendImageMessage(ImageMessage msg) throws WriterException {
 		Path absoluteImgPath = msg.getFilepath();
 
-		if(Files.exists(absoluteImgPath)) {
+		if (Files.exists(absoluteImgPath)) {
 			tsb.appendln("%s\\\\", formatSenderAndTime(msg));
 			tsb.appendln("\\begin{center}");
 			tsb.append(createLatexImage(absoluteImgPath, msg.getSubscription()));
@@ -133,29 +134,29 @@ public class TexWriterPlugin implements IWriterPlugin {
 			logger.warn("File '{}' does not exist, skipping message", absoluteImgPath);
 		}
 	}
-	
+
 	@Override
 	public void appendImageStackMessage(ImageStackMessage msg) throws WriterException {
 		tsb.appendln("%s\\\\", formatSenderAndTime(msg));
-		
+
 		// check if all images exist
-		for(Path p : msg.getFilepaths()) {
-			if(!Files.exists(p) ) {
+		for (Path p : msg.getFilepaths()) {
+			if (!Files.exists(p)) {
 				logger.warn("File '{}' does not exist, skipping message", p);
 				return;
 			}
 		}
-		
+
 		String latexSizeInfo = "height=\\imageheight";
 		tsb.appendln("\\begin{center}");
 		tsb.append(createLatexImageStack(msg.getFilepaths(), latexSizeInfo, msg.getSubscription()));
 		tsb.appendln("\\end{center}");
 	}
-	
+
 	@Override
 	public void appendVideoMessage(VideoMessage msg) throws WriterException {
 		Path videoPath = msg.getFilepath();
-		if(videoPath.toFile().exists()) {
+		if (videoPath.toFile().exists()) {
 			ThumbnailCreator tc = ThumbnailCreator.of(videoPath, videoThumbnailCnt, imageOutputDir);
 			List<Path> tnPaths;
 			try {
@@ -163,7 +164,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 			} catch (IOException | JCodecException e) {
 				throw new WriterException(e);
 			}
-			
+
 			String latexSizeInfo = String.format("width=%f\\columnwidth", tc.isLandScape() ? 0.3 : 0.15);
 			tsb.appendln("%s\\\\", formatSenderAndTime(msg));
 			tsb.appendln("\\begin{center}");
@@ -201,11 +202,11 @@ public class TexWriterPlugin implements IWriterPlugin {
 		tsb.appendln(str);
 		tsb.appendln("\\\\");
 	}
-	
+
 	@Override
 	public void appendLinkMessage(LinkMessage msg) throws WriterException {
 		String str = String.format("\\textit{%s}", Latex.encodeLatex(msg.getUrl()));
-		
+
 		tsb.appendln(str);
 		tsb.appendln("\\\\");
 	}
@@ -213,7 +214,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 	private String getEmojiPath(String str) {
 		Path dst = this.emojiOutputDir.resolve(String.format("%s.png", str));
 		Path rel = this.outputDir.relativize(dst);
-		
+
 		this.copyList.add(new CopyItem(str, dst));
 
 		return String.format("\\raisebox{-0.25\\totalheight}{\\includegraphics[scale=0.2]{%s}}", rel);
@@ -238,8 +239,7 @@ public class TexWriterPlugin implements IWriterPlugin {
 	private String encode(String str) {
 		str = Latex.encodeLatex(str);
 		str = Latex.replaceURL(str);
-		str = this.emojis.wrapEmojis(str,
-				x -> String.format("{\\fontspec{Noto Color Emoji}[Renderer=Harfbuzz]%s}", x));
+		str = this.emojis.wrapEmojis(str, x -> String.format("{\\fontspec{Noto Color Emoji}[Renderer=Harfbuzz]%s}", x));
 		return str;
 	}
 
@@ -251,55 +251,64 @@ public class TexWriterPlugin implements IWriterPlugin {
 	private String createLatexImage(String path, String subscription) throws WriterException {
 		Path src = Paths.get(path);
 		Path fileName = src.getFileName();
-		Path dst = this.imageOutputDir.resolve(fileName);
-		Path relDst = this.outputDir.relativize(dst);
-		try {
-			Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
-		}
-		catch(IOException ioe) {
-			throw new WriterException("Cannot copy file from '" + src.toString() + "' to '" + dst.toString() + "'",
-					ioe);
-		}
-		
-		TextStringBuilder tsb = new TextStringBuilder();
-		tsb.appendln("\\includegraphics[height=\\imageheight]{%s}\\\\", relDst);
-		
-		if(subscription==null) {
-			subscription="";
-		}
-		subscription = subscription.replace("\n", " ").replace("\r", "");
-		tsb.appendln("\\small{\\textit{%s}}", encode(subscription));
-		return tsb.toString();
-	}
-	
-	public String createLatexImageStack(List<Path> paths, String latexSizeInfo, String subscription) throws WriterException {
-		TextStringBuilder tsb = new TextStringBuilder();
-		
-		for(Path src : paths) {
-			Path fileName = src.getFileName();
-			Path dst = this.imageOutputDir.resolve(fileName);
-			Path relDst = this.outputDir.relativize(dst);
+		Path dst;
+		if (FilenameUtils.getExtension(src.toString()).equals("webp")) {
+			try {
+				dst = WebpConverter.toPng(src, this.imageOutputDir);
+			} catch (IOException e) {
+				throw new WriterException("Cannot convert '" + src.toString() + "' to '" + outputDir + "'");
+			}
+		} else {
+			dst = this.imageOutputDir.resolve(fileName);
 			try {
 				Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
-			}
-			catch(IOException ioe) {
+			} catch (IOException e) {
 				throw new WriterException("Cannot copy file from '" + src.toString() + "' to '" + dst.toString() + "'",
-						ioe);
+						e);
 			}
-			
-			tsb.appendln("\\includegraphics[%s]{%s}", latexSizeInfo, relDst); 
 		}
-		
-		tsb.appendln("\\\\");
-		
-		if(subscription==null) {
+
+		Path relDst = this.outputDir.relativize(dst);
+
+		TextStringBuilder tsb = new TextStringBuilder();
+		tsb.appendln("\\includegraphics[height=\\imageheight]{%s}\\\\", relDst);
+
+		if (subscription == null) {
 			subscription = "";
 		}
 		subscription = subscription.replace("\n", " ").replace("\r", "");
 		tsb.appendln("\\small{\\textit{%s}}", encode(subscription));
 		return tsb.toString();
 	}
-	
+
+	public String createLatexImageStack(List<Path> paths, String latexSizeInfo, String subscription)
+			throws WriterException {
+		TextStringBuilder tsb = new TextStringBuilder();
+
+		for (Path src : paths) {
+			Path fileName = src.getFileName();
+			Path dst = this.imageOutputDir.resolve(fileName);
+			Path relDst = this.outputDir.relativize(dst);
+			try {
+				Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException ioe) {
+				throw new WriterException("Cannot copy file from '" + src.toString() + "' to '" + dst.toString() + "'",
+						ioe);
+			}
+
+			tsb.appendln("\\includegraphics[%s]{%s}", latexSizeInfo, relDst);
+		}
+
+		tsb.appendln("\\\\");
+
+		if (subscription == null) {
+			subscription = "";
+		}
+		subscription = subscription.replace("\n", " ").replace("\r", "");
+		tsb.appendln("\\small{\\textit{%s}}", encode(subscription));
+		return tsb.toString();
+	}
+
 	private String createLatexImage(Path path, String subscription) throws WriterException {
 		return createLatexImage(path.toString(), subscription);
 	}

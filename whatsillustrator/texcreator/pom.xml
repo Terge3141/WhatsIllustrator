@@ -1,35 +1,48 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.terge</groupId>
-    <artifactId>whatsillustrator</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-  </parent>
-  <artifactId>texcreator</artifactId>
-  <name>PDF-Converter for Whatsapp Messages TexCreator</name>
-  <description>Tex Creator Plugin</description>
-  <dependencies>
-	<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
-	<dependency>
-	    <groupId>org.junit.jupiter</groupId>
-	    <artifactId>junit-jupiter-engine</artifactId>
-	    <version>5.9.1</version>
-	    <scope>test</scope>
-	</dependency>
-  	<dependency>
-  		<groupId>com.terge</groupId>
-  		<artifactId>creator</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>com.terge</groupId>
-  		<artifactId>videothumbnails</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>com.terge</groupId>
-  		<artifactId>emojicontainer</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
-  	</dependency>
-  </dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.terge</groupId>
+		<artifactId>whatsillustrator</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>texcreator</artifactId>
+	<name>PDF-Converter for Whatsapp Messages TexCreator</name>
+	<description>Tex Creator Plugin</description>
+	<dependencies>
+		<!--
+		https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.9.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.15.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.terge</groupId>
+			<artifactId>creator</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.terge</groupId>
+			<artifactId>videothumbnails</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.terge</groupId>
+			<artifactId>emojicontainer</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.terge</groupId>
+			<artifactId>imageconverter</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
 </project>

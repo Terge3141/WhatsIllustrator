@@ -18,16 +18,17 @@ class WebpConverterTest {
 	@Test
 	void testToPng(@TempDir Path tmpDir) throws IOException {
 		Path webpPath = tmpDir.resolve("mytest.webp");
-		Path pngExpectedPath = tmpDir.resolve("mytest.expected.png");
+		Path pngComparePath = tmpDir.resolve("mytest.expected.png");
 		Path pngActualPath = tmpDir.resolve("mytest.png");
 
 		writeResource("/imageconverter/mytest.webp", webpPath);
-		writeResource("/imageconverter/mytest.png", pngExpectedPath);
+		writeResource("/imageconverter/mytest.png", pngComparePath);
 
-		WebpConverter.toPng(webpPath, tmpDir);
+		Path p = WebpConverter.toPng(webpPath, tmpDir);
+		assertEquals(pngActualPath, p);
 		
 		assertTrue(pngActualPath.toFile().exists());
-		assertImagesEqual(pngExpectedPath, pngActualPath);
+		assertImagesEqual(pngComparePath, pngActualPath);
 	}
 	
 	private void assertImagesEqual(Path pngExpectedPath, Path pngActualPath) throws IOException {
