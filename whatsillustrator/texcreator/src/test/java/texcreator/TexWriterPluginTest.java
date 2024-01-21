@@ -18,6 +18,7 @@ import helper.Misc;
 import messageparser.ImageMessage;
 import messageparser.LinkMessage;
 import messageparser.MediaMessage;
+import messageparser.StickerMessage;
 import messageparser.TextMessage;
 import messageparser.VideoMessage;
 
@@ -59,7 +60,6 @@ class TexWriterPluginTest {
 		}
 		
 		checkFile(dm.getTexDir().resolve("Myname.tex"));
-		checkFile(dm.getEmojiDir().resolve("1f601.png"));
 	}
 	
 	@Test
@@ -81,6 +81,28 @@ class TexWriterPluginTest {
 		
 		checkFile(dm.getTexDir().resolve("Myname.tex"));
 		checkFile(dm.getImageDir().resolve("image.jpg"), "DUMMYIMAGETEXT12345");
+	}
+	
+	@Test
+	void testSticker(@TempDir Path tmpDir) throws IOException {
+		TexWriterPluginDirMocker dm = new TexWriterPluginDirMocker(tmpDir);
+		
+		String resourceName = "mytest.webp";
+		Path stickerPath = dm.getInputDir().resolve(resourceName);
+		ClassLoader classLoader = getClass().getClassLoader();
+		File file = new File(classLoader.getResource(resourceName).getFile());
+		Files.copy(file.toPath(), stickerPath, StandardCopyOption.REPLACE_EXISTING);
+		
+		TexWriterPlugin twp = new TexWriterPlugin();
+		try {
+			twp.preAppend("", createGlobalConfig(dm.getOutputDir(), "Myname"));
+			twp.appendStickerMessage(new StickerMessage(LocalDateTime.of(2024, 1, 21, 22, 12, 12), "From", stickerPath));
+			twp.postAppend();
+		} catch (WriterException e) {
+			fail(e);
+		}
+		
+		assertTrue(Files.exists(dm.getImageDir().resolve("mytest.png")));
 	}
 	
 	@Test

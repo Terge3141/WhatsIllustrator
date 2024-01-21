@@ -144,6 +144,32 @@ public class WhatsappBackupParserTest {
 	}
 	
 	@Test
+	void testNextMessageSticker(@TempDir Path tmpDir) throws SQLException, IOException, ParserException {
+		Path inputDir = tmpDir.resolve("input");
+		WhatsappBackupParserSQLMocker sm = new WhatsappBackupParserSQLMocker(inputDir);
+		Connection con = sm.getConnection();
+		
+		ZonedDateTime zdt = createZonedDT(2024, 1, 21, 22, 3, 40);
+		Path whatsappDir = getWhatsappDir(tmpDir);
+		Files.createDirectories(whatsappDir);
+		createMultiMediaMessage(con, whatsappDir, 123, zdt, "From", "Mychat", "", "stickers/sticker.webp", "STICKER");
+		
+		con.close();
+		
+		WhatsappBackupParser wbp = createWhatsappBackupParser(tmpDir, sm.getSqliteDBPath(), "Mychat");
+		
+		IMessage msg = wbp.nextMessage();
+		checkBaseMessage(msg, "From", zdt);
+		assertTrue(msg instanceof StickerMessage);
+		StickerMessage vm = (StickerMessage)msg;
+		
+		Path expImagePath = whatsappDir.resolve("stickers/sticker.webp");
+		assertEquals(expImagePath, vm.getFilepath());
+		
+		assertNull(wbp.nextMessage());
+	}
+	
+	@Test
 	void testNextMessageUnknownContentType(@TempDir Path tmpDir) throws SQLException, IOException, ParserException {
 		Path inputDir = tmpDir.resolve("input");
 		WhatsappBackupParserSQLMocker sm = new WhatsappBackupParserSQLMocker(inputDir);
