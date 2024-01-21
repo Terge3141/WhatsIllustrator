@@ -18,6 +18,7 @@
 		<module>configurator</module>
 		<module>emojicontainer</module>
 		<module>helper</module>
+		<module>imageconverter</module>
 		<module>imagematcher</module>
 		<module>messageparser</module>
 		<module>creator</module>
