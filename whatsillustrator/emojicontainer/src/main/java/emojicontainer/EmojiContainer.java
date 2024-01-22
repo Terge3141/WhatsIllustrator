@@ -41,7 +41,7 @@ public class EmojiContainer {
 		
 		boolean allexist = true;
 		for (Emoji emoji : emojis) {
-			String filename = replaceEmoji(emoji, x -> getFilename(x));
+			String filename = replaceEmoji(emoji, x -> getRessourcePath(x));
 			InputStream stream = this.getClass().getResourceAsStream(EMOJIPREFIX);
 			boolean exists = false;
 			if(stream != null) {
@@ -118,10 +118,10 @@ public class EmojiContainer {
 			dst = dst.resolve(filename);
 		}
 
-		InputStream in = this.getClass().getResourceAsStream(filename);
+		InputStream in = this.getClass().getResourceAsStream(getRessourcePath(id));
 		// emoji does not exist, use question mark instead
 		if(in==null) {
-			in = this.getClass().getResourceAsStream(getFilename("2753"));
+			in = this.getClass().getResourceAsStream(getRessourcePath("2753"));
 		}
 		
 		Files.copy(in, dst, StandardCopyOption.REPLACE_EXISTING);
@@ -130,7 +130,11 @@ public class EmojiContainer {
 	}
 	
 	private String getFilename(String id) {
-		return "/emojicontainer/emojis/" + this.EMOJIPREFIX + id + ".png";
+		return this.EMOJIPREFIX + id + ".png";
+	}
+	
+	private String getRessourcePath(String id) {
+		return "/emojicontainer/emojis/" + getFilename(id);
 	}
 	
 	private String replaceEmoji(Emoji emoji, Function<String, String> emojiFormatFunction) {

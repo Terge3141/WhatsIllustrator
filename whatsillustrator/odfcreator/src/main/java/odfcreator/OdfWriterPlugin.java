@@ -296,9 +296,6 @@ public class OdfWriterPlugin implements IWriterPlugin {
 		List<Token> tokens = this.emojis.getTokens(text);
 		for (Token token : tokens) {
 			if (token.isEmoji()) {
-				/*URI uri = this.globalConfig.getEmojiDir()
-						.resolve(this.emojis.getEmojiPrefix() + token.getString() + ".png").toUri();
-				Image image = Image.newImage(paragraph, uri);*/
 				URI uri;
 				try {
 					uri = this.emojis.copyEmoji(token.getString(), this.tmpDir).toUri();
