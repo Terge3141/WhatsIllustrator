@@ -147,10 +147,94 @@ class SignalParserTest {
 		ZonedDateTime zdt = createZonedDT(2023, 1, 21, 23, 23, 40);
 		Path signalDir = tmpDir.resolve("workdir").resolve("signalparser");
 		Files.createDirectories(signalDir);
-		createMultiMediaMessage(con, signalDir, 123, zdt, "From", "Mychat", "Text", "image/webp", 123456, 2345);
+		
+		createTextMessage(con, 124, zdt, "From", "Mychat", "Text");
+		createMultiMediaMessage(con, signalDir, 123, zdt, "From", "Mychat", "Text", "image/wupp", 123456, 2345);
+		
+		con.close();
 	
 		SignalParser sp = createSignalParser(tmpDir, sm.getSqliteDBPath(), "Mychat");
 		
+		assertNotNull(sp.nextMessage());
+		assertNull(sp.nextMessage());
+	}
+	
+	@Test
+	void testNextMessageSticker_WebpExists(@TempDir Path tmpDir) throws SQLException, IOException {
+		String emoji = new String(Character.toChars(0x1F601));
+		
+		Path inputDir = tmpDir.resolve("input");
+		SignalParserSQLMocker sm = new SignalParserSQLMocker(inputDir);
+		Connection con = sm.getConnection();
+		
+		ZonedDateTime zdt = createZonedDT(2024, 1, 24, 21, 06, 40);
+		Path signalDir = tmpDir.resolve("workdir").resolve("signalparser");
+		Files.createDirectories(signalDir);
+		
+		createStickerMessage(con, signalDir, 12, zdt, "From", "Mychat", 23, emoji, true);
+		
+		con.close();
+		
+		SignalParser sp = createSignalParser(tmpDir, sm.getSqliteDBPath(), "Mychat");
+		
+		IMessage msg = sp.nextMessage();
+		checkBaseMessage(msg, "From", zdt);
+		
+		assertTrue(msg instanceof StickerMessage);
+		StickerMessage stm = (StickerMessage)msg;
+		
+		Path expStickerPth = signalDir.resolve("Sticker_0023.webp");
+		assertEquals(expStickerPth, stm.getFilepath());
+	}
+	
+	@Test
+	void testNextMessageSticker_WebpNotExists(@TempDir Path tmpDir) throws SQLException, IOException {
+		String emoji = new String(Character.toChars(0x1F601));
+		
+		Path inputDir = tmpDir.resolve("input");
+		SignalParserSQLMocker sm = new SignalParserSQLMocker(inputDir);
+		Connection con = sm.getConnection();
+		
+		ZonedDateTime zdt = createZonedDT(2024, 1, 24, 21, 06, 40);
+		Path signalDir = tmpDir.resolve("workdir").resolve("signalparser");
+		Files.createDirectories(signalDir);
+		
+		createStickerMessage(con, signalDir, 12, zdt, "From", "Mychat", -1, emoji, false);
+		
+		con.close();
+		
+		SignalParser sp = createSignalParser(tmpDir, sm.getSqliteDBPath(), "Mychat");
+		
+		IMessage msg = sp.nextMessage();
+		checkBaseMessage(msg, "From", zdt);
+		
+		assertTrue(msg instanceof TextMessage);
+		TextMessage tm = (TextMessage)msg;
+		
+		assertEquals(emoji, tm.getContent());
+	}
+	
+	@Test
+	void testNextMessageSticker_WebpNoStickerEntry(@TempDir Path tmpDir) throws SQLException, IOException {
+		String emoji = new String(Character.toChars(0x1F601));
+		
+		Path inputDir = tmpDir.resolve("input");
+		SignalParserSQLMocker sm = new SignalParserSQLMocker(inputDir);
+		Connection con = sm.getConnection();
+		
+		ZonedDateTime zdt = createZonedDT(2024, 1, 24, 21, 06, 40);
+		Path signalDir = tmpDir.resolve("workdir").resolve("signalparser");
+		Files.createDirectories(signalDir);
+
+		// create a image/webp image in part but no entry in v_stickers
+		createTextMessage(con, 124, zdt, "From", "Mychat", "Text");
+		createMultiMediaMessage(con, signalDir, 123, zdt, "From", "Mychat", "", "image/webp", 1, 2);
+		
+		con.close();
+		
+		SignalParser sp = createSignalParser(tmpDir, sm.getSqliteDBPath(), "Mychat");
+		
+		assertNotNull(sp.nextMessage());
 		assertNull(sp.nextMessage());
 	}
 	
@@ -173,6 +257,44 @@ class SignalParserTest {
 		Path attachmentPath = signalDir.resolve(String.format("Attachment_%d.bin", uniqueId));
 		
 		attachmentPath.toFile().createNewFile();
+	}
+	
+	private void createStickerMessage(Connection con, Path signalDir, int msgid, ZonedDateTime zdt, String sender, String chatname, long fileId, String stickerEmoji, boolean createFile) throws SQLException, IOException {
+		String ct = "image/webp";
+		
+		createChatsEntry(con, msgid, zdt, sender, chatname, "", "mms");
+		
+		long uniqueId = 1234;
+		long stickerId = 5678;
+		
+		String sql;
+		PreparedStatement pstmt;
+		
+		sql = "INSERT INTO part (mid, ct, unique_id, sticker_id) VALUES (?, ?, ?, ?);";
+		pstmt = con.prepareStatement(sql);
+		pstmt.setLong(1, msgid);
+		pstmt.setString(2, ct);
+		pstmt.setLong(3, uniqueId);
+		pstmt.setLong(4, stickerId);
+		pstmt.execute();
+		
+		Path stickerPath = signalDir.resolve(String.format("Sticker_%04d.bin", fileId));
+		
+		if(fileId != -1) {
+			stickerPath.toFile().createNewFile();
+		}
+		
+		sql = "INSERT INTO v_stickers (file_id, mid, ct, sticker_emoji) VALUES(?, ?, ?, ?)";
+		pstmt = con.prepareStatement(sql);
+		if(fileId != -1) {
+			pstmt.setLong(1, fileId);
+		} else {
+			pstmt.setNull(1, java.sql.Types.NULL);
+		}
+		pstmt.setLong(2, msgid);
+		pstmt.setString(3, ct);
+		pstmt.setString(4, stickerEmoji);
+		pstmt.execute();
 	}
 	
 	private void createChatsEntry(Connection con, int msgid, ZonedDateTime zdt, String sender, String chatname, String text,

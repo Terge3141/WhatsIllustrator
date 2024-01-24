@@ -1,13 +1,17 @@
 package messageparser;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -67,6 +71,7 @@ public class SignalParser implements IParser {
 			try {
 				dumper = DatabaseAndBlobDumper.of(backupFilePath, passphrase, this.workdir);
 				dumper.setCreateExtraSqlViews(true);
+				dumper.setAllowsOverrides(true);
 				dumper.run();
 			} catch (SignalBackupReaderException | SQLException e) {
 				throw new ParserException("Could not dump database and blobs", e);
@@ -119,6 +124,26 @@ public class SignalParser implements IParser {
 				parseMMS(timepoint, sender, text, messageId);
 			}
 		}
+		
+		if(this.messages.size() == 0) {
+			String sql = "SELECT DISTINCT(chatname) cn FROM v_chats WHERE cn NOT NULL ORDER BY cn ASC";
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			
+			Path chatNamesPath = this.workdir.resolve("chats.txt");
+			FileWriter writer;
+			try {
+				writer = new FileWriter(chatNamesPath.toFile());
+				while(rs.next()) {
+					writer.append(rs.getString("cn") + "\n");
+				}
+				writer.close();
+			} catch (IOException e) {
+				throw new ParserException("No messages for chat and criteria found. Could not write chats to " + chatNamesPath);
+			}
+			
+			throw new ParserException("No messages for chat and criteria found. Available chats written to " + chatNamesPath);
+		}
 	}
 
 	private void parseMMS(LocalDateTime timepoint, String sender, String text, long messageId) throws SQLException, ParserException {
@@ -133,7 +158,7 @@ public class SignalParser implements IParser {
 			long stickerId = rs.getLong("sticker_id");
 			
 			if(contentType.equalsIgnoreCase("image/webp")) {
-				logger.warn("Contenttype '{}' not implemented yet", contentType);
+				handleWebp(timepoint, sender, messageId);
 			}
 			else if(contentType.equalsIgnoreCase("image/jpeg")) {
 				Path dst = copyAttachment("image", "jpg", uniqueId);
@@ -146,7 +171,7 @@ public class SignalParser implements IParser {
 				messages.add(vm);
 			}
 			else {
-				logger.warn("Contenttype {} not supported", contentType);
+				logger.warn("Contenttype '{}' not supported, messageId '{}'", contentType, messageId);
 			}
 		}
 	}
@@ -156,16 +181,53 @@ public class SignalParser implements IParser {
 		return "Signal " + this.chatName;
 	}
 	
+	private void handleWebp(LocalDateTime timepoint, String sender, long messageId) throws SQLException {
+		String query = "SELECT file_id, sticker_emoji  FROM v_stickers WHERE mid=?";
+		PreparedStatement pstmt = connection.prepareStatement(query);
+		pstmt.setLong(1, messageId);
+		
+		ResultSet rs = pstmt.executeQuery();
+		if(!rs.next()) {
+			String msg = String.format("Could not find sticker in v_sticker for messageId '%d', skipping message", messageId);
+			return;
+		}
+		
+		long fileId = rs.getLong("file_id");
+		
+		// sometimes the sticker is not available --> fallback to emoji in this case
+		if(rs.wasNull()) {
+			String emoji = rs.getString("sticker_emoji");
+			TextMessage tm = new TextMessage(timepoint, sender, emoji);
+			messages.add(tm);
+			return;
+		}
+		
+		String prefix = String.format("Sticker_%04d", fileId);
+		Path src = workdir.resolve(String.format("%s.bin", prefix));
+		Path dst = workdir.resolve(String.format("%s.webp", prefix));
+		
+		try {
+			Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+			String msg = String.format("Copied sticker from '%s' to '%s'", src, dst);
+			logger.info(msg);
+			
+			StickerMessage sm = new StickerMessage(timepoint, sender, dst);
+			messages.add(sm);
+		} catch (IOException e) {
+			String msg = String.format("Could not copy sticker from '%s' to '%s', exception '%s'", src, dst, e);
+			logger.warn(msg);
+		}
+	}
+	
 	private Path copyAttachment(String prefix, String extension, long uniqueId) throws ParserException {
 		Path src = workdir.resolve(String.format("Attachment_%d.bin", uniqueId));
 		Path dst = workdir.resolve(String.format("%s_%d.%s", prefix, uniqueId, extension));
 		try {
-			Files.copy(src, dst);
+			Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
 			String msg = String.format("Copied attachment from '%s' to '%s'", src, dst);
 			logger.info(msg);
 		} catch (IOException e) {
-			String msg = String.format("Could not copy attachment from '%s' to '%s'", src, dst);
-			//throw new ParserException(msg, e);
+			String msg = String.format("Could not copy attachment from '%s' to '%s', exception '%s'", src, dst, e);
 			logger.warn(msg);
 		}
 		

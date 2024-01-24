@@ -59,6 +59,15 @@ public class SignalParserSQLMocker {
 				+ ");";
 		invokeSQL(con, sql);
 		
+		// v_stickers
+		sql = "CREATE TABLE v_stickers (\n"
+				+ "file_id INTEGER,\n"
+				+ "mid	 INTEGER,\n"
+				+ "ct TEXT,\n"
+				+ "sticker_emoji STRING\n"
+				+ ");";
+		invokeSQL(con, sql);
+		
 		return con;
 	}
 	

@@ -90,7 +90,7 @@
 		<dependency>
 			<groupId>com.github.Terge3141</groupId>
 			<artifactId>SignalBackupReader</artifactId>
-			<version>0c9bfe770b</version>
+			<version>ba0ddabaeb</version>
 		</dependency>
 	</dependencies>
 </project>
