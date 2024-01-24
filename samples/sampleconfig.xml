@@ -32,6 +32,9 @@
 			<backupfile>path/to/signal-YYYY-MM-DD-hh-mm-ss.backup</backupfile>
 			<passphrase>12345 12345 12345 12345 12345 12345</passphrase>
 			<chatname>chatname</chatname>
+			<!-- Uncomment the next lines if you only want messages with a minimal or maximal date, respectively -->
+			<!-- <mindate>YYYY-MM-DDThh:mm:ss</mindate> -->
+			<!-- <maxdate>YYYY-MM-DDThh:mm:ss</maxdate> -->
 		</parserconfiguration>
 	</parser>
 	<parser>

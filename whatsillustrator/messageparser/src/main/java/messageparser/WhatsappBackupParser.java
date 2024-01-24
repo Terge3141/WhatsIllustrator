@@ -74,8 +74,8 @@ public class WhatsappBackupParser implements IParser {
 			this.msgstoreDBPath = Xml.getPathFromNode(document, "//msgstoredbpath");
 			this.contactsCsvPath = Xml.getPathFromNode(document, "//contactscsvpath");
 			
-			this.dtmin = str2Dt(Xml.getTextFromNode(document, "//mindate"));
-			this.dtmax = str2Dt(Xml.getTextFromNode(document, "//maxdate"));
+			this.dtmin = Xml.getLocalDateTimeFromNode(document, "//mindate");
+			this.dtmax = Xml.getLocalDateTimeFromNode(document, "//maxdate");
 			
 			this.whatsappdirs = new ArrayList<Path>();
 			NodeList nodes = Xml.selectNodes(document, "//whatsappdir");

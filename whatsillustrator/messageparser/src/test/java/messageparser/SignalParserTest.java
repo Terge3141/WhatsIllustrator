@@ -238,6 +238,106 @@ class SignalParserTest {
 		assertNull(sp.nextMessage());
 	}
 	
+	@Test
+	void testMinDate(@TempDir Path tmpDir) throws SQLException, IOException {
+		Path inputDir = tmpDir.resolve("input");
+		
+		SignalParserSQLMocker sm = new SignalParserSQLMocker(inputDir);
+		
+		Connection con = sm.getConnection();
+		
+		ZonedDateTime zdt1 = createZonedDT(2023, 11, 6, 20, 00, 00);
+		ZonedDateTime zdt2 = createZonedDT(2023, 11, 6, 20, 01, 00);
+		
+		createTextMessage(con, 1, zdt1, "Terge", "Mychat", "This is message1");
+		createTextMessage(con, 2, zdt2, "Biff", "Mychat", "This is message2");
+		
+		con.close();
+		
+		String tags = "<mindate>" + LocalDateTime.of(2023, 11, 6, 20, 00, 30) + "</mindate>";
+		
+		SignalParser sp = createSignalParser(tmpDir, sm.getSqliteDBPath(), "Mychat", tags);
+		
+		IMessage msg = null;
+		TextMessage tm = null;
+		
+		msg = sp.nextMessage();
+		checkBaseMessage(msg, "Biff", zdt2);
+		assertTrue(msg instanceof TextMessage);
+		tm = (TextMessage)msg;
+		assertEquals(tm.getContent(), "This is message2");
+		
+		assertNull(sp.nextMessage());
+	}
+	
+	@Test
+	void testMaxDate(@TempDir Path tmpDir) throws SQLException, IOException {
+		Path inputDir = tmpDir.resolve("input");
+		
+		SignalParserSQLMocker sm = new SignalParserSQLMocker(inputDir);
+		
+		Connection con = sm.getConnection();
+		
+		ZonedDateTime zdt1 = createZonedDT(2023, 11, 6, 20, 00, 00);
+		ZonedDateTime zdt2 = createZonedDT(2023, 11, 6, 20, 01, 00);
+		
+		createTextMessage(con, 1, zdt1, "Terge", "Mychat", "This is message1");
+		createTextMessage(con, 2, zdt2, "Terge", "Mychat", "This is message2");
+		
+		con.close();
+		
+		String tags = "<maxdate>" + LocalDateTime.of(2023, 11, 6, 20, 00, 30) + "</maxdate>";
+		
+		SignalParser sp = createSignalParser(tmpDir, sm.getSqliteDBPath(), "Mychat", tags);
+		
+		IMessage msg = null;
+		TextMessage tm = null;
+		
+		msg = sp.nextMessage();
+		checkBaseMessage(msg, "Terge", zdt1);
+		assertTrue(msg instanceof TextMessage);
+		tm = (TextMessage)msg;
+		assertEquals(tm.getContent(), "This is message1");
+		
+		assertNull(sp.nextMessage());
+	}
+	
+	@Test
+	void testMinMaxDate(@TempDir Path tmpDir) throws SQLException, IOException {
+		Path inputDir = tmpDir.resolve("input");
+		
+		SignalParserSQLMocker sm = new SignalParserSQLMocker(inputDir);
+		
+		Connection con = sm.getConnection();
+		
+		ZonedDateTime zdt1 = createZonedDT(2023, 11, 6, 20, 00, 00);
+		ZonedDateTime zdt2 = createZonedDT(2023, 11, 6, 20, 01, 00);
+		ZonedDateTime zdt3 = createZonedDT(2023, 11, 6, 20, 02, 00);
+		
+		createTextMessage(con, 1, zdt1, "Terge", "Mychat", "This is message1");
+		createTextMessage(con, 2, zdt2, "Biff", "Mychat", "This is message2");
+		createTextMessage(con, 3, zdt3, "Terge", "Mychat", "This is message3");
+		
+		con.close();
+		
+		String tags = "";
+		tags += "<mindate>" + LocalDateTime.of(2023, 11, 6, 20, 00, 30) + "</mindate>";
+		tags += "<maxdate>" + LocalDateTime.of(2023, 11, 6, 20, 01, 30) + "</maxdate>";
+		
+		SignalParser sp = createSignalParser(tmpDir, sm.getSqliteDBPath(), "Mychat", tags);
+		
+		IMessage msg = null;
+		TextMessage tm = null;
+		
+		msg = sp.nextMessage();
+		checkBaseMessage(msg, "Biff", zdt2);
+		assertTrue(msg instanceof TextMessage);
+		tm = (TextMessage)msg;
+		assertEquals(tm.getContent(), "This is message2");
+		
+		assertNull(sp.nextMessage());
+	}
+	
 	private void createTextMessage(Connection con, int msgid, ZonedDateTime zdt, String sender, String chatname, String text) throws SQLException {
 		createChatsEntry(con, msgid, zdt, sender, chatname, text, "sms");
 	}
@@ -314,8 +414,8 @@ class SignalParserTest {
 		pstmt.execute();
 	}
 
-	private SignalParser createSignalParser(Path tmpDir, Path sqliteDBPath, String chatName)  {
-		String xmlConfig = createXmlConfig(sqliteDBPath, chatName);
+	private SignalParser createSignalParser(Path tmpDir, Path sqliteDBPath, String chatName, String additionalTags)  {
+		String xmlConfig = createXmlConfig(sqliteDBPath, chatName, additionalTags);
 		
 		Path workDir = tmpDir.resolve("workdir");
 		Global global = null;
@@ -341,22 +441,29 @@ class SignalParserTest {
 		return sp;
 	}
 	
+	private SignalParser createSignalParser(Path tmpDir, Path sqliteDBPath, String chatName)  {
+		return createSignalParser(tmpDir, sqliteDBPath, chatName, null);
+	}
+	
 	private ZonedDateTime createZonedDT(int year, int month, int dayOfMonth, int hour, int minute, int second) {
 		LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second);
 		return ZonedDateTime.of(ldt, ZoneId.systemDefault());
 	}
 
-	private String createXmlConfig(Path sqliteDBPath, String chatName) {
+	private String createXmlConfig(Path sqliteDBPath, String chatName, String additionalTags) {
 		String xml = ""
 				+ "<parserconfiguration>\n"
 				+ "<backupfile>/tmp/signal-2023-01-21-21-254-17.backup</backupfile>\n"
 				+ "<passphrase>12345 12345 12345 12345 12345 12345</passphrase>\n"
 				+ "<sqlitedbpath>" + sqliteDBPath + "</sqlitedbpath>"
-				+ "<chatname>" + chatName + "</chatname>"
-				//+ "<messagedir>" + tmpDir + "</messagedir>\n"
-				//+ "                        <imagepooldir>Path to all whatsapp images (used for ImageMatcher)\n"
-				//+ "                        </imagepooldir>\n"
-				+ "</parserconfiguration>\n";
+				+ "<chatname>" + chatName + "</chatname>";
+		
+		if(additionalTags != null) {
+			xml += additionalTags;
+		}
+
+		
+		xml += "</parserconfiguration>\n";
 		return xml;
 	}
 	

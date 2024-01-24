@@ -2,7 +2,6 @@ package messageparser;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -48,6 +47,9 @@ public class SignalParser implements IParser {
 	private Connection connection;
 	private List<IMessage> messages;
 	private int messageIndex;
+	
+	private LocalDateTime dtmin;
+	private LocalDateTime dtmax;
 
 	@Override
 	public void init(String xmlConfig, Global globalConfig) throws ParserException {
@@ -60,6 +62,9 @@ public class SignalParser implements IParser {
 			passphrase = Xml.getTextFromNode(document, "//passphrase");
 			this.chatName = Xml.getTextFromNode(document, "//chatname");
 			this.sqliteDBPath = Xml.getPathFromNode(document, "//sqlitedbpath");
+			
+			this.dtmin = Xml.getLocalDateTimeFromNode(document, "//mindate");
+			this.dtmax = Xml.getLocalDateTimeFromNode(document, "//maxdate");
 		} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
 			throw new ParserException("Could not read xml configuration", e);
 		}
@@ -116,6 +121,14 @@ public class SignalParser implements IParser {
 			String sender = resultSet.getString("sender");
 			String text = resultSet.getString("text");
 			long messageId = resultSet.getLong("msgid");
+			
+			if(dtmin!=null && timepoint.isBefore(dtmin)) {
+				continue;
+			}
+			
+			if(dtmax!=null && timepoint.isAfter(dtmax)) {
+				continue;
+			}
 			
 			String type = resultSet.getString("type");
 			if (type.equals(TYPE_SMS)) {

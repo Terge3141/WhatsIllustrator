@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -59,6 +60,15 @@ public class Xml {
 		}
 		
 		return Boolean.parseBoolean(val);
+	}
+	
+	public static LocalDateTime getLocalDateTimeFromNode(Node parent, String xPathExpression) throws XPathExpressionException {
+		String val = getTextFromNode(parent, xPathExpression);
+		if(val==null) {
+			return null;
+		}
+		
+		return LocalDateTime.parse(val);
 	}
 	
 	public static void addTextElement(Element el, String name, String value) {
