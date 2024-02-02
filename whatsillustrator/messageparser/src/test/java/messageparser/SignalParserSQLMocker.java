@@ -51,19 +51,17 @@ public class SignalParserSQLMocker {
 		invokeSQL(con, sql);
 		
 		// part
-		sql = "CREATE TABLE part (\n"
-				+ "mid INTEGER,\n"
-				+ "ct TEXT,\n"
-				+ "unique_id INTEGER,\n"
-				+ "sticker_id INTEGER\n"
+		sql = "CREATE TABLE v_attachments (\n"
+				+ "attachmentid INTEGER,\n"
+				+ "msgid INTEGER,\n"
+				+ "content_type TEXT\n"
 				+ ");";
 		invokeSQL(con, sql);
 		
-		// v_stickers
+		// v_attachments
 		sql = "CREATE TABLE v_stickers (\n"
-				+ "file_id INTEGER,\n"
-				+ "mid	 INTEGER,\n"
-				+ "ct TEXT,\n"
+				+ "fileid INTEGER,\n"
+				+ "msgid INTEGER,\n"
 				+ "sticker_emoji STRING\n"
 				+ ");";
 		invokeSQL(con, sql);

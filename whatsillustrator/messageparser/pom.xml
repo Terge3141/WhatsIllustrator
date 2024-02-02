@@ -41,13 +41,14 @@
 			<artifactId>jaxen</artifactId>
 			<version>1.2.0</version>
 		</dependency>
-		
-		<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
+
+		<!--
+		https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
 		<dependency>
-		    <groupId>org.junit.jupiter</groupId>
-		    <artifactId>junit-jupiter-engine</artifactId>
-		    <version>5.9.1</version>
-		    <scope>test</scope>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.9.1</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -61,8 +62,9 @@
 			<artifactId>sqlite-jdbc</artifactId>
 			<version>3.36.0.3</version>
 		</dependency>
-		
-		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+
+		<!--
+		https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
@@ -70,7 +72,8 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
-		<!-- <dependency> <groupId>org.apache.tika</groupId> <artifactId>tika-core</artifactId> 
+		<!-- <dependency> <groupId>org.apache.tika</groupId>
+		<artifactId>tika-core</artifactId> 
 			<version>2.2.1</version> </dependency> -->
 
 		<!--<dependency>
@@ -80,7 +83,7 @@
 			<scope>system</scope>
 			<systemPath>${basedir}/lib/whatsappbackupreader-0.0.1-SNAPSHOT-jar-with-dependencies.jar</systemPath>
 		</dependency>-->
-		
+
 		<dependency>
 			<groupId>com.github.Terge3141</groupId>
 			<artifactId>whatsappbackupreader</artifactId>
@@ -90,7 +93,27 @@
 		<dependency>
 			<groupId>com.github.Terge3141</groupId>
 			<artifactId>SignalBackupReader</artifactId>
-			<version>ba0ddabaeb</version>
+			<version>ee902aa28b</version>
 		</dependency>
+		<!--<dependency>
+			<groupId>com.terge</groupId>
+			<artifactId>whatsappbackupreader</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>system</scope>
+			<systemPath>/path/to/signalbackupreader-1.0.0.jar</systemPath>
+		</dependency>
+
+		<dependency>
+			<groupId>at.favre.lib</groupId>
+			<artifactId>hkdf</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+			<version>3.5.7</version>
+		</dependency>-->
+
 	</dependencies>
 </project>

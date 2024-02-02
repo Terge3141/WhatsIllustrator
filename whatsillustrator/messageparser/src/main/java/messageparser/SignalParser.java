@@ -32,8 +32,8 @@ import signalbackupreader.SignalBackupReaderException;
 
 public class SignalParser implements IParser {
 	
-	private final String TYPE_MMS = "mms";
-	private final String TYPE_SMS = "sms";
+	private final String TYPE_TEXT = "text";
+	private final String TYPE_MEDIA = "media";
 	
 	private static Logger logger = LogManager.getLogger(SignalParser.class);
 
@@ -131,10 +131,13 @@ public class SignalParser implements IParser {
 			}
 			
 			String type = resultSet.getString("type");
-			if (type.equals(TYPE_SMS)) {
+			if (type.equals(TYPE_TEXT)) {
 				messages.add(new TextMessage(timepoint, sender, text));
-			} else if (type.equals(TYPE_MMS)) {
+			} else if (type.equals(TYPE_MEDIA)) {
 				parseMMS(timepoint, sender, text, messageId);
+			}
+			else {
+				logger.warn("Unknown type '{}', skipping msgid '{}'", type, messageId);
 			}
 		}
 		
@@ -160,26 +163,25 @@ public class SignalParser implements IParser {
 	}
 
 	private void parseMMS(LocalDateTime timepoint, String sender, String text, long messageId) throws SQLException, ParserException {
-		String query = "select ct, unique_id, sticker_id from part where mid=?";
+		String query = "SELECT attachmentid, msgid, content_type FROM v_attachments where msgid=?";
 		PreparedStatement pstmt = connection.prepareStatement(query);
 		pstmt.setLong(1, messageId);
+		
 		ResultSet rs = pstmt.executeQuery();
 		while(rs.next()) {
-			String contentType = rs.getString("ct");
-			long uniqueId = rs.getLong("unique_id");
-			@SuppressWarnings("unused")
-			long stickerId = rs.getLong("sticker_id");
+			String contentType = rs.getString("content_type");
+			long attachmentId = rs.getLong("attachmentid");
 			
 			if(contentType.equalsIgnoreCase("image/webp")) {
 				handleWebp(timepoint, sender, messageId);
 			}
 			else if(contentType.equalsIgnoreCase("image/jpeg")) {
-				Path dst = copyAttachment("image", "jpg", uniqueId);
+				Path dst = copyAttachment("image", "jpg", attachmentId);
 				ImageMessage im = new ImageMessage(timepoint, sender, dst, text);
 				messages.add(im);
 			}
 			else if(contentType.equalsIgnoreCase("video/mp4")) {
-				Path dst = copyAttachment("video", "mp4", uniqueId);
+				Path dst = copyAttachment("video", "mp4", attachmentId);
 				VideoMessage vm = new VideoMessage(timepoint, sender, dst, text);
 				messages.add(vm);
 			}
@@ -195,7 +197,7 @@ public class SignalParser implements IParser {
 	}
 	
 	private void handleWebp(LocalDateTime timepoint, String sender, long messageId) throws SQLException {
-		String query = "SELECT file_id, sticker_emoji  FROM v_stickers WHERE mid=?";
+		String query = "SELECT fileid, sticker_emoji  FROM v_stickers WHERE msgid=?";
 		PreparedStatement pstmt = connection.prepareStatement(query);
 		pstmt.setLong(1, messageId);
 		
@@ -205,7 +207,7 @@ public class SignalParser implements IParser {
 			return;
 		}
 		
-		long fileId = rs.getLong("file_id");
+		long fileId = rs.getLong("fileid");
 		
 		// sometimes the sticker is not available --> fallback to emoji in this case
 		if(rs.wasNull()) {
@@ -222,7 +224,7 @@ public class SignalParser implements IParser {
 		try {
 			Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
 			String msg = String.format("Copied sticker from '%s' to '%s'", src, dst);
-			logger.info(msg);
+			logger.debug(msg);
 			
 			StickerMessage sm = new StickerMessage(timepoint, sender, dst);
 			messages.add(sm);
@@ -238,7 +240,7 @@ public class SignalParser implements IParser {
 		try {
 			Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
 			String msg = String.format("Copied attachment from '%s' to '%s'", src, dst);
-			logger.info(msg);
+			logger.debug(msg);
 		} catch (IOException e) {
 			String msg = String.format("Could not copy attachment from '%s' to '%s', exception '%s'", src, dst, e);
 			logger.warn(msg);

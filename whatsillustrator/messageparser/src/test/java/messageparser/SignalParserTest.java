@@ -339,22 +339,21 @@ class SignalParserTest {
 	}
 	
 	private void createTextMessage(Connection con, int msgid, ZonedDateTime zdt, String sender, String chatname, String text) throws SQLException {
-		createChatsEntry(con, msgid, zdt, sender, chatname, text, "sms");
+		createChatsEntry(con, msgid, zdt, sender, chatname, text, "text");
 	}
 
-	private void createMultiMediaMessage(Connection con, Path signalDir, int msgid, ZonedDateTime zdt, String sender, String chatname, String text, String contentType, long uniqueId, long stickerId) throws SQLException, IOException {
-		createChatsEntry(con, msgid, zdt, sender, chatname, text, "mms");
+	private void createMultiMediaMessage(Connection con, Path signalDir, int msgid, ZonedDateTime zdt, String sender, String chatname, String text, String contentType, long attachmentid, long stickerId) throws SQLException, IOException {
+		createChatsEntry(con, msgid, zdt, sender, chatname, text, "media");
 		
-		String sql = "INSERT INTO part (mid, ct, unique_id, sticker_id) VALUES (?, ?, ?, ?);";
+		String sql = "INSERT INTO v_attachments (attachmentid, msgid, content_type) VALUES (?, ?, ?);";
 		PreparedStatement pstmt = con.prepareStatement(sql);
-		pstmt.setLong(1, msgid);
-		pstmt.setString(2, contentType);
-		pstmt.setLong(3, uniqueId);
-		pstmt.setLong(4, stickerId);
+		pstmt.setLong(1, attachmentid);
+		pstmt.setLong(2, msgid);
+		pstmt.setString(3, contentType);
 		
 		pstmt.execute();
 		
-		Path attachmentPath = signalDir.resolve(String.format("Attachment_%d.bin", uniqueId));
+		Path attachmentPath = signalDir.resolve(String.format("Attachment_%d.bin", attachmentid));
 		
 		attachmentPath.toFile().createNewFile();
 	}
@@ -362,20 +361,18 @@ class SignalParserTest {
 	private void createStickerMessage(Connection con, Path signalDir, int msgid, ZonedDateTime zdt, String sender, String chatname, long fileId, String stickerEmoji, boolean createFile) throws SQLException, IOException {
 		String ct = "image/webp";
 		
-		createChatsEntry(con, msgid, zdt, sender, chatname, "", "mms");
+		createChatsEntry(con, msgid, zdt, sender, chatname, "", "media");
 		
-		long uniqueId = 1234;
-		long stickerId = 5678;
+		long attachmentid = 1234;
 		
 		String sql;
 		PreparedStatement pstmt;
 		
-		sql = "INSERT INTO part (mid, ct, unique_id, sticker_id) VALUES (?, ?, ?, ?);";
+		sql = "INSERT INTO v_attachments (attachmentid, msgid, content_type) VALUES (?, ?, ?);";
 		pstmt = con.prepareStatement(sql);
-		pstmt.setLong(1, msgid);
-		pstmt.setString(2, ct);
-		pstmt.setLong(3, uniqueId);
-		pstmt.setLong(4, stickerId);
+		pstmt.setLong(1, attachmentid);
+		pstmt.setLong(2, msgid);
+		pstmt.setString(3, ct);
 		pstmt.execute();
 		
 		Path stickerPath = signalDir.resolve(String.format("Sticker_%04d.bin", fileId));
@@ -384,7 +381,7 @@ class SignalParserTest {
 			stickerPath.toFile().createNewFile();
 		}
 		
-		sql = "INSERT INTO v_stickers (file_id, mid, ct, sticker_emoji) VALUES(?, ?, ?, ?)";
+		sql = "INSERT INTO v_stickers (fileid, msgid, sticker_emoji) VALUES(?, ?, ?)";
 		pstmt = con.prepareStatement(sql);
 		if(fileId != -1) {
 			pstmt.setLong(1, fileId);
@@ -392,8 +389,7 @@ class SignalParserTest {
 			pstmt.setNull(1, java.sql.Types.NULL);
 		}
 		pstmt.setLong(2, msgid);
-		pstmt.setString(3, ct);
-		pstmt.setString(4, stickerEmoji);
+		pstmt.setString(3, stickerEmoji);
 		pstmt.execute();
 	}
 	
